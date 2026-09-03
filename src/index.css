@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #080808;
+    color: #ffffff;
+  }
+  
+  code, kbd, samp, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Custom Bold Typography theme scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #080808;
+}
+::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D8FE41;
+}
+
+/* Bold typography utilities */
+.font-display {
+  font-family: 'Space Grotesk', sans-serif;
+}
+.accent-lime {
+  color: #D8FE41;
+}
+.bg-lime-accent {
+  background-color: #D8FE41;
+}
+.border-lime-accent {
+  border-color: #D8FE41;
+}
+
