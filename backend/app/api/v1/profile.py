@@ -9,13 +9,16 @@ from app.models.user import User
 router = APIRouter(prefix="/profile", tags=["Profile"])
 
 
+from pydantic import BaseModel, Field
+
 class ProfileUpdateRequest(BaseModel):
-    full_name: Optional[str] = None
-    designation: Optional[str] = None
-    cadre: Optional[str] = None
-    qualification: Optional[str] = None
-    years_of_experience: Optional[int] = None
-    location: Optional[str] = None
+    full_name: Optional[str] = Field(None, min_length=1, max_length=100)
+    designation: Optional[str] = Field(None, min_length=1, max_length=100)
+    cadre: Optional[str] = Field(None, max_length=100)
+    qualification: Optional[str] = Field(None, max_length=100)
+    years_of_experience: Optional[int] = Field(None, ge=0, le=70)
+    location: Optional[str] = Field(None, max_length=100)
+
 
 
 @router.get("")

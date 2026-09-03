@@ -5,7 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.database import get_db, async_engine, Base
+from app.core.database import get_db, async_engine, Base, AsyncSessionLocal
 from app.core.exceptions import AppException
 from app.core.logging import setup_logging, logger
 from app.core.middleware import RequestContextMiddleware, global_exception_handler
@@ -20,6 +20,20 @@ async def lifespan(app: FastAPI):
     if "sqlite" in settings.DATABASE_URL:
         async with async_engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+        
+        # Auto-seed database if empty
+        try:
+            from sqlalchemy import select
+            from app.models.user import User
+            from scripts.seed_data import seed_database
+            async with AsyncSessionLocal() as session:
+                res = await session.execute(select(User).limit(1))
+                if not res.scalar_one_or_none():
+                    logger.info("Empty database detected. Running automatic initial seeding...")
+                    await seed_database()
+                    logger.info("Database auto-seeding completed.")
+        except Exception as e:
+            logger.warning(f"Database auto-seeding check encountered: {e}")
             
     yield
     logger.info("Shutting down StatIntel AI Backend Service...")

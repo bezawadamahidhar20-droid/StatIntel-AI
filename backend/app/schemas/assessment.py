@@ -1,5 +1,6 @@
 from typing import List, Optional, Any
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
 
 
 class QuestionSchema(BaseModel):
@@ -30,7 +31,8 @@ class AssessmentResponse(BaseModel):
 
 class AssessmentSubmitRequest(BaseModel):
     answers: List[int]  # Selected indices for each question
-    timeSpentSeconds: int
+    timeSpentSeconds: int = Field(default=0, ge=0)
+
 
 
 class QuizResultResponse(BaseModel):

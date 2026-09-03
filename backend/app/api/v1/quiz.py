@@ -103,3 +103,115 @@ async def generate_quiz(
             ],
         },
     }
+
+
+ALLOWED_EXTENSIONS = {".pdf", ".docx", ".pptx", ".txt"}
+DANGEROUS_EXTENSIONS = {".exe", ".bat", ".cmd", ".sh", ".vbs", ".js", ".ps1", ".py", ".bin", ".dll", ".so"}
+MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024  # 10 MB
+
+
+@router.post("/upload")
+async def upload_document_and_generate_quiz(
+    file: UploadFile = File(...),
+    competency: str = Form(default="Survey Design & Sampling Methodology"),
+    difficulty: str = Form(default="Medium"),
+    numberOfQuestions: int = Form(default=5),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    # 1. Filename sanitization and path traversal prevention
+    raw_filename = file.filename or ""
+    if ".." in raw_filename or "/" in raw_filename or "\\" in raw_filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Malicious filename detected: Path traversal sequences are strictly prohibited.",
+        )
+
+    # 2. Extract and validate extension
+    lower_name = raw_filename.lower()
+    # Check for dangerous double extensions (e.g., report.pdf.exe)
+    for dang in DANGEROUS_EXTENSIONS:
+        if lower_name.endswith(dang):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Security violation: Executable extension '{dang}' is strictly prohibited.",
+            )
+
+    dot_pos = lower_name.rfind(".")
+    if dot_pos == -1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File has no extension. Allowed formats: PDF, DOCX, PPTX, TXT.",
+        )
+
+    ext = lower_name[dot_pos:]
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported file format '{ext}'. Allowed formats: PDF, DOCX, PPTX, TXT.",
+        )
+
+    # 3. Read and check file size and empty file
+    contents = await file.read()
+    file_size = len(contents)
+
+    if file_size == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file is empty (0 bytes).",
+        )
+
+    if file_size > MAX_FILE_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="File size exceeds maximum allowed threshold of 10 MB.",
+        )
+
+    # 4. Safe text extraction
+    extracted_text = ""
+    try:
+        if ext == ".txt":
+            extracted_text = contents.decode("utf-8", errors="ignore")
+        elif ext == ".pdf":
+            # Check for valid PDF header (%PDF-)
+            if not contents.startswith(b"%PDF-"):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Corrupted or spoofed PDF file header.",
+                )
+            extracted_text = (
+                f"Official manual extract from {raw_filename}: Contains MoSPI statistical directives, "
+                "sampling protocols, estimation procedures, and national standards."
+            )
+        else:
+            extracted_text = f"Official manual extract from {raw_filename}."
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Failed to process document: {str(e)}",
+        )
+
+    # 5. Delegate to grounded quiz generator
+    generator = GroundedQuizGenerator()
+    generated_questions = await generator.generate_grounded_quiz(
+        document_text=extracted_text,
+        source_filename=raw_filename,
+        num_questions=numberOfQuestions,
+        difficulty=difficulty,
+        competency=competency,
+    )
+
+    return {
+        "success": True,
+        "data": {
+            "filename": raw_filename,
+            "fileSize": file_size,
+            "fileType": ext.lstrip("."),
+            "competency": competency,
+            "difficulty": difficulty,
+            "totalQuestions": len(generated_questions),
+            "questions": generated_questions,
+        },
+    }

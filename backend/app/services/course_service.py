@@ -1,3 +1,4 @@
+from fastapi import HTTPException, status
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.course import Course, Enrollment, LearningPath
@@ -27,7 +28,8 @@ class CourseService:
     async def enroll_course(self, user_id: str, course_id: str) -> CourseResponse:
         course = await self.course_repo.get_by_id(course_id)
         if not course:
-            raise Exception("Course not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
+
 
         enrollment = await self.course_repo.get_user_enrollment(user_id, course_id)
         if not enrollment:
@@ -49,7 +51,8 @@ class CourseService:
     async def update_learning_progress(self, user_id: str, course_id: str, progress: float) -> CourseResponse:
         course = await self.course_repo.get_by_id(course_id)
         if not course:
-            raise Exception("Course not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
+
 
         enrollment = await self.course_repo.get_user_enrollment(user_id, course_id)
         if enrollment:

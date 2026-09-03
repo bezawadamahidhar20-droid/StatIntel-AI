@@ -10,7 +10,7 @@ router = APIRouter(prefix="/workforce", tags=["Workforce Intelligence"])
 
 @router.get("/overview")
 async def get_workforce_overview(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("workforce:read")),
     db: AsyncSession = Depends(get_db),
 ):
     wf_service = WorkforceService(db)
@@ -23,7 +23,7 @@ async def get_workforce_overview(
 
 @router.get("/heatmap")
 async def get_workforce_heatmap(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("workforce:read")),
     db: AsyncSession = Depends(get_db),
 ):
     wf_service = WorkforceService(db)
@@ -36,7 +36,7 @@ async def get_workforce_heatmap(
 
 @router.get("/skill-demand")
 async def get_predictive_skill_demand(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("workforce:read")),
     db: AsyncSession = Depends(get_db),
 ):
     wf_service = WorkforceService(db)
@@ -49,7 +49,7 @@ async def get_predictive_skill_demand(
 
 @router.get("/readiness")
 async def get_workforce_readiness(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("workforce:read")),
     db: AsyncSession = Depends(get_db),
 ):
     wf_service = WorkforceService(db)

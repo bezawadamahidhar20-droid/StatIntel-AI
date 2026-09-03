@@ -20,10 +20,11 @@ class LoginRequest(BaseModel):
 
 
 class RegisterRequest(BaseModel):
-    employee_id: str = Field(..., min_length=3)
+    employee_id: str = Field(..., min_length=3, max_length=50)
     email: EmailStr
-    password: str = Field(..., min_length=6)
-    full_name: str
-    designation: str
+    password: str = Field(..., min_length=6, max_length=128)
+    full_name: str = Field(..., min_length=2, max_length=100)
+    designation: str = Field(..., min_length=2, max_length=100)
     department_id: Optional[str] = None
     role: UserRole = UserRole.LEARNER
+

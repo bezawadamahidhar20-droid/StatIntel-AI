@@ -19,3 +19,5 @@ htmlcov/
 *.sqlite
 backend/*.db
 backend/*.sqlite
+scratch/
+

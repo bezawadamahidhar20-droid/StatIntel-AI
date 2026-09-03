@@ -3,10 +3,20 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_workforce_heatmap_and_predictive(async_client):
-    # Login as Learner
-    login_res = await async_client.post(
+    # 0. Verify Learner gets 403 Forbidden on workforce endpoints
+    learner_login = await async_client.post(
         "/api/v1/auth/login",
         json={"email": "rajesh.sharma@mospi.gov.in", "password": "password123"},
+    )
+    learner_token = learner_login.json()["data"]["access_token"]
+    learner_headers = {"Authorization": f"Bearer {learner_token}"}
+    forbidden_res = await async_client.get("/api/v1/workforce/heatmap", headers=learner_headers)
+    assert forbidden_res.status_code == 403
+
+    # Login as Admin
+    login_res = await async_client.post(
+        "/api/v1/auth/login",
+        json={"email": "vandana.sengupta@gov.in", "password": "password123"},
     )
     token = login_res.json()["data"]["access_token"]
     headers = {"Authorization": f"Bearer {token}"}

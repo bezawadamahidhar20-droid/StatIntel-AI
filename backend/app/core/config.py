@@ -35,8 +35,8 @@ class Settings(BaseSettings):
 
     # AI Configuration
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-2.5-flash"
-    USE_MOCK_AI: bool = True
+    GEMINI_MODEL: str = "gemini-3.1-flash-lite"
+    USE_MOCK_AI: bool = False
 
     # External Provider Configuration
     IGOT_API_URL: str = "https://igot-karmayogi.gov.in/api/v1"

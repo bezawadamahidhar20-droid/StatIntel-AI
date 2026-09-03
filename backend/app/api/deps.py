@@ -71,17 +71,13 @@ async def get_current_user(
     db: AsyncSession = Depends(get_db),
 ) -> User:
     if not token:
-        # Fallback to demo learner for unauthenticated local development convenience if token is missing
-        user_repo = UserRepository(db)
-        user = await user_repo.get_by_email("rajesh.sharma@mospi.gov.in")
-        if user:
-            return user
         raise UnauthorizedException("Authentication token is required")
 
     payload = decode_token(token)
     user_id = payload.get("sub")
     if not user_id:
         raise UnauthorizedException("Invalid token payload")
+
 
     user_repo = UserRepository(db)
     user = await user_repo.get_by_id(user_id)

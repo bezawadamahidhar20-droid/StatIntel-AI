@@ -1,5 +1,6 @@
 from typing import List, Optional, Any
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
 
 
 class CourseModuleSchema(BaseModel):
@@ -45,4 +46,4 @@ class CourseResponse(BaseModel):
 
 
 class CourseProgressUpdateRequest(BaseModel):
-    progress: float  # 0 to 100
+    progress: float = Field(..., ge=0.0, le=100.0, description="Course progress percentage from 0.0 to 100.0")

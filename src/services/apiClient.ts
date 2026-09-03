@@ -6,8 +6,17 @@ class APIClient {
   private token: string | null = localStorage.getItem('statintel_token');
 
   public setToken(token: string) {
-    self.token = token;
+    this.token = token;
     localStorage.setItem('statintel_token', token);
+  }
+
+  public clearToken() {
+    this.token = null;
+    localStorage.removeItem('statintel_token');
+  }
+
+  public getToken(): string | null {
+    return this.token;
   }
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -20,17 +29,26 @@ class APIClient {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers,
+      });
 
-    const json = await response.json();
-    if (!response.ok || !json.success) {
-      throw new Error(json.error?.message || 'API Request Failed');
+      const json = await response.json();
+      if (!response.ok || !json.success) {
+        throw new Error(json.error?.message || json.detail || 'API Request Failed');
+      }
+
+      return json.data as T;
+    } catch (err: any) {
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        console.warn(`[StatIntel Network Error] Backend at ${API_BASE_URL} is unreachable.`);
+        throw new Error('StatIntel backend server is currently unreachable. Please check backend status.');
+      }
+      throw err;
     }
 
-    return json.data as T;
   }
 
   // Auth APIs

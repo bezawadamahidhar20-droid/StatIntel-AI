@@ -12,6 +12,9 @@ from app.core.logging import logger
 engine_kwargs = {"echo": False}
 if "sqlite" in settings.DATABASE_URL:
     engine_kwargs["connect_args"] = {"check_same_thread": False}
+    if ":memory:" in settings.DATABASE_URL:
+        from sqlalchemy.pool import StaticPool
+        engine_kwargs["poolclass"] = StaticPool
 
 async_engine = create_async_engine(settings.DATABASE_URL, **engine_kwargs)
 
