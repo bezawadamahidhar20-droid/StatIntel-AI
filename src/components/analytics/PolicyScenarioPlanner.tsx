@@ -23,7 +23,11 @@ import {
   PriorityDistrictGap,
 } from '../../services/scenarioService';
 
-export const PolicyScenarioPlanner: React.FC = () => {
+interface PolicyScenarioPlannerProps {
+  onNavigateTab?: (tab: string) => void;
+}
+
+export const PolicyScenarioPlanner: React.FC<PolicyScenarioPlannerProps> = ({ onNavigateTab }) => {
   const [geography, setGeography] = useState<string>('Tamil Nadu');
   const [indicator, setIndicator] = useState<string>('literacy_rate');
   const [currentValue, setCurrentValue] = useState<number>(80.09);
@@ -559,6 +563,18 @@ export const PolicyScenarioPlanner: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+              {onNavigateTab && (
+                <div className="pt-3">
+                  <button
+                    type="button"
+                    onClick={() => onNavigateTab('explainability')}
+                    className="w-full py-2 px-3 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span>Explain Priority Districts in XAI Engine</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-400">

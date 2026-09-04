@@ -59,7 +59,11 @@ const DISTRICT_PRESETS: DistrictPreset[] = [
   },
 ];
 
-export const CounterfactualExplainer: React.FC = () => {
+interface CounterfactualExplainerProps {
+  onNavigateTab?: (tab: string) => void;
+}
+
+export const CounterfactualExplainer: React.FC<CounterfactualExplainerProps> = ({ onNavigateTab }) => {
   const [selectedPreset, setSelectedPreset] = useState<string>('Dharmapuri');
   const [districtName, setDistrictName] = useState<string>('Dharmapuri');
   const [literacyRate, setLiteracyRate] = useState<number>(68.54);
@@ -581,13 +585,31 @@ export const CounterfactualExplainer: React.FC = () => {
           </div>
           <div className="p-3 bg-slate-950/40 rounded-xl border border-slate-800/80">
             <span className="font-semibold text-white block mb-1">Algorithmic Transparency</span>
-            Replaces black-box automated classifications with verifiable SHAP attribution vectors directly inspectable by MoSPI planners and district administrators.
+            Replaces black-box automated classifications with verifiable model feature attribution vectors directly inspectable by MoSPI planners and district administrators.
           </div>
           <div className="p-3 bg-slate-950/40 rounded-xl border border-slate-800/80">
             <span className="font-semibold text-white block mb-1">Strict Causal Boundary</span>
             Guarantees ethical compliance by explicitly differentiating between model sensitivity under perturbation and true counterfactual causal policy outcomes.
           </div>
         </div>
+
+        {onNavigateTab && (
+          <div className="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between">
+            <span className="text-xs text-slate-400">
+              Ready to model multi-year trajectory goals for this indicator?
+            </span>
+            <button
+              type="button"
+              onClick={() => onNavigateTab('scenario')}
+              className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-indigo-600/20 cursor-pointer"
+            >
+              <span>Simulate Targets in Policy Scenario Planner</span>
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

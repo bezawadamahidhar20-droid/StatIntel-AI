@@ -144,20 +144,20 @@ export const StatisticalIntelligenceDashboard: React.FC = () => {
         {activeTab === 'forecasting' && (
           <div className="space-y-6">
             <TimeSeriesChart />
-            <PolicyScenarioPlanner />
+            <PolicyScenarioPlanner onNavigateTab={(t) => setActiveTab(t as any)} />
             <ComparisonMode />
           </div>
         )}
 
         {activeTab === 'scenario' && (
           <div className="space-y-6">
-            <PolicyScenarioPlanner />
+            <PolicyScenarioPlanner onNavigateTab={(t) => setActiveTab(t as any)} />
           </div>
         )}
 
         {activeTab === 'explainability' && (
           <div className="space-y-6">
-            <CounterfactualExplainer />
+            <CounterfactualExplainer onNavigateTab={(t) => setActiveTab(t as any)} />
           </div>
         )}
 

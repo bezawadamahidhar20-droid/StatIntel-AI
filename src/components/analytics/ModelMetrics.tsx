@@ -119,6 +119,40 @@ export const ModelMetrics: React.FC = () => {
         </div>
       </div>
 
+      {/* Scientific Methodology & Trust Framework Card (Requirement 12) */}
+      <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-3">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-indigo-500" />
+          StatIntel-AI Methodology & Trust Framework (MoSPI PS-1628)
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-600 dark:text-slate-300">
+          <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span className="font-bold text-slate-900 dark:text-white block mb-0.5">1. Reference Data</span>
+            Curated from official Census 2011, PLFS, and MoSPI statistical tables. Benchmark indicators provide grounded reference distributions.
+          </div>
+          <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span className="font-bold text-slate-900 dark:text-white block mb-0.5">2. Predictive Forecasting</span>
+            Prophet-LSTM hybrid with polynomial trend decomposition and empirical confidence intervals (95% bounds).
+          </div>
+          <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span className="font-bold text-slate-900 dark:text-white block mb-0.5">3. Multi-Class Classification</span>
+            Gradient Boosting Classifier (`GradientBoostingClassifier`) categorizing districts into Aspirational, Developing, and High-Performing tiers.
+          </div>
+          <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span className="font-bold text-slate-900 dark:text-white block mb-0.5">4. Model Feature Attribution</span>
+            Local normalized baseline difference attribution evaluating feature direction and magnitude without fabricating unverified causal claims.
+          </div>
+          <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span className="font-bold text-slate-900 dark:text-white block mb-0.5">5. Bounded Counterfactuals</span>
+            Iterative perturbation search identifying minimal feasible metric shifts that alter model classification tiers under genuine domain constraints.
+          </div>
+          <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span className="font-bold text-slate-900 dark:text-white block mb-0.5">6. Policy Scenario Planner</span>
+            Delineates model-driven baseline forecasts from linear target planning trajectories with differential gap analysis across priority districts.
+          </div>
+        </div>
+      </div>
+
       <div className="pt-2 text-xs text-slate-400 flex items-center justify-between">
         <span>Last automated retraining cycle: <strong className="text-slate-600 dark:text-slate-300">{lastRetrained}</strong></span>
         <span>Validation Scheme: 5-Fold Expanding Window Time-Series Cross Validation</span>
