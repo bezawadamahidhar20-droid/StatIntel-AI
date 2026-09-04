@@ -31,6 +31,8 @@ export const LearnerDashboardView: React.FC = () => {
     setSelectedCompetency,
     setWhyRecommendedCourse,
     addNotification,
+    userSkills,
+    targetCareerRole,
   } = useApp();
 
   const [downloadingPdf, setDownloadingPdf] = useState(false);
@@ -138,29 +140,49 @@ export const LearnerDashboardView: React.FC = () => {
         </div>
       </div>
 
-      {/* Closed-Loop Journey Bar */}
-      <div className="p-4 border border-blue-100 bg-blue-50/70 rounded-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 border border-blue-200 text-blue-700 rounded-lg shrink-0">
-            <Zap className="w-4 h-4" />
+      {/* 20 Software Roles & Groq AI Skill Intelligence Card */}
+      <div className="p-5 rounded-2xl bg-linear-to-r from-slate-900 via-blue-950 to-indigo-950 text-white shadow-md border border-blue-900/50">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-400 text-blue-950 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-blue-950" />
+                20 Industry Software Roles & Groq AI Scanner
+              </span>
+              <span className="text-xs text-blue-300">
+                Target Role: <strong className="text-amber-300 font-bold">{targetCareerRole || currentUser.targetGoal || 'Frontend Developer'}</strong>
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              <span className="text-xs text-blue-200 font-medium">Active Identified Skills:</span>
+              {userSkills.length > 0 ? (
+                userSkills.map((s) => (
+                  <span
+                    key={s}
+                    className="px-2 py-0.5 rounded-md bg-blue-500/20 border border-blue-400/30 text-[11px] font-semibold text-blue-100"
+                  >
+                    ✓ {s}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs italic text-blue-300/70">
+                  No skills scanned yet. Use Groq AI skill identifier in the roadmap.
+                </span>
+              )}
+            </div>
           </div>
-          <div>
-            <p className="font-semibold text-blue-950">
-              Closed-Loop Competency Engine Active
-            </p>
-            <p className="text-xs text-slate-600 mt-0.5">
-              Pipeline: Digital Twin Model → Gap Diagnostics → Adaptive iGOT Modules → Grounded RAG Quiz → Verified Competency Score Update.
-            </p>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => navigate('learning-path')}
+              className="px-4 py-2.5 bg-linear-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-blue-950 font-bold text-xs rounded-xl flex items-center gap-2 shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <BookOpen className="w-4 h-4 text-blue-950" />
+              <span>Open 20-Role AI Roadmap & Books</span>
+              <ArrowRight className="w-4 h-4 text-blue-950" />
+            </button>
           </div>
         </div>
-
-        <button
-          onClick={() => navigate('digital-twin')}
-          className="px-3 py-1.5 rounded-lg border border-blue-200 bg-white text-blue-700 font-semibold text-xs hover:bg-blue-50 transition-colors shrink-0 flex items-center gap-1 shadow-2xs"
-        >
-          <span>Inspect Digital Twin</span>
-          <ArrowRight className="w-3.5 h-3.5" />
-        </button>
       </div>
 
       {/* Top 5 KPI Cards */}

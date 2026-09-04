@@ -10,20 +10,31 @@ import {
   ArrowRight,
   AlertCircle,
   Code2,
+  Bot,
+  Loader2,
+  Plus,
+  Check,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { groqService } from '../../services/groqService';
+import { ROLE_SKILL_BENCHMARKS } from '../../services/geminiService';
 
-const INITIAL_SKILL_OPTIONS = [
+const POPULAR_SKILL_SUGGESTIONS = [
   'Python',
+  'JavaScript',
+  'TypeScript',
+  'React',
+  'Node.js',
+  'SQL',
   'NumPy',
   'Matplotlib',
   'Pandas',
-  'SQL',
+  'Docker',
+  'PostgreSQL',
+  'Git',
   'Scikit-Learn',
   'PyTorch',
-  'R Programming',
-  'Probability & Inference',
-  'Survey Sampling',
+  'AWS',
 ];
 
 export const AuthModal: React.FC = () => {
@@ -37,17 +48,23 @@ export const AuthModal: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'register' | 'login' | 'admin'>('register');
 
-  // Student Registration Form State (clean, empty defaults)
+  // Student Registration Form State
   const [name, setName] = useState('');
   const [college, setCollege] = useState('');
   const [degree, setDegree] = useState('');
   const [year, setYear] = useState('3rd Year (Semester 5-6)');
-  const [targetRole, setTargetRole] = useState('Data Analyst');
+  const [targetRole, setTargetRole] = useState('Frontend Developer');
   const [email, setEmail] = useState('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [registerError, setRegisterError] = useState('');
 
-  // Student Sign In State (clean, empty defaults)
+  // Groq AI Skill Input State
+  const [aiSkillInput, setAiSkillInput] = useState('');
+  const [isDetectingSkills, setIsDetectingSkills] = useState(false);
+  const [customSkillInput, setCustomSkillInput] = useState('');
+  const [groqDetectionMessage, setGroqDetectionMessage] = useState('');
+
+  // Student Sign In State
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -58,10 +75,53 @@ export const AuthModal: React.FC = () => {
 
   if (!isAuthModalOpen || isAuthenticated) return null;
 
+  const roleList = Object.keys(ROLE_SKILL_BENCHMARKS);
+
   const toggleSkill = (skill: string) => {
     setSelectedSkills((prev) =>
       prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
     );
+  };
+
+  const removeSkill = (skill: string) => {
+    setSelectedSkills((prev) => prev.filter((s) => s !== skill));
+  };
+
+  const handleAddCustomSkill = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = customSkillInput.trim();
+    if (trimmed && !selectedSkills.some((s) => s.toLowerCase() === trimmed.toLowerCase())) {
+      const capitalized = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+      setSelectedSkills((prev) => [...prev, capitalized]);
+      setCustomSkillInput('');
+    }
+  };
+
+  const handleIdentifySkillsWithGroq = async () => {
+    if (!aiSkillInput.trim()) return;
+    setIsDetectingSkills(true);
+    setGroqDetectionMessage('');
+
+    try {
+      const benchmark = ROLE_SKILL_BENCHMARKS[targetRole];
+      const targetSkills = benchmark ? benchmark.allSkills.map((s) => s.name) : undefined;
+      const result = await groqService.identifySkills(aiSkillInput, targetSkills);
+
+      if (result.skills && result.skills.length > 0) {
+        // Merge without duplicates
+        const updated = Array.from(new Set([...selectedSkills, ...result.skills]));
+        setSelectedSkills(updated);
+        setGroqDetectionMessage(`✨ Groq AI identified ${result.skills.length} skills successfully!`);
+        setAiSkillInput('');
+      } else {
+        setGroqDetectionMessage('No clear tech skills found. Try typing e.g. "Python, React, Docker, SQL".');
+      }
+    } catch (err) {
+      setGroqDetectionMessage('Could not connect to Groq. Added text as custom skill.');
+    } finally {
+      setIsDetectingSkills(false);
+      setTimeout(() => setGroqDetectionMessage(''), 4000);
+    }
   };
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
@@ -101,7 +161,6 @@ export const AuthModal: React.FC = () => {
       return;
     }
 
-    // Derive student display name from email if needed
     const extractedName = loginEmail.includes('@')
       ? loginEmail.split('@')[0].replace(/[._-]/g, ' ')
       : loginEmail;
@@ -131,13 +190,13 @@ export const AuthModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
       <div
-        className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden text-slate-800"
+        className="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden text-slate-800 transition-all"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="bg-linear-to-r from-blue-900 via-blue-800 to-indigo-900 text-white p-6 relative">
+        <div className="bg-linear-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-6 relative">
           <button
             onClick={() => setIsAuthModalOpen(false)}
             className="absolute top-4 right-4 p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-colors"
@@ -148,14 +207,17 @@ export const AuthModal: React.FC = () => {
 
           <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/15 text-blue-100 text-xs font-semibold mb-2">
             <GraduationCap className="w-3.5 h-3.5 text-amber-300" />
-            <span>Student Statistical Competency Intelligence Platform</span>
+            <span>AI-Powered Software & Statistical Competency Platform</span>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-            Welcome to StatIntel AI
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+            <span>Welcome to StatIntel AI</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-400 text-slate-900">
+              20 Software Roles
+            </span>
           </h2>
-          <p className="text-xs sm:text-sm text-blue-100/90 mt-1 max-w-lg">
-            Benchmark your statistical, data science, and machine learning skills with personalized AI roadmaps and adaptive quizzes.
+          <p className="text-xs sm:text-sm text-blue-100/90 mt-1 max-w-xl">
+            Choose from 20 industry roles, identify your skills with Groq AI, and get a tailored career roadmap with recommended master books.
           </p>
 
           {/* Navigation Tabs */}
@@ -214,21 +276,23 @@ export const AuthModal: React.FC = () => {
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 max-h-[75vh] overflow-y-auto">
+        <div className="p-6 max-h-[76vh] overflow-y-auto space-y-4">
           {/* TAB 1: Student Registration */}
           {activeTab === 'register' && (
             <form onSubmit={handleRegisterSubmit} className="space-y-4">
-              <div className="pb-1">
-                <h3 className="text-sm font-bold text-slate-900">
-                  Create Your Student Profile
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Enter your academic information to synthesize your statistical competency digital twin.
-                </p>
+              <div className="pb-1 flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Create Your Student Profile & Skill Twin
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Select your target industry career and enter what you know — Groq AI will benchmark your readiness.
+                  </p>
+                </div>
               </div>
 
               {registerError && (
-                <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 animate-in fade-in">
                   <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
                   <span>{registerError}</span>
                 </div>
@@ -244,8 +308,8 @@ export const AuthModal: React.FC = () => {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter your full name"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600"
+                    placeholder="e.g. Mahidhar Bezawada"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600 transition-all shadow-2xs"
                   />
                 </div>
 
@@ -258,7 +322,7 @@ export const AuthModal: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="student@university.edu"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600 transition-all shadow-2xs"
                   />
                 </div>
 
@@ -272,7 +336,7 @@ export const AuthModal: React.FC = () => {
                     value={college}
                     onChange={(e) => setCollege(e.target.value)}
                     placeholder="e.g. IIT Madras / Delhi University / ISI Kolkata"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600 transition-all shadow-2xs"
                   />
                 </div>
 
@@ -286,7 +350,7 @@ export const AuthModal: React.FC = () => {
                     value={degree}
                     onChange={(e) => setDegree(e.target.value)}
                     placeholder="e.g. B.Tech Computer Science / B.Sc Statistics"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600 transition-all shadow-2xs"
                   />
                 </div>
 
@@ -297,7 +361,7 @@ export const AuthModal: React.FC = () => {
                   <select
                     value={year}
                     onChange={(e) => setYear(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600 transition-all shadow-2xs"
                   >
                     <option value="1st Year (Semester 1-2)">1st Year (Semester 1-2)</option>
                     <option value="2nd Year (Semester 3-4)">2nd Year (Semester 3-4)</option>
@@ -305,49 +369,139 @@ export const AuthModal: React.FC = () => {
                     <option value="Final Year (Semester 7-8)">Final Year (Semester 7-8)</option>
                     <option value="Postgraduate / Masters (Year 1)">Postgraduate / Masters (Year 1)</option>
                     <option value="Postgraduate / Masters (Year 2)">Postgraduate / Masters (Year 2)</option>
-                    <option value="Recent Graduate / Aspirant">Recent Graduate / Aspirant</option>
+                    <option value="Recent Graduate / Job Seeker">Recent Graduate / Job Seeker</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Target Career Benchmark / Goal *
+                  <label className="block font-semibold text-slate-700 mb-1 flex items-center justify-between">
+                    <span>Target Career Benchmark (20 Roles) *</span>
+                    <span className="text-[10px] text-blue-600 font-bold">Industry Standard</span>
                   </label>
                   <select
                     value={targetRole}
                     onChange={(e) => setTargetRole(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600"
+                    className="w-full px-3 py-2 border border-blue-300 bg-blue-50/50 rounded-lg text-xs font-semibold text-blue-950 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600 transition-all shadow-2xs"
                   >
-                    <option value="Data Analyst">Data Analyst (NumPy, Matplotlib, Pandas, SQL)</option>
-                    <option value="Machine Learning Engineer">Machine Learning Engineer (Scikit-Learn, PyTorch, MLOps)</option>
-                    <option value="Official Statistical Scientist (MoSPI / ISS)">Statistical Scientist (Inference, Sampling, Econometrics)</option>
+                    {roleList.map((r) => (
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
 
-              {/* Interactive Skill Selection */}
-              <div className="pt-2 border-t border-slate-100">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                    <Code2 className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Skills You Currently Know (Select all that apply):</span>
-                  </label>
-                  <span className="text-[11px] text-slate-500 font-medium">
-                    {selectedSkills.length} selected
+              {/* SECTION: GROQ AI SKILL IDENTIFIER */}
+              <div className="p-4 rounded-xl border border-indigo-200 bg-linear-to-br from-indigo-50/70 via-blue-50/40 to-slate-50 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-indigo-600 text-white shadow-xs">
+                      <Bot className="w-4 h-4 animate-pulse" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                        <span>Groq AI Skill Identifier</span>
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-indigo-100 text-indigo-700 font-semibold">
+                          Groq Ultra-Fast
+                        </span>
+                      </h4>
+                      <p className="text-[11px] text-slate-500">
+                        Type or paste your skills, projects, or background — AI will extract and structure them automatically.
+                      </p>
+                    </div>
+                  </div>
+
+                  <span className="text-xs font-bold text-indigo-700 self-start sm:self-center bg-indigo-100/70 px-2.5 py-1 rounded-full">
+                    {selectedSkills.length} Skills Added
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {INITIAL_SKILL_OPTIONS.map((skill) => {
+
+                {/* AI Input Textarea + Button */}
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="text"
+                    value={aiSkillInput}
+                    onChange={(e) => setAiSkillInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleIdentifySkillsWithGroq();
+                      }
+                    }}
+                    placeholder="e.g. I know Python, building APIs with FastAPI, Pandas, React, Docker, and PostgreSQL"
+                    className="flex-1 px-3 py-2 border border-indigo-200 rounded-lg text-xs bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-600 shadow-2xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleIdentifySkillsWithGroq}
+                    disabled={isDetectingSkills || !aiSkillInput.trim()}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold rounded-lg shadow-sm flex items-center justify-center gap-1.5 transition-all shrink-0 hover:scale-102 active:scale-98"
+                  >
+                    {isDetectingSkills ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Scanning with Groq AI...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                        <span>Identify with AI</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {groqDetectionMessage && (
+                  <p className="text-xs font-semibold text-emerald-700 animate-in fade-in">
+                    {groqDetectionMessage}
+                  </p>
+                )}
+
+                {/* Display Selected / Identified Skills as Interactive Badges */}
+                {selectedSkills.length > 0 ? (
+                  <div className="space-y-1.5 pt-1">
+                    <p className="text-[11px] font-semibold text-slate-600">Your Identified Skills:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedSkills.map((skill) => (
+                        <span
+                          key={skill}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-xs transition-all animate-in zoom-in-95 hover:bg-indigo-700"
+                        >
+                          <Check className="w-3 h-3 text-emerald-300" />
+                          <span>{skill}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeSkill(skill)}
+                            className="p-0.5 hover:bg-white/20 rounded-full text-white/80 hover:text-white transition-colors ml-0.5"
+                            title={`Remove ${skill}`}
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-slate-400 italic">
+                    No skills identified yet. Type your skills above or click the popular suggestions below:
+                  </p>
+                )}
+
+                {/* Quick 1-Click Suggestions */}
+                <div className="pt-1.5 border-t border-indigo-100 flex flex-wrap items-center gap-1.5 text-[11px]">
+                  <span className="font-semibold text-slate-500 mr-1">Quick Add:</span>
+                  {POPULAR_SKILL_SUGGESTIONS.map((skill) => {
                     const isSelected = selectedSkills.includes(skill);
                     return (
                       <button
                         key={skill}
                         type="button"
                         onClick={() => toggleSkill(skill)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                        className={`px-2 py-0.5 rounded-md font-medium transition-all ${
                           isSelected
-                            ? 'bg-blue-600 border-blue-700 text-white shadow-xs'
-                            : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'
+                            ? 'bg-blue-600 text-white font-bold shadow-2xs'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-blue-300'
                         }`}
                       >
                         {isSelected ? '✓ ' : '+ '}
@@ -362,9 +516,9 @@ export const AuthModal: React.FC = () => {
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-3 px-4 bg-linear-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-xl font-bold text-xs shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 transition-all hover:scale-101 active:scale-99"
                 >
-                  <span>Register & Launch Student Digital Twin</span>
+                  <span>Register & Launch My Career Roadmap ({targetRole})</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -427,7 +581,7 @@ export const AuthModal: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 transition-all hover:scale-101 active:scale-99"
                 >
                   <span>Sign In to Student Portal</span>
                   <ArrowRight className="w-4 h-4" />
@@ -482,7 +636,7 @@ export const AuthModal: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="w-full py-2.5 px-4 bg-slate-900 hover:bg-black text-white rounded-xl font-bold text-xs shadow-md flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-2.5 px-4 bg-slate-900 hover:bg-black text-white rounded-xl font-bold text-xs shadow-md flex items-center justify-center gap-2 transition-all hover:scale-101 active:scale-99"
                 >
                   <Shield className="w-4 h-4 text-blue-400" />
                   <span>Verify Passcode & Enter Faculty Dashboard</span>
