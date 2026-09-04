@@ -9,7 +9,8 @@ import { WhyRecommendedModal } from './components/common/WhyRecommendedModal';
 import { AuthModal } from './components/common/AuthModal';
 import { AdminAuthModal } from './components/common/AdminAuthModal';
 
-// Views
+import { LanguageProvider } from './services/i18n';
+import { StatisticalIntelligenceDashboard } from './views/StatisticalIntelligenceDashboard';
 import { LandingView } from './views/LandingView';
 import { LoginView } from './views/LoginView';
 import { LearnerDashboardView } from './views/LearnerDashboardView';
@@ -69,7 +70,7 @@ const MainLayout: React.FC = () => {
     switch (view) {
       case 'landing':             return <LandingView />;
       case 'login':               return <LoginView />;
-      case 'dashboard':           return <LearnerDashboardView />;
+      case 'dashboard':           return <StatisticalIntelligenceDashboard />;
       case 'digital-twin':        return <CompetencyDigitalTwinView />;
       case 'skill-gaps':          return <SkillGapView />;
       case 'learning-path':       return <LearningPathView />;
@@ -152,9 +153,11 @@ const MainLayout: React.FC = () => {
 
 export default function App() {
   return (
-    <AppProvider>
-      <MainLayout />
-    </AppProvider>
+    <LanguageProvider>
+      <AppProvider>
+        <MainLayout />
+      </AppProvider>
+    </LanguageProvider>
   );
 }
 

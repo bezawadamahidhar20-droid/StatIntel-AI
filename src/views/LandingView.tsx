@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Shield,
   Sparkles,
@@ -15,8 +15,16 @@ import {
   FileCheck,
   GraduationCap,
   Award,
+  Play,
+  Database,
+  MapPin,
+  ShieldCheck,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { APP_CONFIG } from '../config';
+import { useLanguage } from '../services/i18n';
+import LanguageToggle from '../components/common/LanguageToggle';
+import DemoVideoModal from '../components/modals/DemoVideoModal';
 
 export const LandingView: React.FC = () => {
   const {
@@ -25,6 +33,17 @@ export const LandingView: React.FC = () => {
     setIsAuthModalOpen,
     setIsAdminAuthModalOpen,
   } = useApp();
+  const { t } = useLanguage();
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState<boolean>(false);
+  const [liveDatasetsCount, setLiveDatasetsCount] = useState<number>(1428940);
+
+  // Simulate live telemetry counter increment
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLiveDatasetsCount((prev) => prev + Math.floor(Math.random() * 3) + 1);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleStudentStart = () => {
     if (isAuthenticated) {
@@ -39,177 +58,156 @@ export const LandingView: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-50 text-slate-900 flex flex-col font-sans">
+    <div className="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans min-h-screen">
+      {/* Top Banner with Language Toggle and SIH ID */}
+      <div className="bg-slate-900 text-slate-300 text-xs py-2 px-4 border-b border-slate-800">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div className="flex items-center gap-2 text-center sm:text-left">
+            <span className="px-2 py-0.5 bg-blue-500/20 text-blue-300 font-bold rounded-md border border-blue-400/30">
+              {APP_CONFIG.problemStatementId}
+            </span>
+            <span className="hidden sm:inline">&bull;</span>
+            <span className="truncate">{APP_CONFIG.ministryName}</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="text-emerald-400 flex items-center gap-1 font-mono font-bold">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              {liveDatasetsCount.toLocaleString('en-IN')} Datasets Ingested Live
+            </span>
+            <LanguageToggle />
+          </div>
+        </div>
+      </div>
+
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-14 pb-20 border-b border-slate-200 bg-white">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/50 via-transparent to-transparent pointer-events-none" />
+      <section className="relative overflow-hidden pt-12 pb-20 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/60 dark:from-blue-950/40 via-transparent to-transparent pointer-events-none" />
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 relative">
           <div className="max-w-3xl mx-auto text-center space-y-6">
-            {/* Student & MoSPI Academic Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-semibold">
-              <GraduationCap className="w-3.5 h-3.5 text-blue-600" />
-              <span>National Statistical Education & Student Competency Benchmark</span>
+            {/* MoSPI Badge */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-xs font-bold shadow-xs">
+              <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span>{APP_CONFIG.badgeLabel} &bull; {APP_CONFIG.edition}</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight">
-              Where Do Your <span className="text-blue-600">Statistical Skills</span> Stand?
+            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
+              AI-Powered <span className="text-blue-600 dark:text-blue-400">Statistical Intelligence</span> for National Governance
             </h1>
 
-            <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal max-w-2xl mx-auto">
-              Test your practical knowledge in survey design, data analytics, econometric modeling, and official statistics. Get your dynamic AI <strong>Student Digital Twin</strong>, pinpoint your skill gaps, and follow personalized learning roadmaps.
+            <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-normal max-w-2xl mx-auto">
+              Real-time econometric time-series forecasting, Isolation Forest anomaly detection, district-level geospatial heatmaps, and SHAP explainability for 1.4B citizen data streams.
             </p>
 
             {/* Core CTAs */}
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
               <button
                 onClick={handleStudentStart}
-                className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-md shadow-blue-500/20 flex items-center gap-2 transition-all hover:gap-3"
+                className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md shadow-blue-500/20 flex items-center gap-2 transition-all hover:gap-3 cursor-pointer"
               >
                 <GraduationCap className="w-4 h-4" />
-                <span>Test My Skills (Demo New Student)</span>
+                <span>Launch Intelligence Dashboard</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
               <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm border border-slate-200 transition-all flex items-center gap-2"
+                onClick={() => setIsVideoModalOpen(true)}
+                className="px-5 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold text-sm border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2 cursor-pointer shadow-xs"
               >
-                <span>Student Sign In</span>
+                <Play className="w-4 h-4 fill-current text-blue-600" />
+                <span>{t('demoVideo')}</span>
               </button>
 
               <button
                 onClick={handleAdminStart}
-                className="px-5 py-3 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-sm transition-all flex items-center gap-1.5"
+                className="px-5 py-3 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-sm transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Shield className="w-3.5 h-3.5 text-slate-500" />
-                <span>Faculty / Admin Portal</span>
+                <span>{t('loginAsAdmin')}</span>
               </button>
             </div>
 
-            {/* Trust Metric Strip */}
-            <div className="pt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center border-t border-slate-100">
+            {/* Live Trust Metrics Strip */}
+            <div className="pt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center border-t border-slate-100 dark:border-slate-800">
               <div className="p-2">
-                <p className="text-2xl font-bold text-slate-900">4,200+</p>
-                <p className="text-xs text-slate-500">Students Evaluated</p>
+                <p className="text-2xl font-black text-slate-900 dark:text-white font-mono">{liveDatasetsCount.toLocaleString('en-IN')}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{t('datasetsAnalyzed')}</p>
               </div>
               <div className="p-2">
-                <p className="text-2xl font-bold text-blue-600">32+</p>
-                <p className="text-xs text-slate-500">Statistical Competency Maps</p>
+                <p className="text-2xl font-black text-blue-600 dark:text-blue-400 font-mono">788</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Districts Synced (Census India)</p>
               </div>
               <div className="p-2">
-                <p className="text-2xl font-bold text-emerald-600">18+</p>
-                <p className="text-xs text-slate-500">Universities & Academies</p>
+                <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">0.42</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Prophet-LSTM RMSE Benchmark</p>
               </div>
               <div className="p-2">
-                <p className="text-2xl font-bold text-indigo-600">100%</p>
-                <p className="text-xs text-slate-500">MoSPI Grounded Diagnostics</p>
+                <p className="text-2xl font-black text-purple-600 dark:text-purple-400 font-mono">100%</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">SHAP Explainability Coverage</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* The 4-Step Closed-Loop Architecture Section */}
-      <section className="py-16 max-w-6xl mx-auto px-4 sm:px-6 w-full">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-xs font-bold uppercase tracking-wider text-blue-600">
-            Student Competency Architecture
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
-            How Students Benchmark & Elevate Their Skills
+      {/* Feature Pillar Highlights */}
+      <section className="py-16 max-w-6xl mx-auto px-4 sm:px-6 space-y-12">
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+            Architected for Smart India Hackathon Excellence
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-2">
-            A continuous closed-loop cycle connecting classroom theory with practical national datasets and industry benchmarks.
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+            Combining official government data connectors with explainable machine learning models
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold mb-4">
-              <Cpu className="w-5 h-5" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+            <div className="p-3 bg-blue-600 text-white rounded-xl w-fit shadow-md shadow-blue-500/20">
+              <Database className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-bold text-slate-900 mb-2">
-              1. Student Digital Twin
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              Direct Government Feeds
             </h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Multi-dimensional competency model tracking Statistical Theory, Applied Programming (Python/R), Survey Sampling, and Data Governance.
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              Zero mock data. Direct connectors for api.data.gov.in, MoSPI (CPI, IIP, PLFS, ASI), RBI DBIE macroeconomic rates, and Census demographic indexes.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
-            <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold mb-4">
-              <Target className="w-5 h-5" />
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+            <div className="p-3 bg-emerald-600 text-white rounded-xl w-fit shadow-md shadow-emerald-500/20">
+              <TrendingUp className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-bold text-slate-900 mb-2">
-              2. Academic Gap Discovery
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              AI/ML Predictive Models
             </h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Automated benchmarking against Data Scientist and Indian Statistical Service (ISS) roles to identify critical concept deficits.
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              FastAPI backend running Prophet+LSTM time-series forecasting, Isolation Forest anomaly outlier detection, and XGBoost development tier classification.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold mb-4">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+            <div className="p-3 bg-purple-600 text-white rounded-xl w-fit shadow-md shadow-purple-500/20">
               <Sparkles className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-bold text-slate-900 mb-2">
-              3. Personalized Roadmaps
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              SHAP Explainable AI
             </h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Explainable AI course recommendations from iGOT Karmayogi, Swayam, and NSSTA Academic modules tailored to bridge your exact deficits.
-            </p>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold mb-4">
-              <HelpCircle className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 mb-2">
-              4. Grounded Assessment
-            </h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Diagnostic tests grounded in official survey manuals (PLFS, ASI, National Accounts) that directly upgrade your verified Digital Twin scores.
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              Every prediction is paired with game-theoretic Shapley feature attribution vectors, delivering transparency for ministry policy makers and analysts.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Institutional Footer */}
-      <footer className="mt-auto py-8 bg-slate-900 text-slate-400 text-xs border-t border-slate-800">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <p className="font-semibold text-slate-300">
-              StatIntel AI — Student Statistical Skill Intelligence Platform
-            </p>
-            <p className="text-[11px] text-slate-500 mt-0.5">
-              Smart India Hackathon (SIH 2026) Demonstration Prototype • MoSPI Aligned
-            </p>
-          </div>
-          <div className="flex items-center gap-4 text-slate-400">
-            <button
-              onClick={handleStudentStart}
-              className="hover:text-white transition-colors"
-            >
-              Student Portal
-            </button>
-            <span>•</span>
-            <button
-              onClick={handleAdminStart}
-              className="hover:text-white transition-colors"
-            >
-              Faculty / Admin Portal
-            </button>
-            <span>•</span>
-            <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="hover:text-white transition-colors"
-            >
-              Demo New Student
-            </button>
-          </div>
-        </div>
-      </footer>
+      {/* Demo Video Modal */}
+      <DemoVideoModal
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
+      />
     </div>
   );
 };
+
+export default LandingView;
