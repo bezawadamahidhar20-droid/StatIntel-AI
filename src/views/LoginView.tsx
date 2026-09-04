@@ -44,6 +44,7 @@ export const LoginView: React.FC = () => {
 
   // Student Registration Form
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [college, setCollege] = useState('');
   const [degree, setDegree] = useState('');
   const [year, setYear] = useState('3rd Year (Semester 5-6)');

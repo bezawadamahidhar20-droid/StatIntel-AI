@@ -11,7 +11,9 @@ import {
   LearningPathResponse,
 } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.DEV ? 'http://localhost:8000/api/v1' : '/api/v1');
 
 class APIClient {
   private token: string | null = localStorage.getItem('statintel_token');

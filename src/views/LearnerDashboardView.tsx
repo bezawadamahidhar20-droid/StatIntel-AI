@@ -36,6 +36,7 @@ export const LearnerDashboardView: React.FC = () => {
     setWhyRecommendedCourse,
     addNotification,
     targetCareerRole,
+    enrollCourse,
   } = useApp();
 
   const [downloadingPdf, setDownloadingPdf] = useState(false);
