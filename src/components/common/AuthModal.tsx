@@ -4,17 +4,27 @@ import {
   GraduationCap,
   Sparkles,
   Shield,
-  BookOpen,
-  Building,
   User,
   Mail,
   Lock,
   ArrowRight,
-  CheckCircle2,
   AlertCircle,
-  HelpCircle,
+  Code2,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+
+const INITIAL_SKILL_OPTIONS = [
+  'Python',
+  'NumPy',
+  'Matplotlib',
+  'Pandas',
+  'SQL',
+  'Scikit-Learn',
+  'PyTorch',
+  'R Programming',
+  'Probability & Inference',
+  'Survey Sampling',
+];
 
 export const AuthModal: React.FC = () => {
   const {
@@ -25,19 +35,22 @@ export const AuthModal: React.FC = () => {
     isAuthenticated,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'demo' | 'login' | 'admin'>('demo');
+  const [activeTab, setActiveTab] = useState<'register' | 'login' | 'admin'>('register');
 
-  // Demo New Student Form State
-  const [name, setName] = useState('Aarav Sharma');
-  const [college, setCollege] = useState('Department of Statistics, University of Delhi');
-  const [degree, setDegree] = useState('B.Sc (Hons) Statistics & Data Analytics');
-  const [year, setYear] = useState('Final Year (Semester 6)');
-  const [targetRole, setTargetRole] = useState('Data Scientist & Statistical Analyst');
-  const [email, setEmail] = useState('aarav.sharma@du.ac.in');
+  // Student Registration Form State (clean, empty defaults)
+  const [name, setName] = useState('');
+  const [college, setCollege] = useState('');
+  const [degree, setDegree] = useState('');
+  const [year, setYear] = useState('3rd Year (Semester 5-6)');
+  const [targetRole, setTargetRole] = useState('Data Analyst');
+  const [email, setEmail] = useState('');
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [registerError, setRegisterError] = useState('');
 
-  // Student Login State
-  const [loginEmail, setLoginEmail] = useState('aarav.sharma@du.ac.in');
-  const [loginPassword, setLoginPassword] = useState('••••••••••••');
+  // Student Sign In State (clean, empty defaults)
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
 
   // Admin Passcode State
   const [adminPasscode, setAdminPasscode] = useState('');
@@ -45,26 +58,66 @@ export const AuthModal: React.FC = () => {
 
   if (!isAuthModalOpen || isAuthenticated) return null;
 
-  const handleDemoSubmit = (e: React.FormEvent) => {
+  const toggleSkill = (skill: string) => {
+    setSelectedSkills((prev) =>
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+    );
+  };
+
+  const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setRegisterError('');
+
+    if (!name.trim()) {
+      setRegisterError('Please enter your full name.');
+      return;
+    }
+    if (!college.trim()) {
+      setRegisterError('Please enter your college or university.');
+      return;
+    }
+    if (!degree.trim()) {
+      setRegisterError('Please enter your degree program.');
+      return;
+    }
+
     loginAsStudent({
-      name,
-      college,
-      degree,
+      name: name.trim(),
+      college: college.trim(),
+      degree: degree.trim(),
       year,
       targetRole,
-      email,
+      email: email.trim(),
+      knownSkills: selectedSkills,
     });
   };
 
-  const handleQuickStudentLogin = () => {
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError('');
+
+    if (!loginEmail.trim()) {
+      setLoginError('Please enter your student email or username.');
+      return;
+    }
+
+    // Derive student display name from email if needed
+    const extractedName = loginEmail.includes('@')
+      ? loginEmail.split('@')[0].replace(/[._-]/g, ' ')
+      : loginEmail;
+    const capitalizedName = extractedName
+      .split(' ')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+
     loginAsStudent({
-      name: 'Aarav Sharma',
-      college: 'Department of Statistics, University of Delhi',
-      degree: 'B.Sc (Hons) Statistics & Data Analytics',
-      year: 'Final Year (Semester 6)',
-      targetRole: 'Data Scientist & Statistical Analyst',
-      email: 'aarav.sharma@du.ac.in',
+      name: capitalizedName || 'Student Scholar',
+      college: 'University / Institute',
+      degree: 'Degree Program',
+      year: 'Undergraduate',
+      targetRole: 'Data Analyst',
+      email: loginEmail.trim(),
+      knownSkills: selectedSkills.length > 0 ? selectedSkills : ['Python', 'NumPy'],
     });
   };
 
@@ -73,17 +126,8 @@ export const AuthModal: React.FC = () => {
     setAdminError('');
     const success = loginAsAdmin(adminPasscode);
     if (!success) {
-      setAdminError('Invalid Institutional Admin Passcode. Use "admin2026" for SIH evaluation.');
+      setAdminError('Invalid Institutional Admin Passcode. Use "admin2026" for evaluation.');
     }
-  };
-
-  const handlePrefillDemo = () => {
-    setName('Priya Patel');
-    setCollege('Indian Statistical Institute (ISI), Kolkata');
-    setDegree('M.Sc Applied Statistics & Machine Learning');
-    setYear('Postgraduate (Year 2)');
-    setTargetRole('National Statistical Service (ISS) & Policy Analyst');
-    setEmail('priya.patel@isical.ac.in');
   };
 
   return (
@@ -111,29 +155,33 @@ export const AuthModal: React.FC = () => {
             Welcome to StatIntel AI
           </h2>
           <p className="text-xs sm:text-sm text-blue-100/90 mt-1 max-w-lg">
-            Test and benchmark your statistical skills against official National MoSPI & Data Science industry standards.
+            Benchmark your statistical, data science, and machine learning skills with personalized AI roadmaps and adaptive quizzes.
           </p>
 
           {/* Navigation Tabs */}
           <div className="flex gap-2 mt-5 border-b border-white/15 pb-0 text-xs">
             <button
               onClick={() => {
-                setActiveTab('demo');
+                setActiveTab('register');
+                setRegisterError('');
+                setLoginError('');
                 setAdminError('');
               }}
               className={`pb-2.5 px-3 font-semibold transition-all border-b-2 flex items-center gap-1.5 ${
-                activeTab === 'demo'
+                activeTab === 'register'
                   ? 'border-amber-400 text-white font-bold'
                   : 'border-transparent text-blue-200 hover:text-white'
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>Demo New Student</span>
+              <span>Student Registration</span>
             </button>
 
             <button
               onClick={() => {
                 setActiveTab('login');
+                setRegisterError('');
+                setLoginError('');
                 setAdminError('');
               }}
               className={`pb-2.5 px-3 font-semibold transition-all border-b-2 flex items-center gap-1.5 ${
@@ -149,6 +197,8 @@ export const AuthModal: React.FC = () => {
             <button
               onClick={() => {
                 setActiveTab('admin');
+                setRegisterError('');
+                setLoginError('');
                 setAdminError('');
               }}
               className={`pb-2.5 px-3 font-semibold transition-all border-b-2 flex items-center gap-1.5 ${
@@ -165,27 +215,24 @@ export const AuthModal: React.FC = () => {
 
         {/* Modal Body */}
         <div className="p-6 max-h-[75vh] overflow-y-auto">
-          {/* TAB 1: Demo New Student */}
-          {activeTab === 'demo' && (
-            <form onSubmit={handleDemoSubmit} className="space-y-4">
-              <div className="flex items-center justify-between pb-1">
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">
-                    Set Up Your Student Profile & Skill Twin
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Provide your academic details to synthesize your personalized statistical competency baseline.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handlePrefillDemo}
-                  className="text-xs font-semibold text-blue-600 hover:text-blue-800 underline flex items-center gap-1"
-                >
-                  <Sparkles className="w-3 h-3 text-amber-500" />
-                  <span>Fill Sample Student</span>
-                </button>
+          {/* TAB 1: Student Registration */}
+          {activeTab === 'register' && (
+            <form onSubmit={handleRegisterSubmit} className="space-y-4">
+              <div className="pb-1">
+                <h3 className="text-sm font-bold text-slate-900">
+                  Create Your Student Profile
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Enter your academic information to synthesize your statistical competency digital twin.
+                </p>
               </div>
+
+              {registerError && (
+                <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                  <span>{registerError}</span>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
                 <div>
@@ -197,7 +244,7 @@ export const AuthModal: React.FC = () => {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Aarav Sharma"
+                    placeholder="Enter your full name"
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                   />
                 </div>
@@ -210,7 +257,7 @@ export const AuthModal: React.FC = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="e.g. aarav.sharma@du.ac.in"
+                    placeholder="student@university.edu"
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                   />
                 </div>
@@ -224,7 +271,7 @@ export const AuthModal: React.FC = () => {
                     required
                     value={college}
                     onChange={(e) => setCollege(e.target.value)}
-                    placeholder="e.g. Delhi University / ISI Kolkata / IIT Madras"
+                    placeholder="e.g. IIT Madras / Delhi University / ISI Kolkata"
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                   />
                 </div>
@@ -238,7 +285,7 @@ export const AuthModal: React.FC = () => {
                     required
                     value={degree}
                     onChange={(e) => setDegree(e.target.value)}
-                    placeholder="e.g. B.Sc Statistics / M.Sc Data Science / B.Tech AI"
+                    placeholder="e.g. B.Tech Computer Science / B.Sc Statistics"
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                   />
                 </div>
@@ -255,7 +302,7 @@ export const AuthModal: React.FC = () => {
                     <option value="1st Year (Semester 1-2)">1st Year (Semester 1-2)</option>
                     <option value="2nd Year (Semester 3-4)">2nd Year (Semester 3-4)</option>
                     <option value="3rd Year (Semester 5-6)">3rd Year (Semester 5-6)</option>
-                    <option value="Final Year (Semester 6)">Final Year (Semester 6)</option>
+                    <option value="Final Year (Semester 7-8)">Final Year (Semester 7-8)</option>
                     <option value="Postgraduate / Masters (Year 1)">Postgraduate / Masters (Year 1)</option>
                     <option value="Postgraduate / Masters (Year 2)">Postgraduate / Masters (Year 2)</option>
                     <option value="Recent Graduate / Aspirant">Recent Graduate / Aspirant</option>
@@ -271,39 +318,54 @@ export const AuthModal: React.FC = () => {
                     onChange={(e) => setTargetRole(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                   >
-                    <option value="Data Scientist & Statistical Analyst">Data Scientist & Statistical Analyst</option>
-                    <option value="National Statistical Service (ISS / MoSPI) Aspirant">National Statistical Service (ISS / MoSPI) Aspirant</option>
-                    <option value="Quantitative Risk & Financial Modeling Analyst">Quantitative Risk & Financial Modeling Analyst</option>
-                    <option value="Survey Design, Sampling & Socio-Economic Researcher">Survey Design, Sampling & Socio-Economic Researcher</option>
-                    <option value="Machine Learning & Applied Econometrician">Machine Learning & Applied Econometrician</option>
+                    <option value="Data Analyst">Data Analyst (NumPy, Matplotlib, Pandas, SQL)</option>
+                    <option value="Machine Learning Engineer">Machine Learning Engineer (Scikit-Learn, PyTorch, MLOps)</option>
+                    <option value="Official Statistical Scientist (MoSPI / ISS)">Statistical Scientist (Inference, Sampling, Econometrics)</option>
                   </select>
                 </div>
               </div>
 
-              {/* Information Banner */}
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-800 flex items-start gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                <p>
-                  Your profile will be benchmarked against <strong>MoSPI National Statistical Standards</strong>, <strong>NSSO/PLFS sampling methodologies</strong>, and <strong>iGOT Karmayogi learning frameworks</strong>.
-                </p>
+              {/* Interactive Skill Selection */}
+              <div className="pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <Code2 className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Skills You Currently Know (Select all that apply):</span>
+                  </label>
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    {selectedSkills.length} selected
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {INITIAL_SKILL_OPTIONS.map((skill) => {
+                    const isSelected = selectedSkills.includes(skill);
+                    return (
+                      <button
+                        key={skill}
+                        type="button"
+                        onClick={() => toggleSkill(skill)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                          isSelected
+                            ? 'bg-blue-600 border-blue-700 text-white shadow-xs'
+                            : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'
+                        }`}
+                      >
+                        {isSelected ? '✓ ' : '+ '}
+                        {skill}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+              <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full sm:flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 transition-all"
                 >
-                  <span>Launch Student Skill Intelligence & Digital Twin</span>
+                  <span>Register & Launch Student Digital Twin</span>
                   <ArrowRight className="w-4 h-4" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleQuickStudentLogin}
-                  className="w-full sm:w-auto py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-xs transition-colors"
-                >
-                  Quick Student Demo
                 </button>
               </div>
             </form>
@@ -311,28 +373,36 @@ export const AuthModal: React.FC = () => {
 
           {/* TAB 2: Student Sign In */}
           {activeTab === 'login' && (
-            <div className="space-y-4">
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
                 <h3 className="text-sm font-bold text-slate-900">
-                  Registered Student Sign In
+                  Student Sign In
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Sign in with your University Student ID or Institutional Email.
+                  Sign in with your University Student Email or Roll ID.
                 </p>
               </div>
+
+              {loginError && (
+                <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                  <span>{loginError}</span>
+                </div>
+              )}
 
               <div className="space-y-3.5 text-xs">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    Student ID or Institutional Email
+                    Student Email or Roll ID *
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                     <input
                       type="text"
+                      required
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
-                      placeholder="student@university.edu.in"
+                      placeholder="Enter your student email (e.g. rahul@university.edu)"
                       className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                     />
                   </div>
@@ -340,29 +410,30 @@ export const AuthModal: React.FC = () => {
 
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    Password
+                    Password *
                   </label>
                   <div className="relative">
                     <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                     <input
                       type="password"
+                      required
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
+                      placeholder="Enter your password"
                       className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                     />
                   </div>
                 </div>
 
                 <button
-                  type="button"
-                  onClick={handleQuickStudentLogin}
+                  type="submit"
                   className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 transition-all"
                 >
-                  <span>Sign In as Student (Aarav Sharma)</span>
+                  <span>Sign In to Student Portal</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
-            </div>
+            </form>
           )}
 
           {/* TAB 3: Faculty / Admin Access */}
@@ -374,7 +445,7 @@ export const AuthModal: React.FC = () => {
                   <span>Institutional Administrator & Faculty Gate</span>
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Protected access for University Deans, Faculty Advisors, and MoSPI Academy Directors.
+                  Protected access for University Deans, Faculty Advisors, and Institutional Directors.
                 </p>
               </div>
 
@@ -397,7 +468,7 @@ export const AuthModal: React.FC = () => {
                       required
                       value={adminPasscode}
                       onChange={(e) => setAdminPasscode(e.target.value)}
-                      placeholder="Enter admin passcode..."
+                      placeholder="Enter faculty admin passcode..."
                       className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                     />
                   </div>

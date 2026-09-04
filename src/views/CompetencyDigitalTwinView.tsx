@@ -54,7 +54,7 @@ export const CompetencyDigitalTwinView: React.FC = () => {
             </h1>
           </div>
           <p className="text-xs text-slate-500 font-medium">
-            Dynamic computational model calibrated against the MoSPI ISS Competency Dictionary and verified evidence logs.
+            Dynamic computational model synthesizing your statistical theory, programming benchmarks, and verified assessment scores.
           </p>
         </div>
 

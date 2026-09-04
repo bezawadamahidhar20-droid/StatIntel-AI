@@ -17,17 +17,17 @@ export const LoginView: React.FC = () => {
   const { loginAsStudent, loginAsAdmin, navigate } = useApp();
   const [mode, setMode] = useState<'demo' | 'login' | 'admin'>('demo');
 
-  // Demo New Student Form
-  const [name, setName] = useState('Aarav Sharma');
-  const [college, setCollege] = useState('Department of Statistics, University of Delhi');
-  const [degree, setDegree] = useState('B.Sc (Hons) Statistics & Data Analytics');
-  const [year, setYear] = useState('Final Year (Semester 6)');
-  const [targetRole, setTargetRole] = useState('Data Scientist & Statistical Analyst');
-  const [email, setEmail] = useState('aarav.sharma@du.ac.in');
+  // Student Registration Form
+  const [name, setName] = useState('');
+  const [college, setCollege] = useState('');
+  const [degree, setDegree] = useState('');
+  const [year, setYear] = useState('3rd Year (Semester 5-6)');
+  const [targetRole, setTargetRole] = useState('Data Analyst');
+  const [email, setEmail] = useState('');
 
   // Student Login
-  const [loginEmail, setLoginEmail] = useState('aarav.sharma@du.ac.in');
-  const [loginPassword, setLoginPassword] = useState('••••••••••••');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
 
   // Admin Passcode
   const [passcode, setPasscode] = useState('');
@@ -36,24 +36,34 @@ export const LoginView: React.FC = () => {
   const handleDemoSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     loginAsStudent({
-      name,
-      college,
-      degree,
+      name: name.trim() || 'Student Scholar',
+      college: college.trim() || 'University',
+      degree: degree.trim() || 'Degree Program',
       year,
       targetRole,
-      email,
+      email: email.trim(),
     });
   };
 
   const handleStudentLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    const extractedName = loginEmail.includes('@')
+      ? loginEmail.split('@')[0].replace(/[._-]/g, ' ')
+      : loginEmail;
+    const capitalizedName = extractedName
+      ? extractedName
+          .split(' ')
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(' ')
+      : 'Student Scholar';
+
     loginAsStudent({
-      name: 'Aarav Sharma',
-      college: 'Department of Statistics, University of Delhi',
-      degree: 'B.Sc (Hons) Statistics & Data Analytics',
-      year: 'Final Year (Semester 6)',
-      targetRole: 'Data Scientist & Statistical Analyst',
-      email: loginEmail,
+      name: capitalizedName,
+      college: 'University / Institute',
+      degree: 'Degree Program',
+      year: 'Undergraduate',
+      targetRole: 'Data Analyst',
+      email: loginEmail.trim(),
     });
   };
 
@@ -98,7 +108,7 @@ export const LoginView: React.FC = () => {
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Demo New Student</span>
+              <span>Student Registration</span>
             </button>
 
             <button
@@ -268,7 +278,7 @@ export const LoginView: React.FC = () => {
                 type="submit"
                 className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 transition-all"
               >
-                <span>Sign In as Student (Aarav Sharma)</span>
+                <span>Sign In to Student Portal</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>

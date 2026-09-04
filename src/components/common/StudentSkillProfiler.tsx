@@ -46,6 +46,16 @@ export const StudentSkillProfiler: React.FC = () => {
   const [loadingAi, setLoadingAi] = useState<boolean>(false);
   const [aiAdviceText, setAiAdviceText] = useState<string>('');
 
+  useEffect(() => {
+    setSelectedSkills(userSkills || []);
+  }, [userSkills]);
+
+  useEffect(() => {
+    if (targetCareerRole) {
+      setSelectedRole(targetCareerRole);
+    }
+  }, [targetCareerRole]);
+
   // Re-calculate guidance whenever role or skills change
   useEffect(() => {
     let isMounted = true;

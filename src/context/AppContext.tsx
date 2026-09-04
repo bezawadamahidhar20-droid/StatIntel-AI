@@ -159,11 +159,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // ignore
       }
     }
-    return ['Python Basics', 'NumPy Arrays', 'Matplotlib Visualizations', 'Basic Probability'];
+    return [];
   });
 
   const [targetCareerRole, setTargetCareerRole] = useState<string>(() => {
-    return localStorage.getItem('statintel_target_role') || 'Data Scientist & Statistical Analyst';
+    return localStorage.getItem('statintel_target_role') || 'Data Analyst';
   });
 
   const [geminiApiKey, setGeminiApiKey] = useState<string>(() => {
@@ -195,8 +195,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [notifications, setNotifications] = useState<AppNotification[]>([
     {
       id: 'notif-1',
-      title: 'New iGOT Recommendation',
-      message: 'Python Foundations for Statistical Analysis recommended based on NSSO microdata requirement.',
+      title: 'New Skill Benchmark Available',
+      message: 'Python & Data Analytics Foundations benchmark updated for students.',
       time: '10 mins ago',
       type: 'recommendation',
       read: false,
@@ -205,7 +205,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     {
       id: 'notif-2',
       title: 'Diagnostic Ready',
-      message: 'AI generated 6 questions for Survey Design & Sampling Methodology from 78th Round Manual.',
+      message: 'AI generated 5 adaptive questions for your chosen career track.',
       time: '1 hour ago',
       type: 'assessment',
       read: false,
@@ -213,12 +213,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     },
     {
       id: 'notif-3',
-      title: 'MoSPI Training Priority',
-      message: 'Survey Division mandates DPDP Act 2023 compliance certification by Q3.',
+      title: 'Roadmap Milestone',
+      message: 'Check off your skills in the Learning Path to calculate your career readiness score.',
       time: '1 day ago',
       type: 'alert',
       read: true,
-      linkView: 'skill-gaps',
+      linkView: 'learning-path',
     },
   ]);
 
@@ -256,29 +256,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     email?: string;
     knownSkills?: string[];
   }) => {
+    const studentName = data.name?.trim() || (data.email ? data.email.split('@')[0] : 'Student Scholar');
+    const studentSkills = data.knownSkills || [];
+    const calculatedCompetency = studentSkills.length > 0 ? Math.min(95, studentSkills.length * 15) : 40;
+
     const studentUser: User = {
       ...initialUser,
       id: `stu-${Date.now()}`,
-      name: data.name?.trim() || 'Aarav Sharma',
-      designation: `${data.degree || 'B.Sc Statistics'} Scholar`,
-      department: `Dept. of Statistics & Analytics`,
-      institution: data.college || 'University of Delhi',
-      degree: data.degree || 'B.Sc (Hons) Statistics & Data Analytics',
-      academicYear: data.year || 'Final Year (Semester 6)',
-      targetGoal: data.targetRole || 'Data Scientist & National Statistical Service (ISS) Aspirant',
-      cadre: `Student Roll #STU-${Math.floor(1000 + Math.random() * 9000)} • ${data.year || '3rd Year'}`,
+      name: studentName,
+      designation: `${data.degree?.trim() || 'Data Science'} Scholar`,
+      department: `Department of Statistics & Analytics`,
+      institution: data.college?.trim() || 'University / Institute',
+      degree: data.degree?.trim() || 'Degree Program',
+      academicYear: data.year || 'Undergraduate',
+      targetGoal: data.targetRole || 'Data Analyst',
+      cadre: `Student Roll #STU-${Math.floor(1000 + Math.random() * 9000)} • ${data.year || 'Student'}`,
       employeeId: `STU-${Math.floor(1000 + Math.random() * 9000)}`,
-      email: data.email || `${(data.name || 'aarav').toLowerCase().replace(/\s+/g, '.')}@edu.in`,
+      email: data.email?.trim() || `${studentName.toLowerCase().replace(/\s+/g, '.')}@university.edu`,
       role: 'LEARNER',
-      overallCompetency: 74,
-      roleReadiness: 76,
+      overallCompetency: calculatedCompetency,
+      roleReadiness: calculatedCompetency + 5,
     };
     setCurrentUser(studentUser);
     setUserRole('LEARNER');
     setIsAuthenticated(true);
-    if (data.knownSkills && data.knownSkills.length > 0) {
-      setUserSkills(data.knownSkills);
-      localStorage.setItem('statintel_skills', JSON.stringify(data.knownSkills));
+    if (studentSkills.length > 0) {
+      setUserSkills(studentSkills);
+      localStorage.setItem('statintel_skills', JSON.stringify(studentSkills));
     }
     if (data.targetRole) {
       setTargetCareerRole(data.targetRole);

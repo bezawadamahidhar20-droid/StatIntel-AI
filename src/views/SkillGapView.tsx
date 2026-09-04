@@ -38,7 +38,7 @@ export const SkillGapView: React.FC = () => {
             </h1>
           </div>
           <p className="text-xs text-slate-500 font-medium">
-            Automated divergence diagnosis between verified officer competencies and MoSPI Senior Statistical Officer cadre mandates.
+            Automated divergence diagnosis between your verified skills and target career requirements in Data Science, ML, and Statistics.
           </p>
         </div>
 
