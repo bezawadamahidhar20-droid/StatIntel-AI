@@ -27,11 +27,14 @@ import AnomalyAlert from '../components/analytics/AnomalyAlert';
 import ComparisonMode from '../components/analytics/ComparisonMode';
 import DrillDown from '../components/analytics/DrillDown';
 import DataUpload from '../components/analytics/DataUpload';
+import ExecutiveReportGenerator from '../components/analytics/ExecutiveReportGenerator';
+import AlertThresholdSettings from '../components/analytics/AlertThresholdSettings';
+import AuditTrailViewer from '../components/analytics/AuditTrailViewer';
 import { CensusDistrictData } from '../services/api/types';
 
 export const StatisticalIntelligenceDashboard: React.FC = () => {
   const { t } = useLanguage();
-  const [activeTab, setActiveTab] = useState<'overview' | 'map' | 'forecasting' | 'anomalies' | 'comparison' | 'upload'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'map' | 'forecasting' | 'anomalies' | 'comparison' | 'reports' | 'upload' | 'audit'>('overview');
   const [selectedDistrict, setSelectedDistrict] = useState<CensusDistrictData | null>(null);
 
   return (
@@ -72,7 +75,9 @@ export const StatisticalIntelligenceDashboard: React.FC = () => {
             { id: 'forecasting', label: t('forecasting'), icon: TrendingUp },
             { id: 'anomalies', label: t('anomalies'), icon: ShieldAlert },
             { id: 'comparison', label: 'Comparison Mode', icon: ArrowLeftRight },
+            { id: 'reports', label: t('reports'), icon: FileSpreadsheet },
             { id: 'upload', label: t('dataUpload'), icon: UploadCloud },
+            { id: 'audit', label: 'Audit Trail', icon: Database },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -132,7 +137,7 @@ export const StatisticalIntelligenceDashboard: React.FC = () => {
         {activeTab === 'anomalies' && (
           <div className="space-y-6">
             <AnomalyAlert />
-            <TimeSeriesChart />
+            <AlertThresholdSettings />
           </div>
         )}
 
@@ -143,9 +148,21 @@ export const StatisticalIntelligenceDashboard: React.FC = () => {
           </div>
         )}
 
+        {activeTab === 'reports' && (
+          <div className="space-y-6">
+            <ExecutiveReportGenerator />
+          </div>
+        )}
+
         {activeTab === 'upload' && (
           <div className="space-y-6">
             <DataUpload />
+          </div>
+        )}
+
+        {activeTab === 'audit' && (
+          <div className="space-y-6">
+            <AuditTrailViewer />
           </div>
         )}
       </main>
