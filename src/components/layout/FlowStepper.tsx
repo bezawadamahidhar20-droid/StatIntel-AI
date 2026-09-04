@@ -17,18 +17,18 @@ interface FlowStep {
 }
 
 export const FLOW_STEPS: FlowStep[] = [
-  { id: 'dashboard', number: 1, label: 'Competency Overview', stage: 'Stage 1: Assess' },
-  { id: 'digital-twin', number: 2, label: 'Digital Twin Model', stage: 'Stage 1: Assess' },
-  { id: 'skill-gaps', number: 3, label: 'Gap Analysis', stage: 'Stage 2: Analyze' },
-  { id: 'learning-path', number: 4, label: 'Adaptive Path', stage: 'Stage 3: Learn' },
-  { id: 'courses', number: 5, label: 'MoSPI Modules', stage: 'Stage 3: Learn' },
-  { id: 'quiz-generator', number: 6, label: 'AI Quiz Studio', stage: 'Stage 4: Certify' },
-  { id: 'assessment', number: 7, label: 'Competency Exam', stage: 'Stage 4: Certify' },
-  { id: 'admin-dashboard', number: 8, label: 'Cadre Intelligence', stage: 'Executive Governance', roleRequired: 'ADMIN' },
+  { id: 'dashboard', number: 1, label: 'Student Overview', stage: 'Stage 1: Assess' },
+  { id: 'digital-twin', number: 2, label: 'Student Digital Twin', stage: 'Stage 1: Assess' },
+  { id: 'skill-gaps', number: 3, label: 'Academic & Industry Gaps', stage: 'Stage 2: Analyze' },
+  { id: 'learning-path', number: 4, label: 'Personalized Roadmap', stage: 'Stage 3: Learn' },
+  { id: 'courses', number: 5, label: 'Curricula & Modules', stage: 'Stage 3: Learn' },
+  { id: 'quiz-generator', number: 6, label: 'AI Diagnostic Studio', stage: 'Stage 4: Certify' },
+  { id: 'assessment', number: 7, label: 'Skill Diagnostic Exam', stage: 'Stage 4: Certify' },
+  { id: 'admin-dashboard', number: 8, label: 'Faculty Intelligence (Protected)', stage: 'Faculty Governance', roleRequired: 'ADMIN' },
 ];
 
 export const FlowStepper: React.FC = () => {
-  const { activeView, navigate, switchRole, userRole } = useApp();
+  const { activeView, navigate, userRole, setIsAdminAuthModalOpen } = useApp();
 
   const currentStepIndex = FLOW_STEPS.findIndex((s) => {
     if (activeView === 'course-detail') return s.id === 'courses';
@@ -46,10 +46,9 @@ export const FlowStepper: React.FC = () => {
     : null;
 
   const handleStepClick = (step: FlowStep) => {
-    if (step.roleRequired && userRole !== step.roleRequired) {
-      switchRole(step.roleRequired);
-    } else if (!step.roleRequired && userRole === 'ADMIN' && step.id !== 'admin-dashboard') {
-      switchRole('LEARNER');
+    if (step.roleRequired === 'ADMIN' && userRole !== 'ADMIN') {
+      setIsAdminAuthModalOpen(true);
+      return;
     }
     navigate(step.id);
   };

@@ -92,6 +92,22 @@ interface AppContextType {
   searchOpen: boolean;
   setSearchOpen: (open: boolean) => void;
 
+  isAuthenticated: boolean;
+  isAuthModalOpen: boolean;
+  setIsAuthModalOpen: (open: boolean) => void;
+  isAdminAuthModalOpen: boolean;
+  setIsAdminAuthModalOpen: (open: boolean) => void;
+  loginAsStudent: (data: {
+    name: string;
+    college: string;
+    degree: string;
+    year: string;
+    targetRole: string;
+    email?: string;
+  }) => void;
+  loginAsAdmin: (passcode: string) => boolean;
+  logout: () => void;
+
   enrollCourse: (courseId: string) => void;
   submitAssessmentAttempt: (assessmentId: string, userAnswers: number[], timeSpentSeconds: number) => void;
   addNewGeneratedAssessment: (newAssessment: Assessment) => void;
@@ -101,9 +117,37 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [userRole, setUserRole] = useState<UserRole>('LEARNER');
-  const [currentUser, setCurrentUser] = useState<User>(initialUser);
-  const [activeView, setActiveView] = useState<AppView>('dashboard');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return sessionStorage.getItem('statintel_auth') === 'true';
+  });
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(() => {
+    return sessionStorage.getItem('statintel_auth') !== 'true';
+  });
+  const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState<boolean>(false);
+
+  const [userRole, setUserRole] = useState<UserRole>(() => {
+    const savedRole = sessionStorage.getItem('statintel_role') as UserRole;
+    return savedRole === 'ADMIN' ? 'ADMIN' : 'LEARNER';
+  });
+
+  const [currentUser, setCurrentUser] = useState<User>(() => {
+    const savedUser = sessionStorage.getItem('statintel_user');
+    if (savedUser) {
+      try {
+        return JSON.parse(savedUser);
+      } catch (e) {
+        // ignore
+      }
+    }
+    const savedRole = sessionStorage.getItem('statintel_role');
+    return savedRole === 'ADMIN' ? adminUser : initialUser;
+  });
+
+  const [activeView, setActiveView] = useState<AppView>(() => {
+    const isAuth = sessionStorage.getItem('statintel_auth') === 'true';
+    if (!isAuth) return 'landing';
+    return 'dashboard';
+  });
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
   const [competencies, setCompetencies] = useState<Competency[]>(initialCompetencies);
@@ -176,7 +220,80 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsDarkMode((prev) => !prev);
   };
 
+  const loginAsStudent = (data: {
+    name: string;
+    college: string;
+    degree: string;
+    year: string;
+    targetRole: string;
+    email?: string;
+  }) => {
+    const studentUser: User = {
+      ...initialUser,
+      id: `stu-${Date.now()}`,
+      name: data.name?.trim() || 'Aarav Sharma',
+      designation: `${data.degree || 'B.Sc Statistics'} Scholar`,
+      department: `Dept. of Statistics & Analytics`,
+      institution: data.college || 'University of Delhi',
+      degree: data.degree || 'B.Sc (Hons) Statistics & Data Analytics',
+      academicYear: data.year || 'Final Year (Semester 6)',
+      targetGoal: data.targetRole || 'Data Scientist & National Statistical Service (ISS) Aspirant',
+      cadre: `Student Roll #STU-${Math.floor(1000 + Math.random() * 9000)} • ${data.year || '3rd Year'}`,
+      employeeId: `STU-${Math.floor(1000 + Math.random() * 9000)}`,
+      email: data.email || `${(data.name || 'aarav').toLowerCase().replace(/\s+/g, '.')}@edu.in`,
+      role: 'LEARNER',
+      overallCompetency: 74,
+      roleReadiness: 76,
+    };
+    setCurrentUser(studentUser);
+    setUserRole('LEARNER');
+    setIsAuthenticated(true);
+    sessionStorage.setItem('statintel_auth', 'true');
+    sessionStorage.setItem('statintel_user', JSON.stringify(studentUser));
+    sessionStorage.setItem('statintel_role', 'LEARNER');
+    setIsAuthModalOpen(false);
+    setActiveView('dashboard');
+  };
+
+  const loginAsAdmin = (passcode: string): boolean => {
+    if (passcode.trim() === 'admin2026' || passcode.trim() === 'admin123') {
+      setCurrentUser(adminUser);
+      setUserRole('ADMIN');
+      setIsAuthenticated(true);
+      sessionStorage.setItem('statintel_auth', 'true');
+      sessionStorage.setItem('statintel_user', JSON.stringify(adminUser));
+      sessionStorage.setItem('statintel_role', 'ADMIN');
+      setIsAdminAuthModalOpen(false);
+      setIsAuthModalOpen(false);
+      setActiveView('admin-dashboard');
+      return true;
+    }
+    return false;
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    sessionStorage.removeItem('statintel_auth');
+    sessionStorage.removeItem('statintel_user');
+    sessionStorage.removeItem('statintel_role');
+    setUserRole('LEARNER');
+    setCurrentUser(initialUser);
+    setActiveView('landing');
+    setIsAuthModalOpen(true);
+  };
+
   const navigate = (view: AppView, params?: { courseId?: string; assessmentId?: string }) => {
+    // If not authenticated and attempting to view internal dashboard routes
+    if (!isAuthenticated && view !== 'landing' && view !== 'login') {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    // If attempting to access admin route without admin role
+    if (view.startsWith('admin-') && userRole !== 'ADMIN') {
+      setIsAdminAuthModalOpen(true);
+      return;
+    }
+
     if (params?.courseId) {
       setActiveCourseId(params.courseId);
     }
@@ -188,19 +305,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const switchRole = (role: UserRole) => {
-    setUserRole(role);
     if (role === 'ADMIN') {
-      setCurrentUser(adminUser);
-      if (activeView.startsWith('admin-')) {
-        // stay in admin view
-      } else {
-        setActiveView('admin-dashboard');
+      // Require authentication
+      setIsAdminAuthModalOpen(true);
+      return;
+    }
+    // Switching back to student
+    setUserRole('LEARNER');
+    sessionStorage.setItem('statintel_role', 'LEARNER');
+    const savedStudent = sessionStorage.getItem('statintel_user');
+    if (savedStudent) {
+      try {
+        setCurrentUser(JSON.parse(savedStudent));
+      } catch (e) {
+        setCurrentUser(initialUser);
       }
     } else {
       setCurrentUser(initialUser);
-      if (activeView.startsWith('admin-')) {
-        setActiveView('dashboard');
-      }
+    }
+    if (activeView.startsWith('admin-')) {
+      setActiveView('dashboard');
     }
   };
 
@@ -464,6 +588,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         markAllNotificationsAsRead,
         searchOpen,
         setSearchOpen,
+        isAuthenticated,
+        isAuthModalOpen,
+        setIsAuthModalOpen,
+        isAdminAuthModalOpen,
+        setIsAdminAuthModalOpen,
+        loginAsStudent,
+        loginAsAdmin,
+        logout,
         enrollCourse,
         submitAssessmentAttempt,
         addNewGeneratedAssessment,

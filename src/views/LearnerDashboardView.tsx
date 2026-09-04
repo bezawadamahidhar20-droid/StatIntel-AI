@@ -56,7 +56,7 @@ export const LearnerDashboardView: React.FC = () => {
       setDownloadingPdf(false);
       addNotification({
         title: 'Competency Dossier Exported',
-        message: 'Official Competency Dossier (PDF) for Rajesh Sharma (SSO) downloaded successfully.',
+        message: `Official Student Competency Dossier (PDF) for ${currentUser.name} downloaded successfully.`,
         type: 'success',
       });
     }, 700);
@@ -65,31 +65,31 @@ export const LearnerDashboardView: React.FC = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto font-sans text-slate-800">
       {/* SIH Impact KPI Headline Banner */}
-      <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-4 sm:p-5 rounded-2xl shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-linear-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-4 sm:p-5 rounded-2xl shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-400 text-blue-950">
-              SIH 2026 Innovation Benchmark
+              SIH 2026 Student Intelligence Benchmark
             </span>
             <span className="text-xs text-blue-200 font-medium hidden sm:inline">
-              MoSPI National Public Infrastructure
+              National Statistical Education Benchmark
             </span>
           </div>
           <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white">
-            Transforming Civil Service Capacity: Rule of Law to Role-Based Competence
+            Student Statistical Competency Intelligence & Career Readiness Twin
           </h2>
           <p className="text-xs text-blue-200 leading-normal max-w-2xl">
-            Real-time competency digital twin bridging official statistical frameworks (SNA 2008, NSSO microdata) with adaptive iGOT Karmayogi learning interventions.
+            Real-time competency digital twin bridging university statistical theory (Probability, Inference, Sampling) with official MoSPI datasets and industry data science benchmarks.
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
           <div className="text-right px-3 py-1.5 bg-white/10 rounded-xl border border-white/10 backdrop-blur-xs">
-            <p className="text-xs text-blue-200">Cadre Impact</p>
-            <p className="text-lg font-bold text-amber-300">1,248 Officers</p>
+            <p className="text-xs text-blue-200">Students Evaluated</p>
+            <p className="text-lg font-bold text-amber-300">4,200+ Scholars</p>
           </div>
           <div className="text-right px-3 py-1.5 bg-white/10 rounded-xl border border-white/10 backdrop-blur-xs">
-            <p className="text-xs text-blue-200">Gap Closure</p>
+            <p className="text-xs text-blue-200">Skill Growth</p>
             <p className="text-lg font-bold text-emerald-300">3.4x Faster</p>
           </div>
         </div>
@@ -103,11 +103,11 @@ export const LearnerDashboardView: React.FC = () => {
               Welcome, {currentUser.name}
             </h1>
             <span className="px-2.5 py-0.5 rounded-full border border-blue-200 bg-blue-50 text-blue-700 text-xs font-semibold">
-              Senior Statistical Officer (SSO)
+              {currentUser.designation}
             </span>
           </div>
           <p className="text-xs text-slate-500 font-medium">
-            {currentUser.department} • Official Statistical Competency Twin & Closed-Loop Intelligence
+            {currentUser.institution || currentUser.department} • {currentUser.cadre} • Student Skill Twin & Career Benchmark
           </p>
         </div>
 

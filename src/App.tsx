@@ -6,6 +6,8 @@ import { FlowStepper } from './components/layout/FlowStepper';
 import { CommandPalette } from './components/layout/CommandPalette';
 import { CompetencyDetailDrawer } from './components/common/CompetencyDetailDrawer';
 import { WhyRecommendedModal } from './components/common/WhyRecommendedModal';
+import { AuthModal } from './components/common/AuthModal';
+import { AdminAuthModal } from './components/common/AdminAuthModal';
 
 // Views
 import { LandingView } from './views/LandingView';
@@ -136,6 +138,12 @@ const MainLayout: React.FC = () => {
         course={whyRecommendedCourse}
         onClose={() => setWhyRecommendedCourse(null)}
       />
+
+      {/* Student Login & Demo New User Popup */}
+      <AuthModal />
+
+      {/* Institutional Admin Security Gate Modal */}
+      <AdminAuthModal />
     </div>
   );
 };

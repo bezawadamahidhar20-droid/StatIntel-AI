@@ -15,6 +15,10 @@ export interface User {
   criticalGapsCount: number;
   learningHours: number;
   assessmentAverage: number;
+  institution?: string;
+  degree?: string;
+  academicYear?: string;
+  targetGoal?: string;
 }
 
 export type CompetencyDomain = 'Statistical' | 'Technical' | 'Digital Governance' | 'Behavioural & Managerial';
