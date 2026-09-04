@@ -16,7 +16,7 @@ import {
   Check,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { groqService } from '../../services/groqService';
+import { groqService, isTechnicalSoftwareSkill, normalizeSkillName } from '../../services/groqService';
 import { ROLE_SKILL_BENCHMARKS } from '../../services/geminiService';
 
 const POPULAR_SKILL_SUGGESTIONS = [
@@ -90,9 +90,17 @@ export const AuthModal: React.FC = () => {
   const handleAddCustomSkill = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = customSkillInput.trim();
-    if (trimmed && !selectedSkills.some((s) => s.toLowerCase() === trimmed.toLowerCase())) {
-      const capitalized = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
-      setSelectedSkills((prev) => [...prev, capitalized]);
+    if (!trimmed) return;
+
+    if (!isTechnicalSoftwareSkill(trimmed)) {
+      setGroqDetectionMessage(`"${trimmed}" is a daily personal activity or hobby, not a technical software skill.`);
+      setTimeout(() => setGroqDetectionMessage(''), 4500);
+      return;
+    }
+
+    const norm = normalizeSkillName(trimmed) || trimmed;
+    if (!selectedSkills.some((s) => s.toLowerCase() === norm.toLowerCase())) {
+      setSelectedSkills((prev) => [...prev.filter(isTechnicalSoftwareSkill), norm]);
       setCustomSkillInput('');
     }
   };
@@ -107,20 +115,24 @@ export const AuthModal: React.FC = () => {
       const targetSkills = benchmark ? benchmark.allSkills.map((s) => s.name) : undefined;
       const result = await groqService.identifySkills(aiSkillInput, targetSkills);
 
-      if (result.skills && result.skills.length > 0) {
-        // Merge without duplicates
-        const updated = Array.from(new Set([...selectedSkills, ...result.skills]));
+      // Strictly filter technical software skills
+      const legitimateSkills = (result.skills || []).filter(isTechnicalSoftwareSkill);
+
+      if (legitimateSkills.length > 0) {
+        // Clean previously selected skills and merge new ones
+        const cleanedExisting = selectedSkills.filter(isTechnicalSoftwareSkill);
+        const updated = Array.from(new Set([...cleanedExisting, ...legitimateSkills]));
         setSelectedSkills(updated);
-        setGroqDetectionMessage(`✨ Groq AI identified ${result.skills.length} skills successfully!`);
+        setGroqDetectionMessage(`✨ Groq AI identified ${legitimateSkills.length} technical skills!`);
         setAiSkillInput('');
       } else {
-        setGroqDetectionMessage('No clear tech skills found. Try typing e.g. "Python, React, Docker, SQL".');
+        setGroqDetectionMessage('Only personal activities or non-tech terms detected. Please enter technical skills (e.g., Python, React, SQL).');
       }
     } catch (err) {
-      setGroqDetectionMessage('Could not connect to Groq. Added text as custom skill.');
+      setGroqDetectionMessage('Could not extract valid technical skills. Try typing e.g. "Python, Docker, SQL".');
     } finally {
       setIsDetectingSkills(false);
-      setTimeout(() => setGroqDetectionMessage(''), 4000);
+      setTimeout(() => setGroqDetectionMessage(''), 4500);
     }
   };
 

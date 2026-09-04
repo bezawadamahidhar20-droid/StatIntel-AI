@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { ROLE_SKILL_BENCHMARKS } from '../services/geminiService';
-import { identifySkillsWithGroq } from '../services/groqService';
+import { identifySkillsWithGroq, isTechnicalSoftwareSkill, normalizeSkillName } from '../services/groqService';
 
 const POPULAR_SKILL_CHIPS = [
   'Python',
@@ -66,8 +66,15 @@ export const LoginView: React.FC = () => {
 
   const handleAddSkillManual = (skill: string) => {
     const trimmed = skill.trim();
-    if (trimmed && !selectedSkills.some((s) => s.toLowerCase() === trimmed.toLowerCase())) {
-      setSelectedSkills((prev) => [...prev, trimmed]);
+    if (!trimmed) return;
+    if (!isTechnicalSoftwareSkill(trimmed)) {
+      setAiDetectionStatus(`"${trimmed}" is a personal activity/hobby, not a technical software skill.`);
+      setTimeout(() => setAiDetectionStatus(null), 4500);
+      return;
+    }
+    const norm = normalizeSkillName(trimmed) || trimmed;
+    if (!selectedSkills.some((s) => s.toLowerCase() === norm.toLowerCase())) {
+      setSelectedSkills((prev) => [...prev.filter(isTechnicalSoftwareSkill), norm]);
     }
   };
 
@@ -82,26 +89,28 @@ export const LoginView: React.FC = () => {
 
     try {
       const result = await identifySkillsWithGroq(skillsInputText, targetRole);
-      if (result.skills && result.skills.length > 0) {
+      const legit = (result.skills || []).filter(isTechnicalSoftwareSkill);
+
+      if (legit.length > 0) {
         setSelectedSkills((prev) => {
-          const combined = [...prev];
-          result.skills.forEach((sk) => {
+          const combined = prev.filter(isTechnicalSoftwareSkill);
+          legit.forEach((sk) => {
             if (!combined.some((c) => c.toLowerCase() === sk.toLowerCase())) {
               combined.push(sk);
             }
           });
           return combined;
         });
-        setAiDetectionStatus(`Groq AI identified ${result.skills.length} skills! (${result.confidence})`);
+        setAiDetectionStatus(`Groq AI identified ${legit.length} technical skills!`);
         setSkillsInputText('');
       } else {
-        setAiDetectionStatus('No standard tech skills detected. Try listing specific tools or languages.');
+        setAiDetectionStatus('Only personal activities or non-tech terms detected. Please enter technical software skills (e.g. Python, SQL, React).');
       }
     } catch {
       setAiDetectionStatus('AI identification completed using smart heuristic fallback.');
     } finally {
       setIsAiIdentifying(false);
-      setTimeout(() => setAiDetectionStatus(null), 4000);
+      setTimeout(() => setAiDetectionStatus(null), 4500);
     }
   };
 

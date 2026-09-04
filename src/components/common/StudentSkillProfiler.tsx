@@ -29,7 +29,7 @@ import {
   CURATED_BOOKS,
   CareerGuidanceResult,
 } from '../../services/geminiService';
-import { groqService } from '../../services/groqService';
+import { groqService, isTechnicalSoftwareSkill, normalizeSkillName } from '../../services/groqService';
 
 const ROLE_CATEGORIES: { [cat: string]: string[] } = {
   'All (20)': Object.keys(ROLE_SKILL_BENCHMARKS),
@@ -92,7 +92,8 @@ export const StudentSkillProfiler: React.FC = () => {
   const [aiAdviceText, setAiAdviceText] = useState<string>('');
 
   useEffect(() => {
-    setSelectedSkills(userSkills || []);
+    const valid = (userSkills || []).filter(isTechnicalSoftwareSkill);
+    setSelectedSkills(valid);
   }, [userSkills]);
 
   useEffect(() => {
@@ -152,15 +153,18 @@ export const StudentSkillProfiler: React.FC = () => {
       const targetSkills = benchmark ? benchmark.allSkills.map((s) => s.name) : undefined;
       const res = await groqService.identifySkills(groqInputText, targetSkills);
 
-      if (res.skills && res.skills.length > 0) {
-        const merged = Array.from(new Set([...selectedSkills, ...res.skills]));
+      const legitSkills = (res.skills || []).filter(isTechnicalSoftwareSkill);
+
+      if (legitSkills.length > 0) {
+        const cleanedExisting = selectedSkills.filter(isTechnicalSoftwareSkill);
+        const merged = Array.from(new Set([...cleanedExisting, ...legitSkills]));
         setSelectedSkills(merged);
         setUserSkills(merged);
         localStorage.setItem('statintel_skills', JSON.stringify(merged));
-        setGroqScanMessage(`🎉 Groq AI detected ${res.skills.length} skills and updated your readiness score!`);
+        setGroqScanMessage(`🎉 Groq AI detected ${legitSkills.length} technical skills and updated your readiness score!`);
         setGroqInputText('');
       } else {
-        setGroqScanMessage('No technical skills detected. Try entering specific technologies like "React, Python, Docker".');
+        setGroqScanMessage('Only personal activities or non-tech terms detected. Please enter technical software skills (e.g. "React, Python, Docker").');
       }
     } catch (err) {
       setGroqScanMessage('Groq scanner error. Please try again.');

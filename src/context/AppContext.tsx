@@ -20,6 +20,7 @@ import {
   initialTimelineEvents,
   initialCertificates,
 } from '../data/mockData';
+import { isTechnicalSoftwareSkill } from '../services/groqService';
 
 export type AppView =
   | 'landing'
@@ -154,7 +155,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const saved = localStorage.getItem('statintel_skills');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const cleaned = parsed.filter(isTechnicalSoftwareSkill);
+          if (cleaned.length !== parsed.length) {
+            localStorage.setItem('statintel_skills', JSON.stringify(cleaned));
+          }
+          return cleaned;
+        }
       } catch (e) {
         // ignore
       }
@@ -257,7 +265,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     knownSkills?: string[];
   }) => {
     const studentName = data.name?.trim() || (data.email ? data.email.split('@')[0] : 'Student Scholar');
-    const studentSkills = data.knownSkills || [];
+    const studentSkills = (data.knownSkills || []).filter(isTechnicalSoftwareSkill);
     const calculatedCompetency = studentSkills.length > 0 ? Math.min(95, studentSkills.length * 15) : 40;
 
     const studentUser: User = {
