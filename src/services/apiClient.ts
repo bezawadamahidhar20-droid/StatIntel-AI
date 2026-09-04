@@ -1,4 +1,15 @@
-import { User, Competency, SkillGapItem, Course, Assessment, QuizResult } from '../types';
+import {
+  User,
+  Competency,
+  SkillGapItem,
+  Course,
+  Assessment,
+  QuizResult,
+  DepartmentHeatmapRow,
+  PredictiveSkillItem,
+  WorkforceOverview,
+  LearningPathResponse,
+} from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
 
@@ -19,11 +30,26 @@ class APIClient {
     return this.token;
   }
 
+  public async ensureAuth(role: 'LEARNER' | 'ADMIN' = 'LEARNER'): Promise<string> {
+    if (this.token) return this.token;
+    try {
+      const email = role === 'ADMIN' ? 'vandana.sengupta@gov.in' : 'rajesh.sharma@mospi.gov.in';
+      const data = await this.login(email, 'password123');
+      return data.access_token;
+    } catch {
+      return '';
+    }
+  }
+
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
     };
+
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`;
@@ -42,13 +68,12 @@ class APIClient {
 
       return json.data as T;
     } catch (err: any) {
-      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+      if (err.name === 'TypeError' && err.message?.includes('fetch')) {
         console.warn(`[StatIntel Network Error] Backend at ${API_BASE_URL} is unreachable.`);
         throw new Error('StatIntel backend server is currently unreachable. Please check backend status.');
       }
       throw err;
     }
-
   }
 
   // Auth APIs
@@ -89,6 +114,12 @@ class APIClient {
     return this.request<Course[]>('/recommendations');
   }
 
+  // Learning Path APIs
+  async getLearningPath(): Promise<LearningPathResponse> {
+    await this.ensureAuth('LEARNER');
+    return this.request<LearningPathResponse>('/learning/path');
+  }
+
   // Assessment & Quiz APIs
   async getAssessments(): Promise<Assessment[]> {
     return this.request<Assessment[]>('/assessments');
@@ -102,15 +133,47 @@ class APIClient {
   }
 
   async generateQuiz(params: {
-    documentName: string;
+    documentName?: string;
+    documentText?: string;
     numberOfQuestions: number;
     difficulty: string;
     competency: string;
   }): Promise<Assessment> {
+    await this.ensureAuth('LEARNER');
     return this.request<Assessment>('/quiz/generate', {
       method: 'POST',
       body: JSON.stringify(params),
     });
+  }
+
+  async uploadDocumentAndGenerateQuiz(formData: FormData): Promise<any> {
+    await this.ensureAuth('LEARNER');
+    return this.request<any>('/quiz/upload', {
+      method: 'POST',
+      body: formData,
+    });
+  }
+
+  // Workforce Intelligence APIs
+  async getWorkforceOverview(): Promise<WorkforceOverview> {
+    await this.ensureAuth('ADMIN');
+    return this.request<WorkforceOverview>('/workforce/overview');
+  }
+
+  async getWorkforceHeatmap(): Promise<DepartmentHeatmapRow[]> {
+    await this.ensureAuth('ADMIN');
+    return this.request<DepartmentHeatmapRow[]>('/workforce/heatmap');
+  }
+
+  async getPredictiveSkillDemand(): Promise<PredictiveSkillItem[]> {
+    await this.ensureAuth('ADMIN');
+    return this.request<PredictiveSkillItem[]>('/workforce/skill-demand');
+  }
+
+  // Admin Operations & Presentation Reset
+  async resetDemoState(): Promise<any> {
+    await this.ensureAuth('ADMIN');
+    return this.request<any>('/admin/demo-reset', { method: 'POST' });
   }
 
   // Assistant Chat API
@@ -123,3 +186,4 @@ class APIClient {
 }
 
 export const apiClient = new APIClient();
+

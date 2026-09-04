@@ -203,3 +203,21 @@ export interface PredictiveSkillItem {
   drivers: string;
   targetOfficers: number;
 }
+
+export interface WorkforceOverview {
+  totalLearners: number;
+  activeLearners: number;
+  overallReadiness: number;
+  criticalGapsCount: number;
+  heatmap: DepartmentHeatmapRow[];
+  predictiveSkills: PredictiveSkillItem[];
+}
+
+export interface LearningPathResponse {
+  targetCompetency: string;
+  targetLevel: string;
+  estimatedDuration: string;
+  overallProgress: number;
+  steps: LearningPathStep[];
+}
+

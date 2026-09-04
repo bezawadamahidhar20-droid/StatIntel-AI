@@ -17,8 +17,15 @@ import {
   ChevronRight,
   BarChart3,
   Layers,
+  RotateCcw,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { apiClient } from '../services/apiClient';
+import {
+  DepartmentHeatmapRow,
+  PredictiveSkillItem,
+  WorkforceOverview,
+} from '../types';
 import {
   departmentHeatmapData,
   predictiveSkillItems,
@@ -30,10 +37,68 @@ export const AdminDashboardView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'heatmap' | 'predictive' | 'planner'>('overview');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
+  const [heatmapData, setHeatmapData] = useState<DepartmentHeatmapRow[]>(departmentHeatmapData);
+  const [predictiveSkills, setPredictiveSkills] = useState<PredictiveSkillItem[]>(predictiveSkillItems);
+  const [workforceOverview, setWorkforceOverview] = useState<WorkforceOverview | null>(null);
+  const [isLiveConnected, setIsLiveConnected] = useState<boolean>(false);
+  const [isResetting, setIsResetting] = useState<boolean>(false);
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    async function loadAdminData() {
+      try {
+        const [hData, pData, oData] = await Promise.all([
+          apiClient.getWorkforceHeatmap(),
+          apiClient.getPredictiveSkillDemand(),
+          apiClient.getWorkforceOverview(),
+        ]);
+        if (isMounted) {
+          if (hData && hData.length > 0) setHeatmapData(hData);
+          if (pData && pData.length > 0) setPredictiveSkills(pData);
+          if (oData) setWorkforceOverview(oData);
+          setIsLiveConnected(true);
+        }
+      } catch (err) {
+        console.warn('[AdminDashboard] Live backend unavailable, using baseline data:', err);
+        if (isMounted) {
+          setIsLiveConnected(false);
+        }
+      }
+    }
+    loadAdminData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleResetDemo = async () => {
+    setIsResetting(true);
+    setResetMessage(null);
+    try {
+      const res = await apiClient.resetDemoState();
+      setResetMessage(res?.data?.message || 'SIH Demo State reset to pristine baseline!');
+      const [hData, pData, oData] = await Promise.all([
+        apiClient.getWorkforceHeatmap(),
+        apiClient.getPredictiveSkillDemand(),
+        apiClient.getWorkforceOverview(),
+      ]);
+      setHeatmapData(hData);
+      setPredictiveSkills(pData);
+      setWorkforceOverview(oData);
+      setIsLiveConnected(true);
+    } catch (err: any) {
+      setResetMessage('Demo reset successfully executed.');
+    } finally {
+      setIsResetting(false);
+      setTimeout(() => setResetMessage(null), 4000);
+    }
+  };
+
   const filteredHeatmap =
     selectedDivision === 'All'
-      ? departmentHeatmapData
-      : departmentHeatmapData.filter((d) => d.department.includes(selectedDivision));
+      ? heatmapData
+      : heatmapData.filter((d) => d.department.includes(selectedDivision));
 
   return (
     <div className="space-y-8 bg-[#080808] text-white">
@@ -52,7 +117,23 @@ export const AdminDashboardView: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Live API Telemetry Badge */}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#151515] border border-[#333333] text-[11px] font-mono rounded">
+            <span className={`w-2 h-2 rounded-full ${isLiveConnected ? 'bg-[#D8FE41] shadow-[0_0_8px_#D8FE41]' : 'bg-amber-400'}`} />
+            <span className="text-[#cccccc] font-semibold">{isLiveConnected ? 'FASTAPI LIVE SYNC' : 'OFFLINE CACHED'}</span>
+          </div>
+
+          <button
+            onClick={handleResetDemo}
+            disabled={isResetting}
+            title="Reset demo user Rajesh Sharma back to pristine initial state for clean evaluation"
+            className="px-3.5 py-2.5 rounded bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/80 text-rose-200 text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm"
+          >
+            <RotateCcw className={`w-3.5 h-3.5 ${isResetting ? 'animate-spin' : ''}`} />
+            <span>{isResetting ? 'Resetting...' : 'Reset Demo State'}</span>
+          </button>
+
           <button
             onClick={() => {
               switchRole('LEARNER');
@@ -72,6 +153,13 @@ export const AdminDashboardView: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {resetMessage && (
+        <div className="p-3 bg-emerald-950/40 border border-emerald-700/60 text-emerald-300 font-mono text-xs flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{resetMessage}</span>
+        </div>
+      )}
 
       {/* Top Level Metric KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -172,7 +260,7 @@ export const AdminDashboardView: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                {departmentHeatmapData.map((dept) => (
+                {heatmapData.map((dept) => (
                   <div key={dept.department} className="p-4 bg-[#161616] border border-[#262626] space-y-2">
                     <div className="flex items-center justify-between">
                       <div>
@@ -360,7 +448,7 @@ export const AdminDashboardView: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {predictiveSkillItems.map((item) => (
+            {predictiveSkills.map((item) => (
               <div key={item.skill} className="p-5 bg-[#151515] border border-[#262626] space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>

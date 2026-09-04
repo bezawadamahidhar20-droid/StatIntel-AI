@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Route,
   Sparkles,
@@ -12,6 +12,8 @@ import {
   Lock,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { apiClient } from '../services/apiClient';
+import { LearningPathStep } from '../types';
 import { learningPathSteps } from '../data/mockData';
 
 export const LearningPathView: React.FC = () => {
@@ -21,6 +23,50 @@ export const LearningPathView: React.FC = () => {
     setWhyRecommendedCourse,
     enrollCourse,
   } = useApp();
+
+  const [pathSteps, setPathSteps] = useState<LearningPathStep[]>(learningPathSteps);
+  const [pathMeta, setPathMeta] = useState<{
+    targetCompetency: string;
+    targetLevel: string;
+    estimatedDuration: string;
+    overallProgress: number;
+  }>({
+    targetCompetency: 'Survey Design & Sampling Methodology',
+    targetLevel: 'L4 (Advanced)',
+    estimatedDuration: '28 hours total',
+    overallProgress: 35,
+  });
+  const [isLiveConnected, setIsLiveConnected] = useState<boolean>(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchLearningPath() {
+      try {
+        const res = await apiClient.getLearningPath();
+        if (isMounted && res && res.steps && res.steps.length > 0) {
+          setPathSteps(res.steps);
+          setPathMeta({
+            targetCompetency: res.targetCompetency,
+            targetLevel: res.targetLevel,
+            estimatedDuration: res.estimatedDuration,
+            overallProgress: res.overallProgress,
+          });
+          setIsLiveConnected(true);
+        }
+      } catch (err) {
+        console.warn('[LearningPath] Live backend unavailable, using baseline pathway:', err);
+        if (isMounted) {
+          setIsLiveConnected(false);
+        }
+      }
+    }
+    fetchLearningPath();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const completedCount = pathSteps.filter((s) => s.status === 'Completed').length;
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -40,16 +86,21 @@ export const LearningPathView: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-mono rounded">
+            <span className={`w-2 h-2 rounded-full ${isLiveConnected ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-amber-400'}`} />
+            <span className="text-slate-600 dark:text-slate-300 font-semibold">{isLiveConnected ? 'FASTAPI LIVE SYNC' : 'OFFLINE CACHED'}</span>
+          </div>
+
           <span className="text-xs font-semibold text-slate-500">
-            Path Progress: <strong className="text-blue-600">20%</strong> (1 of 5 completed)
+            Path Progress: <strong className="text-blue-600">{pathMeta.overallProgress}%</strong> ({completedCount} of {pathSteps.length} completed)
           </span>
         </div>
       </div>
 
       {/* Path Roadmap Container */}
       <div className="relative pl-6 sm:pl-10 space-y-8 before:absolute before:left-3 sm:before:left-5 before:top-4 before:bottom-4 before:w-0.5 before:bg-linear-to-b before:from-blue-600 before:via-indigo-500 before:to-slate-300 dark:before:to-slate-700">
-        {learningPathSteps.map((step) => {
+        {pathSteps.map((step) => {
           const linkedCourse = courses.find((c) => c.id === step.courseId);
           const isCompleted = step.status === 'Completed';
           const isInProgress = step.status === 'In Progress';
