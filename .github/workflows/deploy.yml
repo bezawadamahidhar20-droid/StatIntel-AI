@@ -1,0 +1,43 @@
+name: StatIntel-AI CI/CD Production Pipeline
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test-frontend:
+    name: Frontend Lint, Typecheck & Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: TypeScript Type Check
+        run: npx tsc --noEmit
+      - name: Production Vite Build
+        run: npm run build
+
+  test-ml-backend:
+    name: ML Microservice Tests & Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ml_backend/requirements.txt
+      - name: Run Test Suite
+        run: |
+          python ml_backend/tests/run_tests.py

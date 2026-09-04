@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_BASE_URL=http://localhost:8000/api/v1
+    depends_on:
+      - ml_backend
+    networks:
+      - statintel-network
+
+  ml_backend:
+    build:
+      context: ./ml_backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+    networks:
+      - statintel-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: statintel-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: statintel
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - statintel-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: statintel-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - statintel-network
+
+networks:
+  statintel-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
