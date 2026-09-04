@@ -10,6 +10,8 @@ import {
   BarChart3,
   RotateCcw,
   Target,
+  Clock,
+  Award,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -42,164 +44,163 @@ export const AssessmentResultView: React.FC = () => {
   const seconds = result.timeSpentSeconds % 60;
 
   return (
-    <div className="space-y-8 bg-[#080808] text-white">
+    <div className="space-y-6 max-w-6xl mx-auto">
       {/* Top Completion Header */}
-      <div className="bg-[#121212] border border-[#222222] p-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#D8FE41]/5 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="max-w-3xl relative z-10 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#D8FE41]/10 border border-[#D8FE41]/40 text-[#D8FE41] text-xs font-mono font-bold uppercase tracking-widest">
-            <CheckCircle2 className="w-4 h-4 text-[#D8FE41]" />
-            <span>CLOSED-LOOP ASSESSMENT COMPLETE</span>
+      <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-xs relative overflow-hidden">
+        <div className="max-w-3xl space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold rounded-full">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <span>Closed-Loop Assessment Validated</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-black font-display uppercase tracking-tight text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
             Competency Twin Synchronized
           </h1>
 
-          <p className="text-sm font-mono text-[#aaaaaa] leading-relaxed">
-            Your validated answers from <strong className="text-white">{result.assessmentTitle}</strong> have directly upgraded your official MoSPI Competency Digital Twin and refreshed your career role readiness.
+          <p className="text-sm text-slate-600 leading-relaxed font-normal">
+            Your answers from <strong className="text-slate-900">{result.assessmentTitle}</strong> have directly upgraded your official MoSPI Competency Digital Twin and updated your cadre readiness.
           </p>
         </div>
       </div>
 
-      {/* Primary KPI Grid: High-contrast Bold Typography */}
+      {/* Primary KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Score & Accuracy */}
-        <div className="bg-[#121212] border border-[#222222] p-6 space-y-2">
-          <p className="text-[11px] font-mono font-bold uppercase text-[#888888] tracking-wider">
+        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-2">
+          <p className="text-xs font-semibold uppercase text-slate-500 tracking-wider">
             Accuracy Rate
           </p>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black font-display text-[#D8FE41]">
+            <span className="text-3xl font-bold text-blue-600">
               {result.accuracy}%
             </span>
-            <span className="text-xs font-mono text-[#888888]">
+            <span className="text-xs text-slate-500 font-medium">
               ({result.score}/{result.total} Correct)
             </span>
           </div>
-          <p className="text-[11px] font-mono text-[#777777]">
-            MoSPI Benchmarking: Exceeds standard pass threshold of 70%
+          <p className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>Exceeds standard 70% threshold</span>
           </p>
         </div>
 
         {/* Competency Gain */}
-        <div className="bg-[#121212] border border-[#D8FE41]/50 p-6 space-y-2 shadow-[0_0_15px_rgba(216,254,65,0.1)]">
-          <p className="text-[11px] font-mono font-bold uppercase text-[#D8FE41] tracking-wider flex items-center gap-1.5">
-            <TrendingUp className="w-3.5 h-3.5 text-[#D8FE41]" />
+        <div className="bg-white rounded-xl border border-blue-200 p-5 shadow-xs space-y-2 bg-blue-50/30">
+          <p className="text-xs font-semibold uppercase text-blue-700 tracking-wider flex items-center gap-1.5">
+            <TrendingUp className="w-3.5 h-3.5 text-blue-600" />
             <span>Digital Twin Boost</span>
           </p>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black font-display text-white">
+            <span className="text-3xl font-bold text-slate-900">
               +{result.competencyGain}%
             </span>
-            <span className="text-xs font-mono text-[#888888]">
+            <span className="text-xs text-slate-500 font-medium">
               ({result.competencyBefore}% → {result.competencyAfter}%)
             </span>
           </div>
-          <p className="text-[11px] font-mono text-[#D8FE41]">
-            Target Competency: {result.targetCompetency}
+          <p className="text-xs text-slate-600 truncate">
+            Target: <span className="font-semibold text-slate-800">{result.targetCompetency}</span>
           </p>
         </div>
 
         {/* Role Readiness */}
-        <div className="bg-[#121212] border border-[#222222] p-6 space-y-2">
-          <p className="text-[11px] font-mono font-bold uppercase text-[#888888] tracking-wider">
-            Overall Role Readiness
+        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-2">
+          <p className="text-xs font-semibold uppercase text-slate-500 tracking-wider">
+            Role Readiness
           </p>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black font-display text-white">
+            <span className="text-3xl font-bold text-slate-900">
               {currentUser.roleReadiness}%
             </span>
-            <span className="text-xs font-mono text-[#D8FE41] font-bold">
+            <span className="text-xs text-emerald-600 font-semibold">
               +4% Increase
             </span>
           </div>
-          <p className="text-[11px] font-mono text-[#777777]">
-            Cadre Target: 85% for Senior Posting Qualification
+          <p className="text-xs text-slate-500">
+            Cadre Target: 85% for Senior Posting
           </p>
         </div>
 
         {/* Duration */}
-        <div className="bg-[#121212] border border-[#222222] p-6 space-y-2">
-          <p className="text-[11px] font-mono font-bold uppercase text-[#888888] tracking-wider">
+        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-2">
+          <p className="text-xs font-semibold uppercase text-slate-500 tracking-wider">
             Time Taken
           </p>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black font-display text-white">
+            <span className="text-3xl font-bold text-slate-900">
               {minutes}m {seconds}s
             </span>
           </div>
-          <p className="text-[11px] font-mono text-[#777777]">
-            Average speed: ~48s per grounded methodological item
+          <p className="text-xs text-slate-500">
+            Pacing: ~48s per grounded question
           </p>
         </div>
       </div>
 
       {/* Closed Loop Visual Demonstration Card */}
-      <div className="bg-[#121212] border border-[#222222] p-6 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#222222] pb-4 gap-3">
+      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-3">
           <div>
-            <h2 className="text-sm font-black font-mono uppercase tracking-widest text-[#D8FE41] flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-[#D8FE41]" />
-              <span>Closed-Loop Digital Twin Impact Summary</span>
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <Cpu className="w-5 h-5 text-blue-600" />
+              <span>Closed-Loop Digital Twin Impact</span>
             </h2>
-            <p className="text-xs font-mono text-[#888888] mt-0.5">
-              Live feedback loop executed: Assessment → Evidence Audit → Competency Twin → Gap Reduction
+            <p className="text-xs text-slate-500 mt-0.5">
+              Live feedback cycle: Grounded Assessment → Evidence Audit → Digital Twin Upgrade → Gap Reduction
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate('digital-twin')}
-              className="px-3.5 py-1.5 bg-[#1a1a1a] hover:bg-[#252525] border border-[#333333] text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5"
+              className="px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
             >
-              <Cpu className="w-3.5 h-3.5 text-[#D8FE41]" />
+              <Cpu className="w-3.5 h-3.5 text-blue-600" />
               <span>Inspect Digital Twin</span>
             </button>
             <button
               onClick={() => navigate('skill-gaps')}
-              className="px-3.5 py-1.5 bg-[#1a1a1a] hover:bg-[#252525] border border-[#333333] text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5"
+              className="px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
             >
-              <Target className="w-3.5 h-3.5 text-[#D8FE41]" />
+              <Target className="w-3.5 h-3.5 text-blue-600" />
               <span>Inspect Skill Gaps</span>
             </button>
           </div>
         </div>
 
         {/* Competency Level Transition Visualization */}
-        <div className="p-6 bg-[#0e0e0e] border border-[#222222] space-y-4">
+        <div className="p-6 bg-slate-50 border border-slate-200 rounded-xl space-y-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-mono font-bold uppercase text-[#888888]">Target Competency</p>
-              <p className="text-base font-mono font-black text-white">{result.targetCompetency}</p>
+              <p className="text-xs font-semibold uppercase text-slate-500">Target Competency</p>
+              <p className="text-base font-bold text-slate-900">{result.targetCompetency}</p>
             </div>
 
-            <div className="flex items-center gap-4 font-mono">
+            <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-[10px] text-[#888888] uppercase">Before Test</p>
-                <p className="text-lg font-bold text-[#888888]">{result.competencyBefore}%</p>
+                <p className="text-[11px] text-slate-500 uppercase font-medium">Before Test</p>
+                <p className="text-base font-semibold text-slate-600">{result.competencyBefore}%</p>
               </div>
 
-              <div className="px-3 py-1 bg-[#D8FE41] text-black font-black text-xs uppercase tracking-widest flex items-center gap-1">
+              <div className="px-3 py-1 bg-emerald-100 text-emerald-800 font-bold text-xs rounded-full flex items-center gap-1">
                 <span>+{result.competencyGain}%</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-3 h-3" />
               </div>
 
               <div>
-                <p className="text-[10px] text-[#D8FE41] uppercase font-bold">Updated Score</p>
-                <p className="text-lg font-black text-white">{result.competencyAfter}%</p>
+                <p className="text-[11px] text-blue-600 uppercase font-semibold">Updated Score</p>
+                <p className="text-lg font-bold text-slate-900">{result.competencyAfter}%</p>
               </div>
             </div>
           </div>
 
-          <div className="w-full bg-[#181818] h-3 rounded-none overflow-hidden relative">
+          <div className="w-full bg-slate-200 h-3 rounded-full overflow-hidden relative">
             <div
-              className="bg-[#444444] h-full absolute left-0"
+              className="bg-slate-400 h-full absolute left-0"
               style={{ width: `${result.competencyBefore}%` }}
             />
             <div
-              className="bg-[#D8FE41] h-full absolute"
+              className="bg-emerald-500 h-full absolute"
               style={{
                 left: `${result.competencyBefore}%`,
                 width: `${result.competencyGain}%`,
@@ -207,39 +208,39 @@ export const AssessmentResultView: React.FC = () => {
             />
           </div>
 
-          <div className="flex items-center justify-between text-[11px] font-mono text-[#888888]">
+          <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
             <span>L1: Beginner (0-39)</span>
             <span>L2: Developing (40-59)</span>
-            <span className="text-white font-bold">L3: Operational (60-79)</span>
-            <span className="text-[#D8FE41] font-bold">L4: Advanced (80-92) ★ TARGET MET</span>
+            <span className="text-slate-700 font-semibold">L3: Operational (60-79)</span>
+            <span className="text-emerald-700 font-bold">L4: Advanced (80-92) ★ TARGET MET</span>
             <span>L5: Expert (93-100)</span>
           </div>
         </div>
 
         {/* Recommended Next Actions in Sequence */}
         <div className="pt-2">
-          <p className="text-xs font-mono font-bold uppercase text-[#888888] mb-3">
+          <p className="text-xs font-bold uppercase text-slate-500 mb-3 tracking-wider">
             Recommended Next Step in Workflow
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button
               onClick={() => navigate('learning-path')}
-              className="p-4 bg-[#151515] hover:bg-[#1a1a1a] border border-[#252525] hover:border-[#D8FE41] text-left transition-all"
+              className="p-4 bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-300 rounded-xl text-left transition-all shadow-2xs group"
             >
-              <Route className="w-5 h-5 text-[#D8FE41] mb-2" />
-              <p className="text-xs font-mono font-bold text-white uppercase">6. View Learning Path</p>
-              <p className="text-[11px] font-mono text-[#888888] mt-1">
-                See how your next steps are dynamically prioritized.
+              <Route className="w-5 h-5 text-blue-600 mb-2 group-hover:scale-110 transition-transform" />
+              <p className="text-xs font-bold text-slate-900">View Learning Path</p>
+              <p className="text-xs text-slate-500 mt-1 font-normal">
+                See how next courses are dynamically prioritized.
               </p>
             </button>
 
             <button
               onClick={() => navigate('courses')}
-              className="p-4 bg-[#151515] hover:bg-[#1a1a1a] border border-[#252525] hover:border-[#D8FE41] text-left transition-all"
+              className="p-4 bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-300 rounded-xl text-left transition-all shadow-2xs group"
             >
-              <BookOpen className="w-5 h-5 text-[#D8FE41] mb-2" />
-              <p className="text-xs font-mono font-bold text-white uppercase">7. Explore Courses</p>
-              <p className="text-[11px] font-mono text-[#888888] mt-1">
+              <BookOpen className="w-5 h-5 text-blue-600 mb-2 group-hover:scale-110 transition-transform" />
+              <p className="text-xs font-bold text-slate-900">Explore Courses</p>
+              <p className="text-xs text-slate-500 mt-1 font-normal">
                 Browse official iGOT and NSSTA micro-modules.
               </p>
             </button>
@@ -249,12 +250,12 @@ export const AssessmentResultView: React.FC = () => {
                 switchRole('ADMIN');
                 navigate('admin-dashboard');
               }}
-              className="p-4 bg-[#151515] hover:bg-[#1a1a1a] border border-[#252525] hover:border-[#D8FE41] text-left transition-all"
+              className="p-4 bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-300 rounded-xl text-left transition-all shadow-2xs group"
             >
-              <BarChart3 className="w-5 h-5 text-[#D8FE41] mb-2" />
-              <p className="text-xs font-mono font-bold text-white uppercase">10. Admin Dashboard</p>
-              <p className="text-[11px] font-mono text-[#888888] mt-1">
-                Inspect organizational workforce intelligence & division heatmaps.
+              <BarChart3 className="w-5 h-5 text-blue-600 mb-2 group-hover:scale-110 transition-transform" />
+              <p className="text-xs font-bold text-slate-900">Admin Dashboard</p>
+              <p className="text-xs text-slate-500 mt-1 font-normal">
+                Inspect organizational workforce heatmaps.
               </p>
             </button>
           </div>

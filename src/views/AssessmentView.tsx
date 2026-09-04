@@ -10,6 +10,7 @@ import {
   Shield,
   FileText,
   RotateCcw,
+  Flag,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -81,13 +82,13 @@ export const AssessmentView: React.FC = () => {
 
   if (!currentAssessment || !currentQ) {
     return (
-      <div className="p-12 text-center bg-[#080808] text-white">
-        <p className="font-mono text-xs text-[#888888]">No assessment selected.</p>
+      <div className="p-12 text-center bg-white rounded-xl border border-slate-200 text-slate-800 shadow-xs max-w-lg mx-auto">
+        <p className="text-sm text-slate-500">No active assessment selected.</p>
         <button
           onClick={() => navigate('quiz-generator')}
-          className="mt-4 px-4 py-2 bg-[#D8FE41] text-black font-mono font-bold uppercase text-xs"
+          className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-xs transition-colors"
         >
-          Generate Assessment
+          Generate Grounded Assessment
         </button>
       </div>
     );
@@ -97,37 +98,38 @@ export const AssessmentView: React.FC = () => {
   const progressPercent = Math.round((answeredCount / currentAssessment.questions.length) * 100);
 
   return (
-    <div className="space-y-6 bg-[#080808] text-white">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* Top Test Header Bar */}
-      <div className="bg-[#121212] border border-[#222222] p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-2 py-0.5 bg-[#D8FE41]/10 border border-[#D8FE41]/40 text-[#D8FE41] text-[10px] font-mono font-bold tracking-widest uppercase">
+          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+            <span className="px-2.5 py-0.5 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold rounded-full">
               NSSTA / MoSPI Adaptive Assessment
             </span>
-            <span className="text-xs font-mono text-[#888888]">
-              Target: <span className="text-white font-bold">{currentAssessment.targetCompetency}</span>
+            <span className="text-xs text-slate-500 font-medium">
+              Target Competency: <span className="text-slate-900 font-semibold">{currentAssessment.targetCompetency}</span>
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black font-display uppercase tracking-tight text-white">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
             {currentAssessment.title}
           </h1>
         </div>
 
         {/* Timer & Controls */}
-        <div className="flex items-center gap-4 shrink-0">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#181818] border border-[#333333]">
-            <Clock className="w-4 h-4 text-[#D8FE41]" />
-            <span className="font-mono text-sm font-black text-white">
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
+            <Clock className="w-4 h-4 text-blue-600" />
+            <span className="font-mono text-sm font-bold text-slate-800">
               {formatTime(secondsRemaining)}
             </span>
           </div>
 
           <button
             onClick={handleSubmit}
-            className="px-5 py-2.5 bg-[#D8FE41] hover:bg-[#c4eb34] text-black font-mono font-black uppercase text-xs tracking-wider shadow-[0_0_12px_rgba(216,254,65,0.3)] transition-all"
+            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg shadow-sm transition-all flex items-center gap-2"
           >
-            Submit & Boost Twin
+            <span>Submit Assessment</span>
+            <CheckCircle2 className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -136,61 +138,62 @@ export const AssessmentView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Active Question */}
         <div className="lg:col-span-8 space-y-6">
-          <div className="bg-[#121212] border border-[#222222] p-6 space-y-6">
+          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-6">
             {/* Question Meta Bar */}
-            <div className="flex items-center justify-between border-b border-[#222222] pb-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
-                <span className="px-3 py-1 bg-[#D8FE41] text-black font-mono font-black text-xs">
-                  QUESTION {currentQuestionIndex + 1} OF {currentAssessment.questions.length}
+                <span className="px-3 py-1 bg-blue-600 text-white font-bold text-xs rounded-md">
+                  Question {currentQuestionIndex + 1} of {currentAssessment.questions.length}
                 </span>
-                <span className="text-[11px] font-mono text-[#888888] uppercase">
-                  Difficulty: <span className="text-white font-bold">{currentQ.difficulty}</span>
+                <span className="text-xs text-slate-500 font-medium">
+                  Difficulty: <span className="text-slate-800 font-semibold capitalize">{currentQ.difficulty}</span>
                 </span>
               </div>
 
               <button
                 onClick={handleToggleFlag}
-                className={`text-[11px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 border transition-all ${
+                className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 ${
                   flaggedQuestions[currentQuestionIndex]
-                    ? 'border-amber-400 bg-amber-400/10 text-amber-300'
-                    : 'border-[#333333] text-[#777777] hover:text-white'
+                    ? 'border-amber-300 bg-amber-50 text-amber-800'
+                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                 }`}
               >
-                {flaggedQuestions[currentQuestionIndex] ? '★ Flagged' : '☆ Flag for Review'}
+                <Flag className={`w-3.5 h-3.5 ${flaggedQuestions[currentQuestionIndex] ? 'fill-amber-500 text-amber-500' : ''}`} />
+                <span>{flaggedQuestions[currentQuestionIndex] ? 'Flagged for Review' : 'Flag Question'}</span>
               </button>
             </div>
 
             {/* Question Text */}
             <div className="py-2">
-              <h2 className="text-base sm:text-lg font-mono font-bold text-white leading-relaxed">
+              <h2 className="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed">
                 {currentQ.question}
               </h2>
             </div>
 
             {/* Answer Options */}
-            <div className="space-y-3 pt-2">
+            <div className="space-y-3 pt-1">
               {currentQ.options.map((opt, idx) => {
                 const isSelected = selectedAnswers[currentQuestionIndex] === idx;
                 return (
                   <div
                     key={idx}
                     onClick={() => handleSelectOption(idx)}
-                    className={`p-4 border cursor-pointer font-mono transition-all flex items-start gap-3.5 ${
+                    className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start gap-3.5 ${
                       isSelected
-                        ? 'bg-[#1a1a1a] border-[#D8FE41] text-white shadow-[0_0_12px_rgba(216,254,65,0.15)]'
-                        : 'bg-[#141414] border-[#252525] text-[#aaaaaa] hover:border-[#444444] hover:text-white'
+                        ? 'bg-blue-50/70 border-blue-600 text-blue-950 shadow-xs ring-1 ring-blue-600'
+                        : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50/60'
                     }`}
                   >
                     <span
-                      className={`w-6 h-6 shrink-0 flex items-center justify-center font-bold text-xs border ${
+                      className={`w-7 h-7 shrink-0 rounded-lg flex items-center justify-center font-bold text-xs border ${
                         isSelected
-                          ? 'bg-[#D8FE41] text-black border-[#D8FE41]'
-                          : 'bg-[#1e1e1e] text-[#888888] border-[#333333]'
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-slate-100 text-slate-600 border-slate-200'
                       }`}
                     >
                       {String.fromCharCode(65 + idx)}
                     </span>
-                    <span className="text-xs sm:text-sm font-medium leading-relaxed">
+                    <span className="text-sm font-normal leading-relaxed pt-0.5">
                       {opt}
                     </span>
                   </div>
@@ -199,17 +202,17 @@ export const AssessmentView: React.FC = () => {
             </div>
 
             {/* Source Reference Grounding Note */}
-            <div className="p-3 bg-[#0d0d0d] border border-[#222222] flex items-center gap-2.5 text-xs font-mono text-[#888888]">
-              <FileText className="w-4 h-4 text-[#D8FE41] shrink-0" />
-              <span>Grounded in MoSPI Source: <span className="text-white">{currentQ.sourceReference}</span></span>
+            <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg flex items-center gap-2.5 text-xs text-slate-600">
+              <FileText className="w-4 h-4 text-blue-600 shrink-0" />
+              <span>Grounded in MoSPI Source: <strong className="text-slate-900">{currentQ.sourceReference}</strong></span>
             </div>
 
             {/* Navigation Buttons */}
-            <div className="flex items-center justify-between pt-4 border-t border-[#222222]">
+            <div className="flex items-center justify-between pt-4 border-t border-slate-100">
               <button
                 onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
                 disabled={currentQuestionIndex === 0}
-                className="px-4 py-2 border border-[#333333] text-[#888888] hover:text-white disabled:opacity-40 disabled:pointer-events-none font-mono text-xs uppercase tracking-wider flex items-center gap-1.5"
+                className="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Previous Question</span>
@@ -222,7 +225,7 @@ export const AssessmentView: React.FC = () => {
                       Math.min(currentAssessment.questions.length - 1, prev + 1)
                     )
                   }
-                  className="px-5 py-2 bg-[#222222] hover:bg-[#333333] text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs"
                 >
                   <span>Next Question</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -230,9 +233,9 @@ export const AssessmentView: React.FC = () => {
               ) : (
                 <button
                   onClick={handleSubmit}
-                  className="px-6 py-2 bg-[#D8FE41] hover:bg-[#c4eb34] text-black font-mono font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-[0_0_12px_rgba(216,254,65,0.3)]"
+                  className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-xs flex items-center gap-1.5 shadow-sm transition-colors"
                 >
-                  <span>Complete & Submit Assessment</span>
+                  <span>Complete & Submit</span>
                   <CheckCircle2 className="w-4 h-4" />
                 </button>
               )}
@@ -242,22 +245,22 @@ export const AssessmentView: React.FC = () => {
 
         {/* Right Column: Question Palette & Overview */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-[#121212] border border-[#222222] p-6 space-y-5">
-            <h3 className="text-xs font-mono font-black uppercase tracking-widest text-[#D8FE41] border-b border-[#222222] pb-3">
+          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-3">
               Question Palette
             </h3>
 
             {/* Progress Bar */}
             <div className="space-y-1.5">
-              <div className="flex justify-between text-[11px] font-mono text-[#888888]">
+              <div className="flex justify-between text-xs text-slate-500 font-medium">
                 <span>Progress</span>
-                <span className="text-white font-bold">
+                <span className="text-slate-900 font-semibold">
                   {answeredCount} / {currentAssessment.questions.length} ({progressPercent}%)
                 </span>
               </div>
-              <div className="w-full bg-[#1e1e1e] h-2">
+              <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                 <div
-                  className="bg-[#D8FE41] h-full transition-all duration-300"
+                  className="bg-blue-600 h-full rounded-full transition-all duration-300"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
@@ -274,14 +277,14 @@ export const AssessmentView: React.FC = () => {
                   <button
                     key={qIdx}
                     onClick={() => setCurrentQuestionIndex(qIdx)}
-                    className={`h-9 font-mono font-bold text-xs flex items-center justify-center border transition-all ${
+                    className={`h-9 rounded-lg font-semibold text-xs flex items-center justify-center border transition-all ${
                       isCurrent
-                        ? 'border-[#D8FE41] bg-[#D8FE41] text-black font-black'
+                        ? 'border-blue-600 bg-blue-600 text-white shadow-xs'
                         : isFlagged
-                        ? 'border-amber-400 bg-amber-950/30 text-amber-300'
+                        ? 'border-amber-300 bg-amber-50 text-amber-800'
                         : isAnswered
-                        ? 'border-[#383838] bg-[#1e1e1e] text-[#D8FE41]'
-                        : 'border-[#222222] bg-[#141414] text-[#666666] hover:text-white'
+                        ? 'border-blue-200 bg-blue-50 text-blue-800'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                     }`}
                   >
                     {qIdx + 1}
@@ -291,35 +294,35 @@ export const AssessmentView: React.FC = () => {
             </div>
 
             {/* Legend */}
-            <div className="pt-3 border-t border-[#222222] space-y-2 text-[10px] font-mono text-[#888888]">
+            <div className="pt-3 border-t border-slate-100 space-y-2 text-xs text-slate-500">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-[#D8FE41] inline-block" />
+                <span className="w-3 h-3 bg-blue-600 rounded-sm inline-block" />
                 <span>Current Question</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-[#1e1e1e] border border-[#383838] inline-block" />
+                <span className="w-3 h-3 bg-blue-50 border border-blue-200 rounded-sm inline-block" />
                 <span>Answered</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-[#141414] border border-[#222222] inline-block" />
+                <span className="w-3 h-3 bg-white border border-slate-200 rounded-sm inline-block" />
                 <span>Not Answered</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-amber-400/20 border border-amber-400 inline-block" />
+                <span className="w-3 h-3 bg-amber-50 border border-amber-300 rounded-sm inline-block" />
                 <span>Flagged for Review</span>
               </div>
             </div>
 
             {/* Assessment Info */}
-            <div className="p-3 bg-[#151515] border border-[#252525] text-xs font-mono space-y-1.5">
-              <p className="text-[#888888]">
-                <strong className="text-white">Domain:</strong> {currentAssessment.domain}
+            <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1.5 text-slate-600">
+              <p>
+                <strong className="text-slate-800 font-semibold">Domain:</strong> {currentAssessment.domain}
               </p>
-              <p className="text-[#888888]">
-                <strong className="text-white">Questions:</strong> {currentAssessment.totalQuestions}
+              <p>
+                <strong className="text-slate-800 font-semibold">Questions:</strong> {currentAssessment.totalQuestions}
               </p>
-              <p className="text-[#888888]">
-                <strong className="text-white">Engine:</strong> Closed-Loop Digital Twin Sync
+              <p>
+                <strong className="text-slate-800 font-semibold">Engine:</strong> Closed-Loop Digital Twin Sync
               </p>
             </div>
           </div>

@@ -31,6 +31,30 @@ const MainLayout: React.FC = () => {
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { navigate } = useApp();
+
+  // Sync activeView with window.location.hash for deep-linking during SIH evaluation
+  React.useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#/', '');
+      if (hash && hash !== activeView) {
+        navigate(hash as any);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    const initialHash = window.location.hash.replace('#/', '');
+    if (initialHash && initialHash !== activeView) {
+      handleHashChange();
+    }
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  React.useEffect(() => {
+    if (window.location.hash !== `#/${activeView}`) {
+      window.location.hash = `#/${activeView}`;
+    }
+  }, [activeView]);
 
   // Determine which view to render
   const renderActiveView = () => {
@@ -72,15 +96,15 @@ const MainLayout: React.FC = () => {
   const isFullPageView = activeView === 'landing' || activeView === 'login';
 
   return (
-    <div className="min-h-screen bg-[#080808] text-white flex flex-col font-mono selection:bg-[#D8FE41] selection:text-black">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       {/* Persistent App Header with MoSPI Branding, Role Switcher & Notifications */}
       <AppHeader onMobileMenuToggle={() => setMobileMenuOpen(true)} />
 
-      {/* SIH 10-Step Workflow Stepper Navigator */}
+      {/* SIH Workflow Stepper Navigator */}
       <FlowStepper />
 
       {isFullPageView ? (
-        <main className="flex-1 w-full bg-[#080808]">
+        <main className="flex-1 w-full bg-slate-50">
           {renderActiveView()}
         </main>
       ) : (
@@ -92,7 +116,7 @@ const MainLayout: React.FC = () => {
           />
 
           {/* Main Content Area */}
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-[#080808] min-w-0">
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-slate-50 min-w-0">
             {renderActiveView()}
           </main>
         </div>

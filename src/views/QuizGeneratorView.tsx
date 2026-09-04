@@ -25,6 +25,7 @@ export const QuizGeneratorView: React.FC = () => {
     addNewGeneratedAssessment,
     navigate,
     setActiveAssessmentId,
+    addNotification,
   } = useApp();
 
   const [selectedDocId, setSelectedDocId] = useState(sampleUploadDocuments[0].id);
@@ -152,7 +153,13 @@ export const QuizGeneratorView: React.FC = () => {
 
       if (res && res.questions && res.questions.length > 0) {
         setGeneratedQuestions(res.questions);
-        setGenSuccess(`Synthesized ${res.questions.length} questions grounded in ${activeDoc?.title || 'Official Guidelines'} via FastAPI Gemini engine.`);
+        const successMsg = `Synthesized ${res.questions.length} questions grounded in ${activeDoc?.title || 'Official Guidelines'} via FastAPI Gemini engine.`;
+        setGenSuccess(successMsg);
+        addNotification({
+          title: 'AI Questions Generated',
+          message: successMsg,
+          type: 'success',
+        });
       }
     } catch (err: any) {
       console.warn('[QuizGenerator] Backend unreachable, using high-rigor baseline question set:', err);
@@ -180,7 +187,13 @@ export const QuizGeneratorView: React.FC = () => {
       const res = await apiClient.uploadDocumentAndGenerateQuiz(formData);
       if (res && res.data && res.data.questions) {
         setGeneratedQuestions(res.data.questions);
-        setGenSuccess(`Ingested "${file.name}" and synthesized ${res.data.totalQuestions} grounded assessment items!`);
+        const msg = `Ingested "${file.name}" and synthesized ${res.data.totalQuestions} grounded assessment items!`;
+        setGenSuccess(msg);
+        addNotification({
+          title: 'Document Ingested',
+          message: msg,
+          type: 'success',
+        });
       }
     } catch (err: any) {
       console.error('[QuizGenerator] File upload error:', err);
@@ -221,18 +234,18 @@ export const QuizGeneratorView: React.FC = () => {
   const selectedDoc = sampleUploadDocuments.find((d) => d.id === selectedDocId);
 
   return (
-    <div className="space-y-8 bg-[#080808] text-white">
+    <div className="space-y-8 max-w-7xl mx-auto font-sans text-slate-800">
       {/* Header Banner */}
-      <div className="border-b border-[#222222] pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="border-b border-slate-200 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 bg-[#D8FE41]/10 border border-[#D8FE41]/40 rounded text-[11px] font-mono font-bold tracking-widest text-[#D8FE41] uppercase mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-[#D8FE41]" />
-            <span>GROUNDED AI QUIZ & DIAGNOSTIC ENGINE</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-200 rounded-lg text-xs font-semibold text-blue-800 mb-2.5">
+            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+            <span>GROUNDED AI QUIZ & DIAGNOSTIC STUDIO</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight font-display text-white">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
             AI Quiz Generator
           </h1>
-          <p className="text-sm text-[#999999] font-mono mt-1 max-w-2xl">
+          <p className="text-sm text-slate-600 mt-1 max-w-2xl font-normal leading-relaxed">
             Generate verifiable, high-rigor adaptive assessment questions grounded in official MoSPI survey manuals, statistical codes, and legal acts.
           </p>
         </div>
@@ -240,7 +253,7 @@ export const QuizGeneratorView: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('assessment')}
-            className="px-4 py-2.5 rounded bg-[#161616] hover:bg-[#222222] border border-[#333333] text-white text-xs font-mono font-bold uppercase tracking-wider transition-all"
+            className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-semibold transition-colors"
           >
             Go to Assessments →
           </button>
@@ -252,13 +265,15 @@ export const QuizGeneratorView: React.FC = () => {
         {/* Left Column: Generation Controls & Document Grounding */}
         <div className="lg:col-span-5 space-y-6">
           {/* Grounding Source Selection */}
-          <div className="bg-[#121212] border border-[#222222] rounded-none p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-[#222222] pb-3">
-              <h2 className="text-sm font-black font-mono uppercase tracking-widest text-[#D8FE41] flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-[#D8FE41]" />
+          <div className="bg-white border border-slate-200 rounded-xl shadow-xs p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-blue-600" />
                 <span>1. Select Official Grounding Source</span>
               </h2>
-              <span className="text-[10px] font-mono text-[#777777] uppercase">RAG Grounded</span>
+              <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                RAG Grounded
+              </span>
             </div>
 
             <div className="space-y-2.5">
@@ -266,30 +281,30 @@ export const QuizGeneratorView: React.FC = () => {
                 <div
                   key={doc.id}
                   onClick={() => setSelectedDocId(doc.id)}
-                  className={`p-3.5 border cursor-pointer transition-all ${
+                  className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
                     selectedDocId === doc.id
-                      ? 'bg-[#181818] border-[#D8FE41] shadow-[0_0_12px_rgba(216,254,65,0.15)]'
-                      : 'bg-[#141414] border-[#222222] hover:border-[#444444]'
+                      ? 'bg-blue-50/50 border-blue-600 shadow-2xs'
+                      : 'bg-white border-slate-200 hover:border-slate-300'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-start gap-2.5">
                       <FileText
                         className={`w-4 h-4 mt-0.5 shrink-0 ${
-                          selectedDocId === doc.id ? 'text-[#D8FE41]' : 'text-[#888888]'
+                          selectedDocId === doc.id ? 'text-blue-600' : 'text-slate-400'
                         }`}
                       />
                       <div>
-                        <p className="text-xs font-bold font-mono text-white leading-tight">
+                        <p className="text-xs font-bold text-slate-900 leading-tight">
                           {doc.title}
                         </p>
-                        <p className="text-[11px] text-[#888888] font-mono mt-1">
+                        <p className="text-[11px] text-slate-500 mt-1">
                           {doc.pages} pages • {doc.domain} Domain • {doc.size}
                         </p>
                       </div>
                     </div>
                     {selectedDocId === doc.id && (
-                      <span className="w-2 h-2 rounded-full bg-[#D8FE41] animate-pulse shrink-0" />
+                      <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 mt-1" />
                     )}
                   </div>
                 </div>
@@ -306,32 +321,32 @@ export const QuizGeneratorView: React.FC = () => {
             />
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border border-dashed border-[#333333] hover:border-[#D8FE41] p-4 text-center cursor-pointer transition-colors bg-[#0a0a0a]"
+              className="border border-dashed border-slate-300 hover:border-blue-500 rounded-xl p-4 text-center cursor-pointer transition-colors bg-slate-50/50"
             >
-              <Upload className="w-5 h-5 mx-auto text-[#888888] mb-1.5" />
-              <p className="text-xs font-mono font-bold uppercase text-white">Upload New MoSPI Circular / Manual</p>
-              <p className="text-[10px] font-mono text-[#666666] mt-0.5">PDF, DOCX, TXT with automated Gemini RAG grounding</p>
+              <Upload className="w-5 h-5 mx-auto text-slate-400 mb-1.5" />
+              <p className="text-xs font-semibold text-slate-800">Upload New MoSPI Circular / Manual</p>
+              <p className="text-[11px] text-slate-500 mt-0.5 font-normal">PDF, DOCX, TXT with automated Gemini RAG grounding</p>
             </div>
           </div>
 
           {/* Assessment Parameters */}
-          <div className="bg-[#121212] border border-[#222222] rounded-none p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-[#222222] pb-3">
-              <h2 className="text-sm font-black font-mono uppercase tracking-widest text-[#D8FE41] flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-[#D8FE41]" />
+          <div className="bg-white border border-slate-200 rounded-xl shadow-xs p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-blue-600" />
                 <span>2. Target Competency & Scope</span>
               </h2>
             </div>
 
-            <div className="space-y-4 font-mono text-xs">
+            <div className="space-y-4 text-xs">
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-[#999999] mb-1.5 font-bold">
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Target Competency
                 </label>
                 <select
                   value={selectedCompetencyName}
                   onChange={(e) => setSelectedCompetencyName(e.target.value)}
-                  className="w-full bg-[#181818] border border-[#333333] text-white p-2.5 rounded-none focus:border-[#D8FE41] focus:outline-none"
+                  className="w-full bg-white border border-slate-200 rounded-lg text-slate-800 p-2.5 focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                 >
                   {competencies.map((comp) => (
                     <option key={comp.id} value={comp.name}>
@@ -343,13 +358,13 @@ export const QuizGeneratorView: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider text-[#999999] mb-1.5 font-bold">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     Difficulty Level
                   </label>
                   <select
                     value={difficulty}
                     onChange={(e) => setDifficulty(e.target.value as any)}
-                    className="w-full bg-[#181818] border border-[#333333] text-white p-2.5 rounded-none focus:border-[#D8FE41] focus:outline-none"
+                    className="w-full bg-white border border-slate-200 rounded-lg text-slate-800 p-2.5 focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                   >
                     <option value="Easy">Easy (Conceptual)</option>
                     <option value="Medium">Medium (Operational)</option>
@@ -359,13 +374,13 @@ export const QuizGeneratorView: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider text-[#999999] mb-1.5 font-bold">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     Question Count
                   </label>
                   <select
                     value={questionCount}
                     onChange={(e) => setQuestionCount(Number(e.target.value))}
-                    className="w-full bg-[#181818] border border-[#333333] text-white p-2.5 rounded-none focus:border-[#D8FE41] focus:outline-none"
+                    className="w-full bg-white border border-slate-200 rounded-lg text-slate-800 p-2.5 focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                   >
                     <option value={5}>5 Questions (Rapid)</option>
                     <option value={8}>8 Questions (Standard)</option>
@@ -375,14 +390,14 @@ export const QuizGeneratorView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-[#999999] mb-1.5 font-bold">
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Syllabus Focus Prompt
                 </label>
                 <textarea
                   value={customPrompt}
                   onChange={(e) => setCustomPrompt(e.target.value)}
                   rows={3}
-                  className="w-full bg-[#181818] border border-[#333333] text-white p-2.5 rounded-none focus:border-[#D8FE41] focus:outline-none leading-relaxed text-xs"
+                  className="w-full bg-white border border-slate-200 rounded-lg text-slate-800 p-2.5 focus:ring-2 focus:ring-blue-600 focus:outline-hidden leading-relaxed text-xs"
                   placeholder="Specify focus sections, formulas, or statistical acts..."
                 />
               </div>
@@ -390,16 +405,16 @@ export const QuizGeneratorView: React.FC = () => {
               <button
                 onClick={handleGenerateQuestions}
                 disabled={isGenerating}
-                className="w-full py-3 bg-[#D8FE41] hover:bg-[#c4eb34] text-black font-black uppercase tracking-widest text-xs transition-all shadow-[0_0_15px_rgba(216,254,65,0.3)] flex items-center justify-center gap-2"
+                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-xs transition-colors shadow-xs flex items-center justify-center gap-2"
               >
                 {isGenerating ? (
                   <>
-                    <RotateCcw className="w-4 h-4 animate-spin text-black" />
-                    <span>Extracting & Synthesizing Grounded Questions...</span>
+                    <RotateCcw className="w-4 h-4 animate-spin text-white" />
+                    <span>Synthesizing Grounded Questions via AI...</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 text-black" />
+                    <Sparkles className="w-4 h-4 text-white" />
                     <span>Generate Grounded Questions</span>
                   </>
                 )}
@@ -411,39 +426,39 @@ export const QuizGeneratorView: React.FC = () => {
         {/* Right Column: Grounded Questions Preview & Review */}
         <div className="lg:col-span-7 space-y-6">
           {genSuccess && (
-            <div className="p-3 bg-emerald-950/40 border border-emerald-700/60 text-emerald-300 font-mono text-xs flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium rounded-xl flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>{genSuccess}</span>
             </div>
           )}
           {genError && (
-            <div className="p-3 bg-amber-950/30 border border-amber-800/50 text-amber-300 font-mono text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+            <div className="p-3.5 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium rounded-xl flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
               <span>{genError}</span>
             </div>
           )}
 
-          <div className="bg-[#121212] border border-[#222222] rounded-none p-6 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#222222] pb-4 gap-3">
+          <div className="bg-white border border-slate-200 rounded-xl shadow-xs p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-3">
               <div>
-                <h2 className="text-sm font-black font-mono uppercase tracking-widest text-[#D8FE41] flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#D8FE41]" />
+                <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-blue-600" />
                   <span>3. Review & Validate Grounded Questions</span>
                 </h2>
-                <p className="text-[11px] font-mono text-[#888888] mt-0.5">
-                  Grounded in: <span className="text-white font-bold">{selectedDoc?.filename}</span>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Grounded in: <span className="text-slate-800 font-semibold">{selectedDoc?.filename}</span>
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="px-2 py-1 bg-[#1c1c1c] border border-[#333333] text-[10px] font-mono font-bold text-white uppercase">
+                <span className="px-2.5 py-1 bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 rounded-lg">
                   {generatedQuestions.filter((q) => q.approved).length} / {generatedQuestions.length} Approved
                 </span>
                 <button
                   onClick={handleLaunchAssessment}
-                  className="px-4 py-2 bg-[#D8FE41] hover:bg-[#c4eb34] text-black text-xs font-mono font-black uppercase tracking-wider flex items-center gap-1.5 shadow-[0_0_12px_rgba(216,254,65,0.3)] transition-all"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow-xs transition-colors"
                 >
-                  <Play className="w-3.5 h-3.5 fill-black" />
+                  <Play className="w-3.5 h-3.5 fill-white" />
                   <span>Launch Assessment</span>
                 </button>
               </div>
@@ -454,35 +469,35 @@ export const QuizGeneratorView: React.FC = () => {
               {generatedQuestions.map((q, idx) => (
                 <div
                   key={q.id}
-                  className={`p-4 border transition-all ${
+                  className={`p-4 rounded-xl border transition-all ${
                     q.approved
-                      ? 'bg-[#151515] border-[#2e2e2e]'
-                      : 'bg-[#101010] border-rose-900/40 opacity-70'
+                      ? 'bg-white border-slate-200 shadow-2xs'
+                      : 'bg-slate-50/50 border-rose-200 opacity-80'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3 mb-2.5">
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 bg-[#222222] text-[#D8FE41] font-mono font-bold text-[10px]">
+                      <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded font-semibold text-[11px]">
                         Q{idx + 1}
                       </span>
-                      <span className="px-2 py-0.5 bg-[#1a1a1a] border border-[#333333] text-[#888888] font-mono text-[10px] uppercase">
+                      <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-600 rounded text-[11px] font-medium">
                         {q.difficulty}
                       </span>
                     </div>
 
                     <button
                       onClick={() => handleToggleApprove(q.id)}
-                      className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 border ${
+                      className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border transition-colors ${
                         q.approved
-                          ? 'border-[#D8FE41]/50 text-[#D8FE41] bg-[#D8FE41]/10'
-                          : 'border-[#555555] text-[#888888]'
+                          ? 'border-emerald-200 text-emerald-700 bg-emerald-50'
+                          : 'border-slate-300 text-slate-600 bg-white'
                       }`}
                     >
                       {q.approved ? 'Approved ✓' : 'Click to Approve'}
                     </button>
                   </div>
 
-                  <p className="text-xs sm:text-sm font-mono font-bold text-white mb-3 leading-relaxed">
+                  <p className="text-sm font-semibold text-slate-900 mb-3 leading-relaxed">
                     {q.question}
                   </p>
 
@@ -491,13 +506,13 @@ export const QuizGeneratorView: React.FC = () => {
                     {q.options.map((opt, oIdx) => (
                       <div
                         key={oIdx}
-                        className={`p-2.5 text-xs font-mono border ${
+                        className={`p-2.5 text-xs rounded-lg border ${
                           oIdx === q.correctIndex
-                            ? 'border-[#D8FE41]/60 bg-[#D8FE41]/10 text-white font-bold'
-                            : 'border-[#222222] bg-[#121212] text-[#888888]'
+                            ? 'border-blue-300 bg-blue-50/60 text-blue-950 font-semibold'
+                            : 'border-slate-200 bg-white text-slate-700'
                         }`}
                       >
-                        <span className="text-[#D8FE41] font-bold mr-2">
+                        <span className="text-blue-700 font-bold mr-2">
                           {String.fromCharCode(65 + oIdx)}.
                         </span>
                         <span>{opt}</span>
@@ -506,12 +521,12 @@ export const QuizGeneratorView: React.FC = () => {
                   </div>
 
                   {/* Source Reference & Explanation */}
-                  <div className="p-2.5 bg-[#0d0d0d] border border-[#222222] text-[11px] font-mono text-[#888888] space-y-1">
-                    <p className="text-[#D8FE41] font-bold">
-                      CITATION: <span className="text-white font-normal">{q.sourceReference}</span>
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-600 space-y-1">
+                    <p className="text-blue-700 font-semibold">
+                      CITATION: <span className="text-slate-800 font-normal">{q.sourceReference}</span>
                     </p>
-                    <p className="text-[#aaaaaa] leading-relaxed">
-                      <span className="font-bold text-[#888888]">RATIONALE:</span> {q.explanation}
+                    <p className="text-slate-600 leading-relaxed">
+                      <span className="font-semibold text-slate-700">RATIONALE:</span> {q.explanation}
                     </p>
                   </div>
                 </div>
@@ -519,13 +534,13 @@ export const QuizGeneratorView: React.FC = () => {
             </div>
 
             {/* Launch CTA Bar */}
-            <div className="pt-4 border-t border-[#222222] flex items-center justify-between">
-              <span className="text-xs font-mono text-[#888888]">
-                Ready to take test? Your score will update your Competency Digital Twin in real-time.
+            <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <span className="text-xs text-slate-500 font-medium">
+                Ready to take diagnostic? Your score will update your Competency Digital Twin in real-time.
               </span>
               <button
                 onClick={handleLaunchAssessment}
-                className="px-6 py-3 bg-[#D8FE41] hover:bg-[#c4eb34] text-black text-xs font-mono font-black uppercase tracking-widest flex items-center gap-2 shadow-[0_0_15px_rgba(216,254,65,0.35)] transition-all"
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg flex items-center gap-2 shadow-xs transition-colors shrink-0"
               >
                 <span>Take Grounded Assessment</span>
                 <ArrowRight className="w-4 h-4" />
@@ -537,3 +552,4 @@ export const QuizGeneratorView: React.FC = () => {
     </div>
   );
 };
+

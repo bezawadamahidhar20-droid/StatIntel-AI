@@ -34,7 +34,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   mobileOpen = false,
   onMobileClose,
 }) => {
-  const { activeView, navigate, userRole, currentUser, skillGaps, unreadNotificationCount } = useApp();
+  const { activeView, navigate, userRole, currentUser, skillGaps } = useApp();
 
   const criticalGapsCount = skillGaps.filter((g) => g.severity === 'Critical').length;
 
@@ -47,47 +47,47 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   }
 
   const learnerNavItems: NavItem[] = [
-    { id: 'dashboard', label: 'Learner Overview', icon: LayoutDashboard },
+    { id: 'dashboard', label: 'Competency Overview', icon: LayoutDashboard },
     { id: 'digital-twin', label: 'Competency Digital Twin', icon: Cpu },
     {
       id: 'skill-gaps',
       label: 'Skill Gap Analysis',
       icon: Target,
       badge: criticalGapsCount > 0 ? `${criticalGapsCount} Gaps` : undefined,
-      badgeColor: 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300',
+      badgeColor: 'bg-rose-100 text-rose-800 border-rose-200',
     },
-    { id: 'learning-path', label: 'Personalized Path', icon: Route },
-    { id: 'courses', label: 'iGOT / NSSTA Courses', icon: BookOpen },
+    { id: 'learning-path', label: 'Adaptive Path', icon: Route },
+    { id: 'courses', label: 'MoSPI / NSSTA Catalog', icon: BookOpen },
     {
       id: 'quiz-generator',
-      label: 'AI Quiz Generator',
+      label: 'AI Quiz Studio',
       icon: Sparkles,
-      badge: 'Grounded',
-      badgeColor: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300',
+      badge: 'RAG',
+      badgeColor: 'bg-blue-100 text-blue-800 border-blue-200',
     },
     { id: 'assessment', label: 'Adaptive Assessments', icon: HelpCircle },
     { id: 'assistant', label: 'Karmayogi AI Assistant', icon: Bot },
     { id: 'history', label: 'Learning History', icon: History },
     { id: 'certificates', label: 'Verified Certificates', icon: Award },
-    { id: 'profile', label: 'Official Profile', icon: User },
+    { id: 'profile', label: 'Officer Profile', icon: User },
   ];
 
   const adminNavItems: NavItem[] = [
-    { id: 'admin-dashboard', label: 'Workforce Overview', icon: LayoutDashboard },
+    { id: 'admin-dashboard', label: 'Cadre Workforce Overview', icon: LayoutDashboard },
     {
       id: 'admin-heatmap',
       label: 'Competency Heatmap',
       icon: Flame,
-      badge: '5 Divs',
-      badgeColor: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+      badge: '5 Divisions',
+      badgeColor: 'bg-blue-100 text-blue-800 border-blue-200',
     },
     { id: 'admin-training-effectiveness', label: 'Training Effectiveness', icon: TrendingUp },
     {
       id: 'admin-predictive',
       label: 'Predictive Skill Demand',
       icon: BrainCircuit,
-      badge: 'AI Forecast',
-      badgeColor: 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
+      badge: 'Forecast',
+      badgeColor: 'bg-purple-100 text-purple-800 border-purple-200',
     },
     { id: 'admin-training-planner', label: 'AI Training Planner', icon: CalendarDays },
   ];
@@ -100,18 +100,18 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-[#0c0c0c] border-r border-[#222222] text-white font-mono">
+    <div className="flex flex-col h-full bg-white border-r border-slate-200 text-slate-800 font-sans">
       {/* Cadre Indicator Banner */}
-      <div className="p-4 border-b border-[#222222] bg-[#121212]">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-[#181818] border border-[#D8FE41]/40 text-[#D8FE41] flex items-center justify-center font-black text-xs shrink-0">
+      <div className="p-4 border-b border-slate-200 bg-slate-50/70">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 bg-blue-100 border border-blue-200 text-blue-800 flex items-center justify-center font-bold text-xs rounded-lg shrink-0">
             {userRole === 'ADMIN' ? 'ADM' : 'ISS'}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-black uppercase tracking-wider text-white truncate font-display">
+            <p className="text-xs font-semibold text-slate-900 truncate">
               {currentUser.department}
             </p>
-            <p className="text-[10px] text-[#777777] uppercase truncate">
+            <p className="text-[11px] text-slate-500 truncate font-medium">
               {currentUser.cadre}
             </p>
           </div>
@@ -119,9 +119,9 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
       </div>
 
       {/* Navigation List */}
-      <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1">
-        <p className="px-3 pb-2 text-[10px] font-black uppercase tracking-widest text-[#666666]">
-          {userRole === 'ADMIN' ? '// Executive Governance' : '// Competency Journey'}
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+        <p className="px-3 pb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+          {userRole === 'ADMIN' ? 'Cadre Intelligence' : 'Officer Competency Journey'}
         </p>
 
         {currentItems.map((item) => {
@@ -132,16 +132,16 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             <button
               key={item.id}
               onClick={() => handleNav(item.id)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 text-xs transition-all group ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-colors group ${
                 isActive
-                  ? 'bg-[#D8FE41] text-black font-black uppercase tracking-wider shadow-[0_0_12px_rgba(216,254,65,0.3)]'
-                  : 'text-[#888888] hover:bg-[#181818] hover:text-white font-bold uppercase tracking-wider'
+                  ? 'bg-blue-50 text-blue-800 font-semibold border-l-3 border-blue-600 shadow-2xs'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-normal'
               }`}
             >
-              <div className="flex items-center gap-2.5 truncate">
+              <div className="flex items-center gap-3 truncate">
                 <Icon
                   className={`w-4 h-4 shrink-0 transition-colors ${
-                    isActive ? 'text-black' : 'text-[#777777] group-hover:text-white'
+                    isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-700'
                   }`}
                 />
                 <span className="truncate">{item.label}</span>
@@ -149,10 +149,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
               {item.badge && (
                 <span
-                  className={`px-1.5 py-0.5 text-[9px] font-black uppercase shrink-0 ml-2 border ${
-                    isActive
-                      ? 'bg-black text-[#D8FE41] border-black'
-                      : 'bg-[#181818] text-[#D8FE41] border-[#333333]'
+                  className={`px-2 py-0.5 text-[10px] font-semibold rounded-full shrink-0 ml-2 border ${
+                    item.badgeColor || 'bg-slate-100 text-slate-700 border-slate-200'
                   }`}
                 >
                   {item.badge}
@@ -165,33 +163,33 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
       {/* Closed Loop Intelligence Mini-Widget */}
       {userRole === 'LEARNER' && (
-        <div className="p-3 mx-2 mb-3 bg-[#121212] border border-[#262626] text-xs">
+        <div className="p-3.5 mx-3 mb-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="font-bold text-white flex items-center gap-1.5 text-[10px] uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-[#D8FE41]" />
+            <span className="font-semibold text-slate-800 flex items-center gap-1.5 text-xs">
+              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
               Role Readiness
             </span>
-            <span className="font-black text-[#D8FE41] text-xs">
+            <span className="font-bold text-blue-700 text-xs">
               {currentUser.roleReadiness}%
             </span>
           </div>
-          <div className="w-full bg-[#202020] h-1.5 overflow-hidden mb-2">
+          <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden mb-2">
             <div
-              className="bg-[#D8FE41] h-full transition-all duration-500 shadow-[0_0_8px_rgba(216,254,65,0.5)]"
+              className="bg-blue-600 h-full rounded-full transition-all duration-500"
               style={{ width: `${currentUser.roleReadiness}%` }}
             />
           </div>
-          <p className="text-[10px] text-[#777777] leading-tight">
-            Target: 85% for Senior Division postings. Take assessments to boost score.
+          <p className="text-[11px] text-slate-500 leading-normal">
+            Target: 85% for Senior Division postings. Complete gap recommendations to accelerate promotion readiness.
           </p>
         </div>
       )}
 
       {/* Bottom Switcher Footer */}
-      <div className="p-3 border-t border-[#222222] bg-[#0e0e0e] text-[10px] text-[#666666] flex items-center justify-between font-mono">
-        <span className="truncate uppercase font-bold">iGOT Karmayogi v4.2</span>
-        <span className="font-mono text-[9px] bg-[#D8FE41] text-black px-1.5 py-0.5 font-black uppercase">
-          LIVE
+      <div className="p-3 border-t border-slate-200 bg-white text-xs text-slate-500 flex items-center justify-between font-sans">
+        <span className="truncate font-medium text-slate-600">iGOT Karmayogi v4.2</span>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+          Connected
         </span>
       </div>
     </div>
@@ -208,10 +206,10 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs"
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs"
             onClick={onMobileClose}
           />
-          <div className="fixed inset-y-0 left-0 w-72 bg-white dark:bg-slate-900 shadow-2xl z-50">
+          <div className="fixed inset-y-0 left-0 w-72 bg-white shadow-xl z-50">
             {sidebarContent}
           </div>
         </div>
@@ -219,3 +217,4 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     </>
   );
 };
+

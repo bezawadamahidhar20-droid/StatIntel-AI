@@ -25,26 +25,26 @@ export const SkillGapView: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto font-sans text-slate-800">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">
+          <div className="flex items-center gap-2.5 mb-1">
+            <span className="p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700">
               <Target className="w-5 h-5" />
             </span>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Official Skill Gap Analysis
             </h1>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Automated divergence diagnosis between your verified competencies and the Senior Statistical Officer cadre mandate.
+          <p className="text-xs text-slate-500 font-medium">
+            Automated divergence diagnosis between verified officer competencies and MoSPI Senior Statistical Officer cadre mandates.
           </p>
         </div>
 
         <button
           onClick={() => navigate('learning-path')}
-          className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center gap-2 shadow-xs shrink-0"
+          className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center gap-2 shadow-xs shrink-0 transition-colors"
         >
           <Sparkles className="w-3.5 h-3.5" />
           <span>Launch Recommended Learning Path</span>
@@ -52,35 +52,35 @@ export const SkillGapView: React.FC = () => {
       </div>
 
       {/* Comparative Gap Visualizer Banner */}
-      <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
+      <div className="p-6 rounded-xl bg-white border border-slate-200 shadow-xs">
+        <h3 className="text-sm font-bold text-slate-900 mb-1">
           Current Level vs. Role Benchmark Deficits
         </h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-          Red indicates urgent capability gaps in high-priority statistical domains.
+        <p className="text-xs text-slate-500 mb-4 font-normal">
+          Rose deficit bar indicates capability divergence requiring targeted capacity building interventions.
         </p>
 
-        <div className="space-y-3.5">
+        <div className="space-y-4">
           {skillGaps.map((gap) => {
             const deficit = gap.requiredScore - gap.currentScore;
             return (
-              <div key={gap.id} className="space-y-1">
+              <div key={gap.id} className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <span className="font-semibold text-slate-800 flex items-center gap-2">
                     {gap.competencyName}
-                    <span className="text-[10.5px] text-slate-400 font-normal">({gap.domain})</span>
+                    <span className="text-[11px] text-slate-400 font-normal">({gap.domain})</span>
                   </span>
                   <div className="flex items-center gap-3">
-                    <span className="text-slate-500 text-[11px]">
-                      Current: <strong>{gap.currentScore}%</strong> ({gap.currentLevel}) • Target: <strong>{gap.requiredScore}%</strong> ({gap.requiredLevel})
+                    <span className="text-slate-500 text-xs">
+                      Current: <strong className="text-slate-800">{gap.currentScore}%</strong> ({gap.currentLevel}) • Target: <strong className="text-slate-800">{gap.requiredScore}%</strong> ({gap.requiredLevel})
                     </span>
-                    <span className="font-bold text-rose-600 text-[11px]">
+                    <span className="font-bold text-rose-600 text-xs">
                       -{deficit}% Deficit
                     </span>
                   </div>
                 </div>
 
-                <div className="relative w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden">
+                <div className="relative w-full bg-slate-100 h-3 rounded-full overflow-hidden">
                   {/* Current Score Bar */}
                   <div
                     className="absolute left-0 top-0 bottom-0 bg-blue-600 rounded-l-full z-10"
@@ -88,7 +88,7 @@ export const SkillGapView: React.FC = () => {
                   />
                   {/* Deficit Span */}
                   <div
-                    className="absolute top-0 bottom-0 bg-rose-200 dark:bg-rose-950/60"
+                    className="absolute top-0 bottom-0 bg-rose-200"
                     style={{
                       left: `${gap.currentScore}%`,
                       width: `${deficit}%`,
@@ -96,9 +96,9 @@ export const SkillGapView: React.FC = () => {
                   />
                   {/* Benchmark Target Tick */}
                   <div
-                    className="absolute top-0 bottom-0 w-0.5 bg-amber-500 z-20"
+                    className="absolute top-0 bottom-0 w-1 bg-amber-500 z-20"
                     style={{ left: `${gap.requiredScore}%` }}
-                    title={`Target: ${gap.requiredScore}%`}
+                    title={`Benchmark: ${gap.requiredScore}%`}
                   />
                 </div>
               </div>
@@ -118,10 +118,10 @@ export const SkillGapView: React.FC = () => {
             <button
               key={sev}
               onClick={() => setSeverityFilter(sev)}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                 severityFilter === sev
-                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
               }`}
             >
               {sev}
@@ -136,10 +136,10 @@ export const SkillGapView: React.FC = () => {
             <button
               key={dom}
               onClick={() => setDomainFilter(dom)}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                 domainFilter === dom
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
               }`}
             >
               {dom}
@@ -157,61 +157,61 @@ export const SkillGapView: React.FC = () => {
           return (
             <div
               key={gap.id}
-              className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs flex flex-col justify-between"
+              className="p-5 rounded-xl bg-white border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all flex flex-col justify-between"
             >
               <div>
                 {/* Badges */}
-                <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center justify-between gap-2 mb-2.5">
                   <div className="flex items-center gap-1.5">
                     <span
-                      className={`text-[10.5px] font-bold px-2 py-0.5 rounded ${
+                      className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${
                         isCritical
-                          ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
-                          : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                          ? 'bg-rose-50 text-rose-700 border-rose-200'
+                          : 'bg-amber-50 text-amber-700 border-amber-200'
                       }`}
                     >
                       Priority #{gap.priorityRank} • {gap.severity}
                     </span>
-                    <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                    <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">
                       {gap.domain}
                     </span>
                   </div>
 
-                  <span className="text-xs font-extrabold text-blue-600 dark:text-blue-400">
+                  <span className="text-xs font-bold text-blue-700">
                     {gap.roleRelevance}% Role Relevance
                   </span>
                 </div>
 
-                <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">
+                <h3 className="text-base font-bold text-slate-900 mb-2">
                   {gap.competencyName}
                 </h3>
 
                 {/* Level Comparison Box */}
-                <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 mb-3 text-center">
+                <div className="grid grid-cols-3 gap-2 p-3 rounded-lg bg-slate-50 border border-slate-200 mb-3 text-center">
                   <div>
-                    <p className="text-[10px] text-slate-400">Current Level</p>
-                    <p className="text-sm font-bold text-blue-600">{gap.currentLevel} ({gap.currentScore}%)</p>
+                    <p className="text-[11px] text-slate-500 font-medium">Current Level</p>
+                    <p className="text-sm font-bold text-blue-700 mt-0.5">{gap.currentLevel} ({gap.currentScore}%)</p>
                   </div>
-                  <div className="border-x border-slate-200 dark:border-slate-700">
-                    <p className="text-[10px] text-slate-400">Target Level</p>
-                    <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{gap.requiredLevel} ({gap.requiredScore}%)</p>
+                  <div className="border-x border-slate-200">
+                    <p className="text-[11px] text-slate-500 font-medium">Target Benchmark</p>
+                    <p className="text-sm font-bold text-slate-800 mt-0.5">{gap.requiredLevel} ({gap.requiredScore}%)</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-slate-400">Gap Deficit</p>
-                    <p className="text-sm font-bold text-rose-600">-{gap.gapLevels} Levels</p>
+                    <p className="text-[11px] text-slate-500 font-medium">Deficit</p>
+                    <p className="text-sm font-bold text-rose-600 mt-0.5">-{gap.gapLevels} Levels</p>
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                <p className="text-xs text-slate-600 leading-relaxed mb-4 font-normal">
                   {gap.rationale}
                 </p>
               </div>
 
               {/* Recommended Course & Action */}
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-1.5 text-xs text-slate-500">
                   <Clock className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Est. time to bridge: <strong className="text-slate-700 dark:text-slate-300">{gap.estimatedTimeToBridge}</strong></span>
+                  <span>Est. time to bridge: <strong className="text-slate-700 font-semibold">{gap.estimatedTimeToBridge}</strong></span>
                 </div>
 
                 {linkedCourse ? (
@@ -219,7 +219,7 @@ export const SkillGapView: React.FC = () => {
                     onClick={() => {
                       setWhyRecommendedCourse(linkedCourse);
                     }}
-                    className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center gap-1 shadow-xs"
+                    className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center gap-1 shadow-xs transition-colors"
                   >
                     <span>Bridge Gap</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -227,7 +227,7 @@ export const SkillGapView: React.FC = () => {
                 ) : (
                   <button
                     onClick={() => navigate('courses')}
-                    className="px-3.5 py-1.5 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-semibold"
+                    className="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
                   >
                     Browse Solutions
                   </button>
@@ -240,3 +240,4 @@ export const SkillGapView: React.FC = () => {
     </div>
   );
 };
+

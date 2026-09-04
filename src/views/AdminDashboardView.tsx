@@ -32,7 +32,7 @@ import {
 } from '../data/mockData';
 
 export const AdminDashboardView: React.FC = () => {
-  const { switchRole, navigate } = useApp();
+  const { switchRole, navigate, addNotification } = useApp();
   const [selectedDivision, setSelectedDivision] = useState<string>('All');
   const [activeTab, setActiveTab] = useState<'overview' | 'heatmap' | 'predictive' | 'planner'>('overview');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -77,7 +77,13 @@ export const AdminDashboardView: React.FC = () => {
     setResetMessage(null);
     try {
       const res = await apiClient.resetDemoState();
-      setResetMessage(res?.data?.message || 'SIH Demo State reset to pristine baseline!');
+      const msg = res?.data?.message || 'SIH Demo State reset to pristine baseline!';
+      setResetMessage(msg);
+      addNotification({
+        title: 'Demo State Reset',
+        message: msg,
+        type: 'info',
+      });
       const [hData, pData, oData] = await Promise.all([
         apiClient.getWorkforceHeatmap(),
         apiClient.getPredictiveSkillDemand(),
@@ -95,40 +101,49 @@ export const AdminDashboardView: React.FC = () => {
     }
   };
 
+  const handleExportAudit = () => {
+    addNotification({
+      title: 'Cadre Audit Report Exported',
+      message: 'MoSPI National Statistical Cadre Capability Audit (Excel/PDF) downloaded.',
+      type: 'success',
+    });
+    window.print();
+  };
+
   const filteredHeatmap =
     selectedDivision === 'All'
       ? heatmapData
       : heatmapData.filter((d) => d.department.includes(selectedDivision));
 
   return (
-    <div className="space-y-8 bg-[#080808] text-white">
+    <div className="space-y-8 max-w-7xl mx-auto font-sans text-slate-800">
       {/* Header Banner */}
-      <div className="border-b border-[#222222] pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="border-b border-slate-200 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 bg-[#D8FE41]/10 border border-[#D8FE41]/40 rounded text-[11px] font-mono font-bold tracking-widest text-[#D8FE41] uppercase mb-2">
-            <Shield className="w-3.5 h-3.5 text-[#D8FE41]" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-200 rounded-lg text-xs font-semibold text-blue-800 mb-2.5">
+            <Shield className="w-3.5 h-3.5 text-blue-600" />
             <span>EXECUTIVE CADRE INTELLIGENCE • MOSPI & NSSTA</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight font-display text-white">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
             Workforce Competency Intelligence
           </h1>
-          <p className="text-sm text-[#999999] font-mono mt-1 max-w-2xl">
-            Macro-level skill telemetry, departmental heatmaps, and predictive AI training planning for 1,240+ Indian Statistical Service (ISS) & Subordinate Statistical Service (SSS) officers.
+          <p className="text-sm text-slate-600 mt-1 max-w-2xl font-normal leading-relaxed">
+            Macro-level skill telemetry, departmental heatmaps, and predictive AI training planning for 1,248 Indian Statistical Service (ISS) & Subordinate Statistical Service (SSS) officers.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
           {/* Live API Telemetry Badge */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#151515] border border-[#333333] text-[11px] font-mono rounded">
-            <span className={`w-2 h-2 rounded-full ${isLiveConnected ? 'bg-[#D8FE41] shadow-[0_0_8px_#D8FE41]' : 'bg-amber-400'}`} />
-            <span className="text-[#cccccc] font-semibold">{isLiveConnected ? 'FASTAPI LIVE SYNC' : 'OFFLINE CACHED'}</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-50 border border-slate-200 text-xs font-medium rounded-lg">
+            <span className={`w-2 h-2 rounded-full ${isLiveConnected ? 'bg-emerald-500 shadow-xs' : 'bg-amber-400'}`} />
+            <span className="text-slate-700 font-semibold">{isLiveConnected ? 'FastAPI Live Sync' : 'Offline Cached'}</span>
           </div>
 
           <button
             onClick={handleResetDemo}
             disabled={isResetting}
             title="Reset demo user Rajesh Sharma back to pristine initial state for clean evaluation"
-            className="px-3.5 py-2.5 rounded bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/80 text-rose-200 text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm"
+            className="px-3.5 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-semibold transition-colors flex items-center gap-1.5"
           >
             <RotateCcw className={`w-3.5 h-3.5 ${isResetting ? 'animate-spin' : ''}`} />
             <span>{isResetting ? 'Resetting...' : 'Reset Demo State'}</span>
@@ -139,85 +154,85 @@ export const AdminDashboardView: React.FC = () => {
               switchRole('LEARNER');
               navigate('dashboard');
             }}
-            className="px-4 py-2.5 rounded bg-[#161616] hover:bg-[#222222] border border-[#333333] text-white text-xs font-mono font-bold uppercase tracking-wider transition-all"
+            className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-semibold transition-colors"
           >
-            ← Switch to Learner View
+            ← Switch to Officer View
           </button>
 
           <button
-            onClick={() => window.print()}
-            className="px-4 py-2.5 bg-[#D8FE41] hover:bg-[#c4eb34] text-black text-xs font-mono font-black uppercase tracking-wider shadow-[0_0_12px_rgba(216,254,65,0.3)] transition-all flex items-center gap-1.5"
+            onClick={handleExportAudit}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors flex items-center gap-1.5"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Export Cadre Audit Report</span>
+            <span>Export Cadre Audit</span>
           </button>
         </div>
       </div>
 
       {resetMessage && (
-        <div className="p-3 bg-emerald-950/40 border border-emerald-700/60 text-emerald-300 font-mono text-xs flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium rounded-xl flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>{resetMessage}</span>
         </div>
       )}
 
       {/* Top Level Metric KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#121212] border border-[#222222] p-6 space-y-2">
-          <p className="text-[11px] font-mono font-bold uppercase text-[#888888] tracking-wider">
+        <div className="bg-white border border-slate-200 rounded-xl shadow-xs p-6 space-y-2">
+          <p className="text-xs font-semibold uppercase text-slate-500 tracking-wide">
             Total Statistical Cadre Tracked
           </p>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black font-display text-white">1,248</span>
-            <span className="text-xs font-mono text-[#D8FE41]">Across 5 Divisions</span>
+            <span className="text-3xl font-bold text-slate-900">1,248</span>
+            <span className="text-xs font-semibold text-blue-700">Across 5 Divisions</span>
           </div>
-          <p className="text-[11px] font-mono text-[#777777]">
+          <p className="text-xs text-slate-500 font-normal">
             Active digital twins synced with iGOT Karmayogi Bharat
           </p>
         </div>
 
-        <div className="bg-[#121212] border border-[#222222] p-6 space-y-2">
-          <p className="text-[11px] font-mono font-bold uppercase text-[#888888] tracking-wider">
+        <div className="bg-white border border-slate-200 rounded-xl shadow-xs p-6 space-y-2">
+          <p className="text-xs font-semibold uppercase text-slate-500 tracking-wide">
             Cadre Average Readiness
           </p>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black font-display text-[#D8FE41]">74.8%</span>
-            <span className="text-xs font-mono text-[#D8FE41]">+5.2% QoQ</span>
+            <span className="text-3xl font-bold text-blue-700">74.8%</span>
+            <span className="text-xs font-semibold text-emerald-700">+5.2% QoQ</span>
           </div>
-          <p className="text-[11px] font-mono text-[#777777]">
+          <p className="text-xs text-slate-500 font-normal">
             MoSPI Benchmark Target: 80% by Q4 2026
           </p>
         </div>
 
-        <div className="bg-[#121212] border border-[#222222] p-6 space-y-2">
-          <p className="text-[11px] font-mono font-bold uppercase text-[#888888] tracking-wider">
+        <div className="bg-white border border-slate-200 rounded-xl shadow-xs p-6 space-y-2">
+          <p className="text-xs font-semibold uppercase text-slate-500 tracking-wide">
             Critical Skill Gaps Identified
           </p>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black font-display text-rose-400">142</span>
-            <span className="text-xs font-mono text-rose-300">Requires Intervention</span>
+            <span className="text-3xl font-bold text-rose-600">142</span>
+            <span className="text-xs font-semibold text-rose-700">Requires Intervention</span>
           </div>
-          <p className="text-[11px] font-mono text-[#777777]">
+          <p className="text-xs text-slate-500 font-normal">
             Top concentration: DPDP Act Compliance & Python Microdata
           </p>
         </div>
 
-        <div className="bg-[#121212] border border-[#222222] p-6 space-y-2">
-          <p className="text-[11px] font-mono font-bold uppercase text-[#888888] tracking-wider">
+        <div className="bg-white border border-slate-200 rounded-xl shadow-xs p-6 space-y-2">
+          <p className="text-xs font-semibold uppercase text-slate-500 tracking-wide">
             Training ROI & Gain Ratio
           </p>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black font-display text-white">3.4x</span>
-            <span className="text-xs font-mono text-[#D8FE41]">High Efficacy</span>
+            <span className="text-3xl font-bold text-slate-900">3.4x</span>
+            <span className="text-xs font-semibold text-emerald-700">High Efficacy</span>
           </div>
-          <p className="text-[11px] font-mono text-[#777777]">
+          <p className="text-xs text-slate-500 font-normal">
             +7.8% score boost per 10 hours completed on NSSTA courses
           </p>
         </div>
       </div>
 
       {/* Admin Tab Navigation */}
-      <div className="flex items-center gap-2 border-b border-[#222222] overflow-x-auto pb-px">
+      <div className="flex items-center gap-2 border-b border-slate-200 overflow-x-auto pb-px">
         {[
           { id: 'overview', label: 'Workforce Overview', icon: Users },
           { id: 'heatmap', label: 'Division Competency Heatmap', icon: Flame },
@@ -230,10 +245,10 @@ export const AdminDashboardView: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-4 py-3 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
+              className={`px-4 py-3 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap rounded-t-lg ${
                 isActive
-                  ? 'border-[#D8FE41] text-[#D8FE41] bg-[#121212]'
-                  : 'border-transparent text-[#888888] hover:text-white hover:bg-[#0f0f0f]'
+                  ? 'border-blue-600 text-blue-700 bg-blue-50/50'
+                  : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -248,55 +263,55 @@ export const AdminDashboardView: React.FC = () => {
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Division Breakdown Card */}
-            <div className="lg:col-span-8 bg-[#121212] border border-[#222222] p-6 space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#222222] pb-4 gap-2">
-                <h2 className="text-sm font-black font-mono uppercase tracking-widest text-[#D8FE41] flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-[#D8FE41]" />
+            <div className="lg:col-span-8 bg-white border border-slate-200 rounded-xl shadow-xs p-6 space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
+                <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-blue-600" />
                   <span>Division-Level Statistical Capacity Index</span>
                 </h2>
-                <span className="text-[11px] font-mono text-[#888888]">
-                  Updated Live from MoSPI Cadre DB
+                <span className="text-xs text-slate-500 font-medium">
+                  Updated live from MoSPI Cadre Intelligence
                 </span>
               </div>
 
               <div className="space-y-4">
                 {heatmapData.map((dept) => (
-                  <div key={dept.department} className="p-4 bg-[#161616] border border-[#262626] space-y-2">
+                  <div key={dept.department} className="p-4 bg-slate-50/60 border border-slate-200 rounded-xl space-y-2">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs font-mono font-bold text-white">{dept.department}</p>
-                        <p className="text-[11px] font-mono text-[#888888]">
+                        <p className="text-xs font-semibold text-slate-900">{dept.department}</p>
+                        <p className="text-[11px] text-slate-500 font-medium">
                           {dept.totalStaff} Officers Enrolled
                         </p>
                       </div>
                       <div className="text-right">
-                        <span className="text-base font-mono font-black text-[#D8FE41]">
+                        <span className="text-base font-bold text-blue-700">
                           {dept.readinessScore}%
                         </span>
-                        <p className="text-[10px] font-mono text-[#888888] uppercase">Readiness Index</p>
+                        <p className="text-[10px] text-slate-500 uppercase font-medium">Readiness Index</p>
                       </div>
                     </div>
 
-                    <div className="w-full bg-[#202020] h-2">
+                    <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
                       <div
-                        className="bg-[#D8FE41] h-full"
+                        className="bg-blue-600 h-full rounded-full transition-all"
                         style={{ width: `${dept.readinessScore}%` }}
                       />
                     </div>
 
-                    <div className="flex flex-wrap gap-2 pt-1 text-[10px] font-mono">
+                    <div className="flex flex-wrap gap-2 pt-1 text-xs">
                       {dept.scores.map((sc) => (
                         <span
                           key={sc.competency}
-                          className={`px-2 py-0.5 border ${
+                          className={`px-2 py-0.5 rounded-md border text-[11px] font-medium ${
                             sc.gapSeverity === 'Critical'
-                              ? 'border-rose-900/60 bg-rose-950/40 text-rose-300'
+                              ? 'border-rose-200 bg-rose-50 text-rose-700'
                               : sc.gapSeverity === 'Moderate'
-                              ? 'border-amber-900/60 bg-amber-950/40 text-amber-300'
-                              : 'border-[#333333] bg-[#1a1a1a] text-[#888888]'
+                              ? 'border-amber-200 bg-amber-50 text-amber-800'
+                              : 'border-emerald-200 bg-emerald-50 text-emerald-800'
                           }`}
                         >
-                          {sc.competency.slice(0, 18)}...: <strong className="text-white">{sc.score}%</strong>
+                          {sc.competency.slice(0, 18)}...: <strong className="font-semibold">{sc.score}%</strong>
                         </span>
                       ))}
                     </div>
@@ -306,42 +321,42 @@ export const AdminDashboardView: React.FC = () => {
             </div>
 
             {/* Right Column: AI Priority Alerts */}
-            <div className="lg:col-span-4 bg-[#121212] border border-[#222222] p-6 space-y-5">
-              <h2 className="text-sm font-black font-mono uppercase tracking-widest text-[#D8FE41] flex items-center gap-2 border-b border-[#222222] pb-4">
-                <AlertTriangle className="w-4 h-4 text-[#D8FE41]" />
+            <div className="lg:col-span-4 bg-white border border-slate-200 rounded-xl shadow-xs p-6 space-y-5">
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-4">
+                <AlertTriangle className="w-4 h-4 text-amber-600" />
                 <span>Urgent Cadre Recommendations</span>
               </h2>
 
-              <div className="space-y-3 font-mono text-xs">
-                <div className="p-3.5 bg-rose-950/20 border border-rose-900/50 space-y-1.5">
-                  <p className="text-rose-300 font-bold uppercase text-[11px] flex items-center gap-1.5">
+              <div className="space-y-3.5 text-xs">
+                <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl space-y-1.5">
+                  <p className="text-rose-800 font-bold uppercase text-[11px] flex items-center gap-1.5">
                     <span>Critical Alert: DPDP Act 2023</span>
                   </p>
-                  <p className="text-[#cccccc] text-[11px] leading-relaxed">
+                  <p className="text-slate-700 text-xs leading-relaxed">
                     124 Field Officers in FOD lack mandatory statutory compliance certification on personal data handling.
                   </p>
                   <button
                     onClick={() => setActiveTab('planner')}
-                    className="mt-2 text-[10px] font-bold text-[#D8FE41] underline uppercase"
+                    className="mt-2 text-xs font-semibold text-rose-700 underline"
                   >
                     Schedule Targeted NSSTA Cohort →
                   </button>
                 </div>
 
-                <div className="p-3.5 bg-amber-950/20 border border-amber-900/50 space-y-1.5">
-                  <p className="text-amber-300 font-bold uppercase text-[11px]">
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-1.5">
+                  <p className="text-amber-800 font-bold uppercase text-[11px]">
                     Emerging Gap: Python Microdata Analysis
                   </p>
-                  <p className="text-[#cccccc] text-[11px] leading-relaxed">
-                    SDRD officers transitioning from SPSS/STATA require Python & Polars automated validation pipelines.
+                  <p className="text-slate-700 text-xs leading-relaxed">
+                    SDRD officers transitioning from legacy SPSS/STATA require Python & Polars automated validation pipelines.
                   </p>
                 </div>
 
-                <div className="p-3.5 bg-[#161616] border border-[#2a2a2a] space-y-1.5">
-                  <p className="text-[#D8FE41] font-bold uppercase text-[11px]">
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl space-y-1.5">
+                  <p className="text-blue-800 font-bold uppercase text-[11px]">
                     Success: 78th Round Sampling
                   </p>
-                  <p className="text-[#aaaaaa] text-[11px] leading-relaxed">
+                  <p className="text-slate-700 text-xs leading-relaxed">
                     91% of SDRD senior statistical officers successfully certified on circular systematic sampling.
                   </p>
                 </div>
@@ -353,24 +368,24 @@ export const AdminDashboardView: React.FC = () => {
 
       {/* Tab 2: Full Division Competency Heatmap */}
       {activeTab === 'heatmap' && (
-        <div className="bg-[#121212] border border-[#222222] p-6 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#222222] pb-4 gap-3">
+        <div className="bg-white border border-slate-200 rounded-xl shadow-xs p-6 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-3">
             <div>
-              <h2 className="text-sm font-black font-mono uppercase tracking-widest text-[#D8FE41] flex items-center gap-2">
-                <Flame className="w-4 h-4 text-[#D8FE41]" />
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Flame className="w-4 h-4 text-blue-600" />
                 <span>Division Competency Gap Matrix</span>
               </h2>
-              <p className="text-xs font-mono text-[#888888] mt-0.5">
-                Red indicates critical training deficit (&lt;65%). Green indicates benchmark compliance (&gt;80%).
+              <p className="text-xs text-slate-500 mt-0.5 font-normal">
+                Rose indicates critical training deficit (&lt;65%). Amber indicates moderate gap (65-79%). Green indicates benchmark achieved (≥80%).
               </p>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-xs font-mono text-[#888888]">Filter:</span>
+              <span className="text-xs text-slate-500 font-medium">Filter:</span>
               <select
                 value={selectedDivision}
                 onChange={(e) => setSelectedDivision(e.target.value)}
-                className="bg-[#181818] border border-[#333333] text-white p-2 font-mono text-xs focus:border-[#D8FE41] focus:outline-none"
+                className="bg-white border border-slate-200 text-slate-800 p-2 text-xs rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
               >
                 <option value="All">All MoSPI Divisions</option>
                 <option value="SDRD">SDRD (Survey Design)</option>
@@ -384,41 +399,41 @@ export const AdminDashboardView: React.FC = () => {
 
           {/* Matrix Grid */}
           <div className="overflow-x-auto">
-            <table className="w-full text-left font-mono text-xs border-collapse">
+            <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-[#222222] text-[#888888] uppercase text-[10px] tracking-wider">
-                  <th className="p-3 bg-[#161616]">Division / Cadre</th>
-                  <th className="p-3 bg-[#161616]">Staff</th>
-                  <th className="p-3 bg-[#161616]">Readiness</th>
-                  <th className="p-3 bg-[#161616]">Survey Sampling</th>
-                  <th className="p-3 bg-[#161616]">Python Analytics</th>
-                  <th className="p-3 bg-[#161616]">DPDP Act 2023</th>
-                  <th className="p-3 bg-[#161616]">SDMX & Meta</th>
+                <tr className="border-b border-slate-200 text-slate-500 uppercase text-[11px] tracking-wide bg-slate-50/80">
+                  <th className="p-3 font-semibold rounded-l-lg">Division / Cadre</th>
+                  <th className="p-3 font-semibold">Staff</th>
+                  <th className="p-3 font-semibold">Readiness</th>
+                  <th className="p-3 font-semibold">Survey Sampling</th>
+                  <th className="p-3 font-semibold">Python Analytics</th>
+                  <th className="p-3 font-semibold">DPDP Act 2023</th>
+                  <th className="p-3 font-semibold rounded-r-lg">SDMX & Metadata</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#202020]">
+              <tbody className="divide-y divide-slate-100">
                 {filteredHeatmap.map((dept) => (
-                  <tr key={dept.department} className="hover:bg-[#181818] transition-colors">
-                    <td className="p-3 font-bold text-white max-w-[200px]">
+                  <tr key={dept.department} className="hover:bg-slate-50 transition-colors">
+                    <td className="p-3 font-semibold text-slate-900 max-w-[200px]">
                       {dept.department}
                     </td>
-                    <td className="p-3 text-[#aaaaaa]">{dept.totalStaff}</td>
-                    <td className="p-3 font-black text-[#D8FE41]">
+                    <td className="p-3 text-slate-600">{dept.totalStaff}</td>
+                    <td className="p-3 font-bold text-blue-700">
                       {dept.readinessScore}%
                     </td>
                     {dept.scores.map((s, idx) => (
                       <td key={idx} className="p-3">
                         <div
-                          className={`p-2 border text-center font-bold text-xs ${
+                          className={`p-2 rounded-lg border text-center font-semibold text-xs ${
                             s.gapSeverity === 'Critical'
-                              ? 'bg-rose-950/40 border-rose-800/60 text-rose-300'
+                              ? 'bg-rose-50 border-rose-200 text-rose-800'
                               : s.gapSeverity === 'Moderate'
-                              ? 'bg-amber-950/40 border-amber-800/60 text-amber-300'
-                              : 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
+                              ? 'bg-amber-50 border-amber-200 text-amber-800'
+                              : 'bg-emerald-50 border-emerald-200 text-emerald-800'
                           }`}
                         >
                           <span>{s.score}%</span>
-                          <span className="block text-[9px] font-normal opacity-80">
+                          <span className="block text-[10px] font-normal opacity-80 mt-0.5">
                             {s.staffAffected} at risk
                           </span>
                         </div>
@@ -434,14 +449,14 @@ export const AdminDashboardView: React.FC = () => {
 
       {/* Tab 3: Predictive Skill Demand Forecast */}
       {activeTab === 'predictive' && (
-        <div className="bg-[#121212] border border-[#222222] p-6 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#222222] pb-4 gap-3">
+        <div className="bg-white border border-slate-200 rounded-xl shadow-xs p-6 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-3">
             <div>
-              <h2 className="text-sm font-black font-mono uppercase tracking-widest text-[#D8FE41] flex items-center gap-2">
-                <BrainCircuit className="w-4 h-4 text-[#D8FE41]" />
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <BrainCircuit className="w-4 h-4 text-blue-600" />
                 <span>AI Predictive Skill Demand (2026 - 2028 Horizon)</span>
               </h2>
-              <p className="text-xs font-mono text-[#888888] mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5 font-normal">
                 Machine learning forecast based on new statutory mandates, UN statistical guidelines, and census modernisation.
               </p>
             </div>
@@ -449,41 +464,41 @@ export const AdminDashboardView: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {predictiveSkills.map((item) => (
-              <div key={item.skill} className="p-5 bg-[#151515] border border-[#262626] space-y-3">
+              <div key={item.skill} className="p-5 bg-slate-50/70 border border-slate-200 rounded-xl space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <span
-                      className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 border ${
+                      className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border ${
                         item.urgency === 'High'
-                          ? 'border-rose-800 text-rose-300 bg-rose-950/30'
-                          : 'border-amber-800 text-amber-300 bg-amber-950/30'
+                          ? 'border-rose-200 text-rose-700 bg-rose-50'
+                          : 'border-amber-200 text-amber-800 bg-amber-50'
                       }`}
                     >
                       {item.urgency} Urgency
                     </span>
-                    <h3 className="text-sm font-mono font-bold text-white mt-1.5">
+                    <h3 className="text-sm font-bold text-slate-900 mt-1.5">
                       {item.skill}
                     </h3>
                   </div>
 
-                  <div className="text-right font-mono">
-                    <span className="text-xl font-black text-[#D8FE41]">
+                  <div className="text-right">
+                    <span className="text-xl font-bold text-blue-700">
                       +{item.projectedGrowth}%
                     </span>
-                    <p className="text-[10px] text-[#888888] uppercase">Growth Demand</p>
+                    <p className="text-[10px] text-slate-500 uppercase font-medium">Growth Demand</p>
                   </div>
                 </div>
 
-                <div className="p-3 bg-[#0d0d0d] border border-[#202020] text-xs font-mono text-[#aaaaaa]">
-                  <p className="text-[#888888] uppercase text-[10px] font-bold">Policy & Methodological Drivers:</p>
-                  <p className="text-white mt-0.5 leading-relaxed">{item.drivers}</p>
+                <div className="p-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-600">
+                  <p className="text-slate-500 uppercase text-[10px] font-bold">Policy & Methodological Drivers:</p>
+                  <p className="text-slate-800 mt-0.5 leading-relaxed font-medium">{item.drivers}</p>
                 </div>
 
-                <div className="flex items-center justify-between text-xs font-mono text-[#888888]">
-                  <span>Target Officers to Certify: <strong className="text-white">{item.targetOfficers}</strong></span>
+                <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+                  <span>Target Officers to Certify: <strong className="text-slate-900 font-semibold">{item.targetOfficers}</strong></span>
                   <button
                     onClick={() => setActiveTab('planner')}
-                    className="text-[#D8FE41] hover:underline font-bold text-[11px] uppercase"
+                    className="text-blue-700 hover:underline font-semibold text-xs"
                   >
                     Generate NSSTA Cohort →
                   </button>
@@ -496,27 +511,33 @@ export const AdminDashboardView: React.FC = () => {
 
       {/* Tab 4: AI Training Planner */}
       {activeTab === 'planner' && (
-        <div className="bg-[#121212] border border-[#222222] p-6 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#222222] pb-4 gap-3">
+        <div className="bg-white border border-slate-200 rounded-xl shadow-xs p-6 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-3">
             <div>
-              <h2 className="text-sm font-black font-mono uppercase tracking-widest text-[#D8FE41] flex items-center gap-2">
-                <CalendarDays className="w-4 h-4 text-[#D8FE41]" />
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <CalendarDays className="w-4 h-4 text-blue-600" />
                 <span>AI Automated Training Cohort Planner</span>
               </h2>
-              <p className="text-xs font-mono text-[#888888] mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5 font-normal">
                 Automatically bundle officers with matching competency deficits into targeted NSSTA workshops and iGOT mandatory tracks.
               </p>
             </div>
 
             <button
-              onClick={() => alert('New training cohort created and scheduled on NSSTA Training Portal.')}
-              className="px-4 py-2 bg-[#D8FE41] hover:bg-[#c4eb34] text-black font-mono text-xs font-black uppercase tracking-wider shadow-[0_0_12px_rgba(216,254,65,0.3)]"
+              onClick={() => {
+                addNotification({
+                  title: 'Cohort Created',
+                  message: 'New training cohort scheduled on NSSTA Training Portal.',
+                  type: 'success',
+                });
+              }}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
             >
               + Create New NSSTA Cohort
             </button>
           </div>
 
-          <div className="space-y-4 font-mono">
+          <div className="space-y-4">
             {[
               {
                 title: 'DPDP Act 2023 & Anonymization Workshop for Field Staff',
@@ -543,30 +564,42 @@ export const AdminDashboardView: React.FC = () => {
                 status: 'Draft Proposal',
               },
             ].map((cohort, cIdx) => (
-              <div key={cIdx} className="p-4 bg-[#151515] border border-[#252525] flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div key={cIdx} className="p-4 bg-slate-50/70 border border-slate-200 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 bg-[#D8FE41]/10 border border-[#D8FE41]/40 text-[#D8FE41] text-[10px] font-bold uppercase">
+                    <span className="px-2 py-0.5 bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-semibold rounded">
                       {cohort.status}
                     </span>
-                    <span className="text-xs text-[#888888]">{cohort.targetDivision}</span>
+                    <span className="text-xs text-slate-500 font-medium">{cohort.targetDivision}</span>
                   </div>
-                  <h3 className="text-sm font-bold text-white">{cohort.title}</h3>
-                  <p className="text-[11px] text-[#888888]">
+                  <h3 className="text-sm font-bold text-slate-900">{cohort.title}</h3>
+                  <p className="text-xs text-slate-600 font-normal">
                     {cohort.cadreCount} Officers Assigned • {cohort.dates} • {cohort.format}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
                   <button
-                    onClick={() => alert(`Reviewing roster for ${cohort.title}`)}
-                    className="px-3 py-1.5 bg-[#202020] hover:bg-[#303030] text-white text-xs font-bold uppercase border border-[#333333]"
+                    onClick={() => {
+                      addNotification({
+                        title: 'Cohort Roster Loaded',
+                        message: `Reviewing roster for ${cohort.title}`,
+                        type: 'info',
+                      });
+                    }}
+                    className="px-3.5 py-1.5 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 transition-colors"
                   >
                     View Roster
                   </button>
                   <button
-                    onClick={() => alert(`Broadcasted notifications to ${cohort.cadreCount} officers.`)}
-                    className="px-3 py-1.5 bg-[#D8FE41] hover:bg-[#c4eb34] text-black text-xs font-black uppercase"
+                    onClick={() => {
+                      addNotification({
+                        title: 'Cadre Notification Dispatched',
+                        message: `Dispatched SMS & iGOT notifications to ${cohort.cadreCount} officers.`,
+                        type: 'success',
+                      });
+                    }}
+                    className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
                   >
                     Notify Cadre
                   </button>
@@ -579,3 +612,4 @@ export const AdminDashboardView: React.FC = () => {
     </div>
   );
 };
+

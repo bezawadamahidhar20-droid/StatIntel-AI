@@ -2,43 +2,46 @@
 
 @layer base {
   body {
-    font-family: 'Space Grotesk', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #080808;
-    color: #ffffff;
+    font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f8fafc;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   code, kbd, samp, pre, .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
   }
 }
 
-/* Custom Bold Typography theme scrollbar */
+/* Custom Clean Government theme scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #080808;
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #262626;
+  background: #cbd5e1;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #D8FE41;
+  background: #94a3b8;
 }
 
-/* Bold typography utilities */
+/* Typography & Brand utilities */
 .font-display {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
 }
-.accent-lime {
-  color: #D8FE41;
+.text-gov-navy {
+  color: #1e3a8a;
 }
-.bg-lime-accent {
-  background-color: #D8FE41;
+.bg-gov-navy {
+  background-color: #1e3a8a;
 }
-.border-lime-accent {
-  border-color: #D8FE41;
+.border-gov-subtle {
+  border-color: #e2e8f0;
 }
+
 

@@ -30,8 +30,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   value,
   subtitle,
   icon: Icon,
-  iconColor = 'text-[#D8FE41]',
-  iconBg = 'bg-[#181818] border border-[#2a2a2a]',
+  iconColor = 'text-blue-700',
+  iconBg = 'bg-blue-50 border border-blue-100',
   trend,
   progress,
   onClick,
@@ -41,27 +41,27 @@ export const MetricCard: React.FC<MetricCardProps> = ({
     <div
       id={id}
       onClick={onClick}
-      className={`relative p-5 border border-[#222222] bg-[#121212] font-mono transition-all duration-200 ${
-        onClick ? 'cursor-pointer hover:border-[#D8FE41]/60 hover:shadow-[0_0_15px_rgba(216,254,65,0.12)]' : ''
+      className={`relative p-5 border border-slate-200 bg-white rounded-xl shadow-xs transition-all duration-200 ${
+        onClick ? 'cursor-pointer hover:border-blue-300 hover:shadow-md' : ''
       } ${className}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
-          <p className="text-[10px] font-bold text-[#777777] tracking-wider uppercase">
+          <p className="text-xs font-semibold text-slate-500 tracking-wide uppercase">
             {title}
           </p>
           <div className="flex items-baseline gap-2">
-            <h3 className="text-2xl font-black tracking-tight text-white font-display">
+            <h3 className="text-2xl font-bold tracking-tight text-slate-900">
               {value}
             </h3>
             {trend && (
               <span
-                className={`inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-bold uppercase ${
+                className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full border ${
                   trend.isWarning
-                    ? 'bg-amber-950/60 text-amber-300 border border-amber-800'
+                    ? 'bg-amber-50 text-amber-800 border-amber-200'
                     : trend.isPositive
-                    ? 'bg-[#D8FE41]/10 text-[#D8FE41] border border-[#D8FE41]/30'
-                    : 'bg-[#181818] text-[#888888] border border-[#262626]'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : 'bg-slate-100 text-slate-700 border-slate-200'
                 }`}
               >
                 {trend.value}
@@ -69,29 +69,29 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             )}
           </div>
           {subtitle && (
-            <p className="text-[11px] text-[#888888] line-clamp-1 pt-0.5">
+            <p className="text-xs text-slate-500 line-clamp-1 pt-0.5">
               {subtitle}
             </p>
           )}
         </div>
 
-        <div className={`p-2.5 shrink-0 ${iconBg} ${iconColor}`}>
+        <div className={`p-2.5 rounded-xl shrink-0 ${iconBg} ${iconColor}`}>
           <Icon className="w-5 h-5" />
         </div>
       </div>
 
       {progress && (
-        <div className="mt-4 pt-2.5 border-t border-[#1e1e1e]">
-          <div className="flex items-center justify-between text-[10px] uppercase font-bold text-[#777777] mb-1">
-            <span>INDEX STATUS</span>
-            <span className="text-[#D8FE41]">
+        <div className="mt-4 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-between text-xs font-medium text-slate-500 mb-1.5">
+            <span>Index Status</span>
+            <span className="font-semibold text-blue-700">
               {progress.current}%
             </span>
           </div>
-          <div className="w-full h-1.5 bg-[#202020] overflow-hidden">
+          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
             <div
-              className={`h-full transition-all duration-500 ${
-                progress.color || 'bg-[#D8FE41]'
+              className={`h-full rounded-full transition-all duration-500 ${
+                progress.color || 'bg-blue-600'
               }`}
               style={{ width: `${Math.min(100, Math.max(0, progress.current))}%` }}
             />
@@ -101,3 +101,4 @@ export const MetricCard: React.FC<MetricCardProps> = ({
     </div>
   );
 };
+
