@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useTransition } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { AppHeader } from './components/layout/AppHeader';
 import { AppSidebar } from './components/layout/AppSidebar';
@@ -22,6 +22,13 @@ import { QuizGeneratorView } from './views/QuizGeneratorView';
 import { AssessmentView } from './views/AssessmentView';
 import { AssessmentResultView } from './views/AssessmentResultView';
 import { AdminDashboardView } from './views/AdminDashboardView';
+import type { AppView } from './context/AppContext';
+
+// ─── Transition phase machine ─────────────────────────────────────────────────
+// 'idle'      → nothing happening
+// 'covering'  → opaque cover is painted; waiting for next frame to swap view
+// 'switching' → new view is mounted under the cover; about to lift cover
+type TransitionPhase = 'idle' | 'covering' | 'switching';
 
 const MainLayout: React.FC = () => {
   const {
@@ -36,94 +43,167 @@ const MainLayout: React.FC = () => {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Sync activeView with window.location.hash
-  React.useEffect(() => {
+  // Issue #3 fix: useTransition marks heavy view-renders as non-urgent
+  // so the browser keeps the UI responsive during the swap.
+  const [, startTransition] = useTransition();
+
+  // ── Two-phase transition (Issue #2 fix) ───────────────────────────────────
+  // `renderedView` is what <main> actually shows.
+  // It only updates AFTER the cover has been PAINTED by the browser.
+  const [renderedView, setRenderedView] = useState<AppView>(activeView);
+  const [phase, setPhase] = useState<TransitionPhase>('idle');
+  const pendingView = useRef<AppView>(activeView);
+  const rafRef = useRef<number | null>(null);
+
+  const clearRaf = () => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  };
+
+  // Phase 1 trigger: a new activeView arrived → start covering
+  useEffect(() => {
+    if (activeView === renderedView) return; // nothing to do
+    pendingView.current = activeView;
+    setPhase('covering'); // paint the cover this frame
+  }, [activeView]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Phase 2: cover is now painted → swap the view in a rAF so the
+  // browser has definitely committed the cover pixels before we unmount
+  // the old component.
+  useEffect(() => {
+    if (phase !== 'covering') return;
+    clearRaf();
+    rafRef.current = requestAnimationFrame(() => {
+      // Wrap the view swap in startTransition so React 18 doesn't block
+      // higher-priority events (scroll, input) during heavy re-renders.
+      startTransition(() => {
+        setRenderedView(pendingView.current);
+        setPhase('switching');
+      });
+    });
+    return clearRaf;
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Phase 3: new view is mounted → lift the cover in the NEXT rAF so
+  // the browser has a chance to paint the new content before revealing it.
+  useEffect(() => {
+    if (phase !== 'switching') return;
+    clearRaf();
+    rafRef.current = requestAnimationFrame(() => {
+      setPhase('idle');
+    });
+    return clearRaf;
+  }, [phase]);
+
+  // ── Hash sync ──────────────────────────────────────────────────────────────
+  useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#/', '');
       const isAuth = isAuthenticated || localStorage.getItem('statintel_auth') === 'true';
       if (hash && hash !== activeView) {
         if (isAuth || hash === 'landing' || hash === 'login') {
-          navigate(hash as any);
+          navigate(hash as AppView);
         }
       }
     };
 
     window.addEventListener('hashchange', handleHashChange);
     const initialHash = window.location.hash.replace('#/', '');
-    if (initialHash && initialHash !== activeView) {
-      handleHashChange();
-    }
+    if (initialHash && initialHash !== activeView) handleHashChange();
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [activeView, navigate, isAuthenticated]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (window.location.hash !== `#/${activeView}`) {
       window.location.hash = `#/${activeView}`;
     }
   }, [activeView]);
 
-  // Determine which view to render
-  const renderActiveView = () => {
-    switch (activeView) {
-      case 'landing':
-        return <LandingView />;
-      case 'login':
-        return <LoginView />;
-      case 'dashboard':
-        return <LearnerDashboardView />;
-      case 'digital-twin':
-        return <CompetencyDigitalTwinView />;
-      case 'skill-gaps':
-        return <SkillGapView />;
-      case 'learning-path':
-        return <LearningPathView />;
-      case 'courses':
-        return <CoursesView />;
-      case 'course-detail':
-        return <CourseDetailView />;
-      case 'quiz-generator':
-        return <QuizGeneratorView />;
-      case 'assessment':
-        return <AssessmentView />;
-      case 'assessment-result':
-        return <AssessmentResultView />;
+  // ── View renderer ──────────────────────────────────────────────────────────
+  // Issue #5 fix: admin sub-views get unique keys so they remount when
+  // switching between admin tabs (preventing stale-data ghost).
+  const renderView = (view: AppView) => {
+    switch (view) {
+      case 'landing':             return <LandingView />;
+      case 'login':               return <LoginView />;
+      case 'dashboard':           return <LearnerDashboardView />;
+      case 'digital-twin':        return <CompetencyDigitalTwinView />;
+      case 'skill-gaps':          return <SkillGapView />;
+      case 'learning-path':       return <LearningPathView />;
+      case 'courses':             return <CoursesView />;
+      case 'course-detail':       return <CourseDetailView />;
+      case 'quiz-generator':      return <QuizGeneratorView />;
+      case 'assessment':          return <AssessmentView />;
+      case 'assessment-result':   return <AssessmentResultView />;
       case 'admin-dashboard':
       case 'admin-heatmap':
       case 'admin-training-effectiveness':
       case 'admin-predictive':
       case 'admin-training-planner':
-        return <AdminDashboardView />;
+        // Pass the specific sub-view as a key so AdminDashboardView remounts
+        // cleanly when switching between admin tabs.
+        return <AdminDashboardView key={view} />;
       default:
         return <LearnerDashboardView />;
     }
   };
 
-  // Views that have full-page hero layout or don't need persistent app sidebar
-  const isFullPageView = activeView === 'landing' || activeView === 'login';
+  const isFullPageView = renderedView === 'landing' || renderedView === 'login';
+  const showCover = phase === 'covering' || phase === 'switching';
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
-      {/* Persistent App Header with MoSPI Branding, Role Switcher & Notifications */}
+    <div className="h-full flex flex-col font-sans text-slate-900 bg-slate-50 selection:bg-blue-600 selection:text-white overflow-hidden">
+
+      {/* ── Transition cover (Issues #2 fix) ─────────────────────────────────
+          Painted at phase='covering', lifted at phase='idle'.
+          position:fixed + z-index:9999 guarantees it's above EVERYTHING
+          including headers, modals, and scroll artifacts.              */}
+      {showCover && (
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            backgroundColor: '#f8fafc',
+            pointerEvents: 'none',
+          }}
+        />
+      )}
+
+      {/* Persistent App Header */}
       <AppHeader onMobileMenuToggle={() => setMobileMenuOpen(true)} />
 
       {/* SIH Workflow Stepper Navigator */}
       <FlowStepper />
 
       {isFullPageView ? (
-        <main className="flex-1 w-full bg-slate-50">
-          {renderActiveView()}
+        <main
+          key={renderedView}
+          className="flex-1 w-full overflow-y-auto bg-slate-50 view-enter"
+          style={{ minHeight: 0 }}
+        >
+          {renderView(renderedView)}
         </main>
       ) : (
-        <div className="flex-1 flex max-w-[1600px] w-full mx-auto">
+        <div className="flex-1 flex overflow-hidden" style={{ minHeight: 0 }}>
           {/* Persistent Sidebar */}
           <AppSidebar
             mobileOpen={mobileMenuOpen}
             onMobileClose={() => setMobileMenuOpen(false)}
           />
 
-          {/* Main Content Area */}
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-slate-50 min-w-0">
-            {renderActiveView()}
+          {/* Main Content Area — scrolls internally, window never scrolls */}
+          <main
+            key={renderedView}
+            className="flex-1 overflow-y-auto bg-slate-50 min-w-0 view-enter"
+            style={{ minHeight: 0 }}
+          >
+            <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
+              {renderView(renderedView)}
+            </div>
           </main>
         </div>
       )}

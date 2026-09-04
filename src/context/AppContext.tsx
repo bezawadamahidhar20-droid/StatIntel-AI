@@ -49,7 +49,7 @@ export interface AppNotification {
   title: string;
   message: string;
   time: string;
-  type: 'recommendation' | 'assessment' | 'achievement' | 'alert';
+  type: 'recommendation' | 'assessment' | 'achievement' | 'alert' | 'info' | 'success';
   read: boolean;
   linkView?: AppView;
 }
@@ -120,6 +120,7 @@ interface AppContextType {
   submitAssessmentAttempt: (assessmentId: string, userAnswers: number[], timeSpentSeconds: number) => void;
   addNewGeneratedAssessment: (newAssessment: Assessment) => void;
   updateCourseProgress: (courseId: string, progress: number) => void;
+  addNotification: (notification: { title: string; message: string; type: AppNotification['type']; linkView?: AppView }) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -350,7 +351,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setActiveAssessmentId(params.assessmentId);
     }
     setActiveView(view);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll the window to top as a safety net (main resets naturally via key remount)
+    window.scrollTo(0, 0);
   };
 
   const switchRole = (role: UserRole) => {
@@ -385,6 +387,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const markAllNotificationsAsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
+
+  const addNotification = (notification: { title: string; message: string; type: AppNotification['type']; linkView?: AppView }) => {
+    setNotifications((prev) => [
+      {
+        id: `notif-${Date.now()}`,
+        title: notification.title,
+        message: notification.message,
+        time: 'Just now',
+        type: notification.type,
+        read: false,
+        linkView: notification.linkView,
+      },
+      ...prev,
+    ]);
   };
 
   const enrollCourse = (courseId: string) => {
@@ -655,6 +672,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         submitAssessmentAttempt,
         addNewGeneratedAssessment,
         updateCourseProgress,
+        addNotification,
       }}
     >
       {children}

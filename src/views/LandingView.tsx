@@ -39,7 +39,7 @@ export const LandingView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
+    <div className="bg-slate-50 text-slate-900 flex flex-col font-sans">
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-14 pb-20 border-b border-slate-200 bg-white">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/50 via-transparent to-transparent pointer-events-none" />

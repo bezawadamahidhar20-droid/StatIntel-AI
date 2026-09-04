@@ -198,7 +198,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   return (
     <>
       {/* Desktop Persistent Sidebar */}
-      <aside className="hidden lg:block w-64 shrink-0 h-[calc(100vh-4rem)] sticky top-16 z-30">
+      <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 h-full z-30 overflow-y-auto">
         {sidebarContent}
       </aside>
 
