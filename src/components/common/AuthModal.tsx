@@ -43,7 +43,7 @@ export const AuthModal: React.FC = () => {
   const [adminPasscode, setAdminPasscode] = useState('');
   const [adminError, setAdminError] = useState('');
 
-  if (!isAuthModalOpen) return null;
+  if (!isAuthModalOpen || isAuthenticated) return null;
 
   const handleDemoSubmit = (e: React.FormEvent) => {
     e.preventDefault();

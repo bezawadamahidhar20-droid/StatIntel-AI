@@ -15,6 +15,7 @@ import { useApp } from '../context/AppContext';
 import { apiClient } from '../services/apiClient';
 import { LearningPathStep } from '../types';
 import { learningPathSteps } from '../data/mockData';
+import { StudentSkillProfiler } from '../components/common/StudentSkillProfiler';
 
 export const LearningPathView: React.FC = () => {
   const {
@@ -98,7 +99,19 @@ export const LearningPathView: React.FC = () => {
         </div>
       </div>
 
+      {/* Interactive Student Skill Profiler & Career Roadmap Studio */}
+      <StudentSkillProfiler />
+
       {/* Path Roadmap Container */}
+      <div className="pt-6 border-t border-slate-200">
+        <h3 className="text-base font-bold text-slate-900 mb-1">
+          Detailed Official Curricula Pathway
+        </h3>
+        <p className="text-xs text-slate-500 mb-6">
+          Sequential micro-credentials from iGOT Karmayogi Bharat and National Statistical Academy (NSSTA).
+        </p>
+      </div>
+
       <div className="relative pl-6 sm:pl-10 space-y-8 before:absolute before:left-3 sm:before:left-5 before:top-4 before:bottom-4 before:w-0.5 before:bg-linear-to-b before:from-blue-600 before:via-indigo-500 before:to-slate-300 dark:before:to-slate-700">
         {pathSteps.map((step) => {
           const linkedCourse = courses.find((c) => c.id === step.courseId);

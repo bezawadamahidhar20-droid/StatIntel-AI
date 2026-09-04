@@ -30,17 +30,21 @@ const MainLayout: React.FC = () => {
     setSelectedCompetency,
     whyRecommendedCourse,
     setWhyRecommendedCourse,
+    navigate,
+    isAuthenticated,
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { navigate } = useApp();
 
-  // Sync activeView with window.location.hash for deep-linking during SIH evaluation
+  // Sync activeView with window.location.hash
   React.useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#/', '');
+      const isAuth = isAuthenticated || localStorage.getItem('statintel_auth') === 'true';
       if (hash && hash !== activeView) {
-        navigate(hash as any);
+        if (isAuth || hash === 'landing' || hash === 'login') {
+          navigate(hash as any);
+        }
       }
     };
 
@@ -50,7 +54,7 @@ const MainLayout: React.FC = () => {
       handleHashChange();
     }
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  }, [activeView, navigate, isAuthenticated]);
 
   React.useEffect(() => {
     if (window.location.hash !== `#/${activeView}`) {

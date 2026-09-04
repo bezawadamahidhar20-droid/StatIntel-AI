@@ -130,10 +130,10 @@ export const LearnerDashboardView: React.FC = () => {
           </button>
           <button
             onClick={() => navigate('learning-path')}
-            className="px-3.5 py-2 border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-2 border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
           >
-            <Target className="w-3.5 h-3.5 text-blue-600" />
-            <span>Adaptive Path</span>
+            <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Skills & Book Roadmap</span>
           </button>
         </div>
       </div>

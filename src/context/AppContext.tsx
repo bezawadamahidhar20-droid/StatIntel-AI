@@ -96,7 +96,13 @@ interface AppContextType {
   isAuthModalOpen: boolean;
   setIsAuthModalOpen: (open: boolean) => void;
   isAdminAuthModalOpen: boolean;
-  setIsAdminAuthModalOpen: (open: boolean) => void;
+  userSkills: string[];
+  setUserSkills: (skills: string[]) => void;
+  targetCareerRole: string;
+  setTargetCareerRole: (role: string) => void;
+  geminiApiKey: string;
+  setGeminiApiKey: (key: string) => void;
+
   loginAsStudent: (data: {
     name: string;
     college: string;
@@ -104,6 +110,7 @@ interface AppContextType {
     year: string;
     targetRole: string;
     email?: string;
+    knownSkills?: string[];
   }) => void;
   loginAsAdmin: (passcode: string) => boolean;
   logout: () => void;
@@ -118,20 +125,20 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem('statintel_auth') === 'true';
+    return localStorage.getItem('statintel_auth') === 'true';
   });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(() => {
-    return sessionStorage.getItem('statintel_auth') !== 'true';
+    return localStorage.getItem('statintel_auth') !== 'true';
   });
   const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState<boolean>(false);
 
   const [userRole, setUserRole] = useState<UserRole>(() => {
-    const savedRole = sessionStorage.getItem('statintel_role') as UserRole;
+    const savedRole = localStorage.getItem('statintel_role') as UserRole;
     return savedRole === 'ADMIN' ? 'ADMIN' : 'LEARNER';
   });
 
   const [currentUser, setCurrentUser] = useState<User>(() => {
-    const savedUser = sessionStorage.getItem('statintel_user');
+    const savedUser = localStorage.getItem('statintel_user');
     if (savedUser) {
       try {
         return JSON.parse(savedUser);
@@ -139,12 +146,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // ignore
       }
     }
-    const savedRole = sessionStorage.getItem('statintel_role');
+    const savedRole = localStorage.getItem('statintel_role');
     return savedRole === 'ADMIN' ? adminUser : initialUser;
   });
 
+  const [userSkills, setUserSkills] = useState<string[]>(() => {
+    const saved = localStorage.getItem('statintel_skills');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // ignore
+      }
+    }
+    return ['Python Basics', 'NumPy Arrays', 'Matplotlib Visualizations', 'Basic Probability'];
+  });
+
+  const [targetCareerRole, setTargetCareerRole] = useState<string>(() => {
+    return localStorage.getItem('statintel_target_role') || 'Data Scientist & Statistical Analyst';
+  });
+
+  const [geminiApiKey, setGeminiApiKey] = useState<string>(() => {
+    return localStorage.getItem('gemini_api_key') || '';
+  });
+
   const [activeView, setActiveView] = useState<AppView>(() => {
-    const isAuth = sessionStorage.getItem('statintel_auth') === 'true';
+    const isAuth = localStorage.getItem('statintel_auth') === 'true';
     if (!isAuth) return 'landing';
     return 'dashboard';
   });
@@ -227,6 +254,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     year: string;
     targetRole: string;
     email?: string;
+    knownSkills?: string[];
   }) => {
     const studentUser: User = {
       ...initialUser,
@@ -248,9 +276,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(studentUser);
     setUserRole('LEARNER');
     setIsAuthenticated(true);
-    sessionStorage.setItem('statintel_auth', 'true');
-    sessionStorage.setItem('statintel_user', JSON.stringify(studentUser));
-    sessionStorage.setItem('statintel_role', 'LEARNER');
+    if (data.knownSkills && data.knownSkills.length > 0) {
+      setUserSkills(data.knownSkills);
+      localStorage.setItem('statintel_skills', JSON.stringify(data.knownSkills));
+    }
+    if (data.targetRole) {
+      setTargetCareerRole(data.targetRole);
+      localStorage.setItem('statintel_target_role', data.targetRole);
+    }
+    localStorage.setItem('statintel_auth', 'true');
+    localStorage.setItem('statintel_user', JSON.stringify(studentUser));
+    localStorage.setItem('statintel_role', 'LEARNER');
     setIsAuthModalOpen(false);
     setActiveView('dashboard');
   };
@@ -260,9 +296,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentUser(adminUser);
       setUserRole('ADMIN');
       setIsAuthenticated(true);
-      sessionStorage.setItem('statintel_auth', 'true');
-      sessionStorage.setItem('statintel_user', JSON.stringify(adminUser));
-      sessionStorage.setItem('statintel_role', 'ADMIN');
+      localStorage.setItem('statintel_auth', 'true');
+      localStorage.setItem('statintel_user', JSON.stringify(adminUser));
+      localStorage.setItem('statintel_role', 'ADMIN');
       setIsAdminAuthModalOpen(false);
       setIsAuthModalOpen(false);
       setActiveView('admin-dashboard');
@@ -273,9 +309,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logout = () => {
     setIsAuthenticated(false);
-    sessionStorage.removeItem('statintel_auth');
-    sessionStorage.removeItem('statintel_user');
-    sessionStorage.removeItem('statintel_role');
+    localStorage.removeItem('statintel_auth');
+    localStorage.removeItem('statintel_user');
+    localStorage.removeItem('statintel_role');
     setUserRole('LEARNER');
     setCurrentUser(initialUser);
     setActiveView('landing');
@@ -283,8 +319,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const navigate = (view: AppView, params?: { courseId?: string; assessmentId?: string }) => {
+    const isAuth = isAuthenticated || localStorage.getItem('statintel_auth') === 'true';
     // If not authenticated and attempting to view internal dashboard routes
-    if (!isAuthenticated && view !== 'landing' && view !== 'login') {
+    if (!isAuth && view !== 'landing' && view !== 'login') {
       setIsAuthModalOpen(true);
       return;
     }
@@ -593,6 +630,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsAuthModalOpen,
         isAdminAuthModalOpen,
         setIsAdminAuthModalOpen,
+        userSkills,
+        setUserSkills,
+        targetCareerRole,
+        setTargetCareerRole,
+        geminiApiKey,
+        setGeminiApiKey,
         loginAsStudent,
         loginAsAdmin,
         logout,
