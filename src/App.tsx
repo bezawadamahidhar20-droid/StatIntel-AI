@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useTransition } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { AppHeader } from './components/layout/AppHeader';
 import { AppSidebar } from './components/layout/AppSidebar';
@@ -24,12 +24,6 @@ import { AssessmentResultView } from './views/AssessmentResultView';
 import { AdminDashboardView } from './views/AdminDashboardView';
 import type { AppView } from './context/AppContext';
 
-// ─── Transition phase machine ─────────────────────────────────────────────────
-// 'idle'      → nothing happening
-// 'covering'  → opaque cover is painted; waiting for next frame to swap view
-// 'switching' → new view is mounted under the cover; about to lift cover
-type TransitionPhase = 'idle' | 'covering' | 'switching';
-
 const MainLayout: React.FC = () => {
   const {
     activeView,
@@ -42,60 +36,6 @@ const MainLayout: React.FC = () => {
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Issue #3 fix: useTransition marks heavy view-renders as non-urgent
-  // so the browser keeps the UI responsive during the swap.
-  const [, startTransition] = useTransition();
-
-  // ── Two-phase transition (Issue #2 fix) ───────────────────────────────────
-  // `renderedView` is what <main> actually shows.
-  // It only updates AFTER the cover has been PAINTED by the browser.
-  const [renderedView, setRenderedView] = useState<AppView>(activeView);
-  const [phase, setPhase] = useState<TransitionPhase>('idle');
-  const pendingView = useRef<AppView>(activeView);
-  const rafRef = useRef<number | null>(null);
-
-  const clearRaf = () => {
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
-  };
-
-  // Phase 1 trigger: a new activeView arrived → start covering
-  useEffect(() => {
-    if (activeView === renderedView) return; // nothing to do
-    pendingView.current = activeView;
-    setPhase('covering'); // paint the cover this frame
-  }, [activeView]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Phase 2: cover is now painted → swap the view in a rAF so the
-  // browser has definitely committed the cover pixels before we unmount
-  // the old component.
-  useEffect(() => {
-    if (phase !== 'covering') return;
-    clearRaf();
-    rafRef.current = requestAnimationFrame(() => {
-      // Wrap the view swap in startTransition so React 18 doesn't block
-      // higher-priority events (scroll, input) during heavy re-renders.
-      startTransition(() => {
-        setRenderedView(pendingView.current);
-        setPhase('switching');
-      });
-    });
-    return clearRaf;
-  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Phase 3: new view is mounted → lift the cover in the NEXT rAF so
-  // the browser has a chance to paint the new content before revealing it.
-  useEffect(() => {
-    if (phase !== 'switching') return;
-    clearRaf();
-    rafRef.current = requestAnimationFrame(() => {
-      setPhase('idle');
-    });
-    return clearRaf;
-  }, [phase]);
 
   // ── Hash sync ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -122,8 +62,6 @@ const MainLayout: React.FC = () => {
   }, [activeView]);
 
   // ── View renderer ──────────────────────────────────────────────────────────
-  // Issue #5 fix: admin sub-views get unique keys so they remount when
-  // switching between admin tabs (preventing stale-data ghost).
   const renderView = (view: AppView) => {
     switch (view) {
       case 'landing':             return <LandingView />;
@@ -142,37 +80,16 @@ const MainLayout: React.FC = () => {
       case 'admin-training-effectiveness':
       case 'admin-predictive':
       case 'admin-training-planner':
-        // Pass the specific sub-view as a key so AdminDashboardView remounts
-        // cleanly when switching between admin tabs.
         return <AdminDashboardView key={view} />;
       default:
         return <LearnerDashboardView />;
     }
   };
 
-  const isFullPageView = renderedView === 'landing' || renderedView === 'login';
-  const showCover = phase === 'covering' || phase === 'switching';
+  const isFullPageView = activeView === 'landing' || activeView === 'login';
 
   return (
     <div className="h-full flex flex-col font-sans text-slate-900 bg-slate-50 selection:bg-blue-600 selection:text-white overflow-hidden">
-
-      {/* ── Transition cover (Issues #2 fix) ─────────────────────────────────
-          Painted at phase='covering', lifted at phase='idle'.
-          position:fixed + z-index:9999 guarantees it's above EVERYTHING
-          including headers, modals, and scroll artifacts.              */}
-      {showCover && (
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 9999,
-            backgroundColor: '#f8fafc',
-            pointerEvents: 'none',
-          }}
-        />
-      )}
-
       {/* Persistent App Header */}
       <AppHeader onMobileMenuToggle={() => setMobileMenuOpen(true)} />
 
@@ -181,11 +98,11 @@ const MainLayout: React.FC = () => {
 
       {isFullPageView ? (
         <main
-          key={renderedView}
+          key={activeView}
           className="flex-1 w-full overflow-y-auto bg-slate-50 view-enter"
           style={{ minHeight: 0 }}
         >
-          {renderView(renderedView)}
+          {renderView(activeView)}
         </main>
       ) : (
         <div className="flex-1 flex overflow-hidden" style={{ minHeight: 0 }}>
@@ -197,12 +114,12 @@ const MainLayout: React.FC = () => {
 
           {/* Main Content Area — scrolls internally, window never scrolls */}
           <main
-            key={renderedView}
+            key={activeView}
             className="flex-1 overflow-y-auto bg-slate-50 min-w-0 view-enter"
             style={{ minHeight: 0 }}
           >
             <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
-              {renderView(renderedView)}
+              {renderView(activeView)}
             </div>
           </main>
         </div>
@@ -239,3 +156,4 @@ export default function App() {
     </AppProvider>
   );
 }
+
