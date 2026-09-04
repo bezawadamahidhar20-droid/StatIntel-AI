@@ -16,6 +16,7 @@ import {
   Layers,
   ChevronRight,
   Download,
+  Zap,
 } from 'lucide-react';
 import { APP_CONFIG } from '../config';
 import { useLanguage } from '../services/i18n';
@@ -30,11 +31,14 @@ import DataUpload from '../components/analytics/DataUpload';
 import ExecutiveReportGenerator from '../components/analytics/ExecutiveReportGenerator';
 import AlertThresholdSettings from '../components/analytics/AlertThresholdSettings';
 import AuditTrailViewer from '../components/analytics/AuditTrailViewer';
+import CostSavingsCalculator from '../components/analytics/CostSavingsCalculator';
+import ScalabilityMetrics from '../components/analytics/ScalabilityMetrics';
+import ModelMetrics from '../components/analytics/ModelMetrics';
 import { CensusDistrictData } from '../services/api/types';
 
 export const StatisticalIntelligenceDashboard: React.FC = () => {
   const { t } = useLanguage();
-  const [activeTab, setActiveTab] = useState<'overview' | 'map' | 'forecasting' | 'anomalies' | 'comparison' | 'reports' | 'upload' | 'audit'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'map' | 'forecasting' | 'anomalies' | 'comparison' | 'reports' | 'upload' | 'audit' | 'metrics'>('overview');
   const [selectedDistrict, setSelectedDistrict] = useState<CensusDistrictData | null>(null);
 
   return (
@@ -77,6 +81,7 @@ export const StatisticalIntelligenceDashboard: React.FC = () => {
             { id: 'comparison', label: 'Comparison Mode', icon: ArrowLeftRight },
             { id: 'reports', label: t('reports'), icon: FileSpreadsheet },
             { id: 'upload', label: t('dataUpload'), icon: UploadCloud },
+            { id: 'metrics', label: 'Fiscal ROI & Model Registry', icon: Zap },
             { id: 'audit', label: 'Audit Trail', icon: Database },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -157,6 +162,14 @@ export const StatisticalIntelligenceDashboard: React.FC = () => {
         {activeTab === 'upload' && (
           <div className="space-y-6">
             <DataUpload />
+          </div>
+        )}
+
+        {activeTab === 'metrics' && (
+          <div className="space-y-6">
+            <CostSavingsCalculator />
+            <ScalabilityMetrics />
+            <ModelMetrics />
           </div>
         )}
 
