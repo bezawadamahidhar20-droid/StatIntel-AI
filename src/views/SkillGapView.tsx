@@ -14,7 +14,7 @@ import { useApp } from '../context/AppContext';
 import { SkillGapItem } from '../types';
 
 export const SkillGapView: React.FC = () => {
-  const { skillGaps, navigate, courses, setWhyRecommendedCourse } = useApp();
+  const { skillGaps, navigate, courses, setWhyRecommendedCourse, targetCareerRole } = useApp();
   const [severityFilter, setSeverityFilter] = useState<string>('All');
   const [domainFilter, setDomainFilter] = useState<string>('All');
 
@@ -38,7 +38,7 @@ export const SkillGapView: React.FC = () => {
             </h1>
           </div>
           <p className="text-xs text-slate-500 font-medium">
-            Automated divergence diagnosis between your verified skills and target career requirements in Data Science, ML, and Statistics.
+            Automated divergence diagnosis between your verified skills and target requirements for <strong className="text-slate-800">{targetCareerRole || 'Frontend Developer'}</strong>.
           </p>
         </div>
 

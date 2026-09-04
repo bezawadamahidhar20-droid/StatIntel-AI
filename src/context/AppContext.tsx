@@ -21,6 +21,7 @@ import {
   initialCertificates,
 } from '../data/mockData';
 import { isTechnicalSoftwareSkill } from '../services/groqService';
+import { generateCompetenciesAndGapsForRole } from '../services/geminiService';
 
 export type AppView =
   | 'landing'
@@ -198,8 +199,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
-  const [competencies, setCompetencies] = useState<Competency[]>(initialCompetencies);
-  const [skillGaps, setSkillGaps] = useState<SkillGapItem[]>(initialSkillGaps);
+  const [competencies, setCompetencies] = useState<Competency[]>(() => {
+    return generateCompetenciesAndGapsForRole(targetCareerRole, userSkills).competencies;
+  });
+  const [skillGaps, setSkillGaps] = useState<SkillGapItem[]>(() => {
+    return generateCompetenciesAndGapsForRole(targetCareerRole, userSkills).skillGaps;
+  });
   const [courses, setCourses] = useState<Course[]>(allCourses);
   const [assessments, setAssessments] = useState<Assessment[]>(initialAssessments);
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>(initialTimelineEvents);
@@ -269,6 +274,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsDarkMode((prev) => !prev);
   };
 
+  // Dynamically synchronize Competencies & Skill Gaps with student's chosen career role and selected skills
+  useEffect(() => {
+    if (userRole === 'LEARNER') {
+      const generated = generateCompetenciesAndGapsForRole(targetCareerRole, userSkills);
+      setCompetencies(generated.competencies);
+      setSkillGaps(generated.skillGaps);
+    }
+  }, [targetCareerRole, userSkills, userRole]);
+
   const loginAsStudent = (data: {
     name: string;
     college: string;
@@ -276,40 +290,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     year: string;
     targetRole: string;
     email?: string;
+    avatar?: string;
     knownSkills?: string[];
   }) => {
     const studentName = data.name?.trim() || (data.email ? data.email.split('@')[0] : 'Student Scholar');
     const studentSkills = (data.knownSkills || []).filter(isTechnicalSoftwareSkill);
-    const calculatedCompetency = studentSkills.length > 0 ? Math.min(95, studentSkills.length * 15) : 40;
+    const targetRole = data.targetRole || 'Frontend Developer';
+    const generated = generateCompetenciesAndGapsForRole(targetRole, studentSkills);
 
     const studentUser: User = {
       ...initialUser,
       id: `stu-${Date.now()}`,
       name: studentName,
-      designation: `${data.degree?.trim() || 'Data Science'} Scholar`,
+      designation: `${data.degree?.trim() || 'Software & Statistics'} Scholar`,
       department: `Department of Statistics & Analytics`,
       institution: data.college?.trim() || 'University / Institute',
       degree: data.degree?.trim() || 'Degree Program',
       academicYear: data.year || 'Undergraduate',
-      targetGoal: data.targetRole || 'Data Analyst',
+      targetGoal: targetRole,
       avatar: data.avatar || initialUser.avatar,
       cadre: `Student Roll #STU-${Math.floor(1000 + Math.random() * 9000)} • ${data.year || 'Student'}`,
       employeeId: `STU-${Math.floor(1000 + Math.random() * 9000)}`,
       email: data.email?.trim() || `${studentName.toLowerCase().replace(/\s+/g, '.')}@university.edu`,
       role: 'LEARNER',
-      overallCompetency: calculatedCompetency,
-      roleReadiness: calculatedCompetency + 5,
+      overallCompetency: generated.overallCompetency,
+      roleReadiness: generated.roleReadiness,
+      criticalGapsCount: generated.skillGaps.filter((g) => g.severity === 'Critical').length,
     };
     setCurrentUser(studentUser);
+    setCompetencies(generated.competencies);
+    setSkillGaps(generated.skillGaps);
     setUserRole('LEARNER');
     setIsAuthenticated(true);
     if (studentSkills.length > 0) {
       setUserSkills(studentSkills);
       localStorage.setItem('statintel_skills', JSON.stringify(studentSkills));
     }
-    if (data.targetRole) {
-      setTargetCareerRole(data.targetRole);
-      localStorage.setItem('statintel_target_role', data.targetRole);
+    if (targetRole) {
+      setTargetCareerRole(targetRole);
+      localStorage.setItem('statintel_target_role', targetRole);
     }
     localStorage.setItem('statintel_auth', 'true');
     localStorage.setItem('statintel_user', JSON.stringify(studentUser));
