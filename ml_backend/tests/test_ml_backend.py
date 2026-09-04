@@ -120,23 +120,90 @@ def test_socio_economic_classifier():
     assert high_perf["metrics"]["training_accuracy"] > 0.85
 
 
-# --- 6. IndicBERT NLP Tests ---
+# --- 6. IndicBERT Multilingual NLP & Structured Query Tests ---
 
-def test_indic_nlp_processor_english():
+def test_indic_nlp_processor_english_trend():
     nlp = IndicNLPProcessor()
-    res = nlp.parse_query("What is the latest inflation rate in Maharashtra?")
+    res = nlp.parse_query("Show literacy trend in Tamil Nadu")
     assert res["detected_language"] == "en"
-    assert res["intent"] == "inflation_query"
-    assert res["region_entity"] == "maharashtra"
-    assert res["confidence"] >= 0.85
+    assert res["prediction"] in ["trend", "growth"]
+    assert res["region_entity"] == "Tamil Nadu"
+    assert res["indicator"] == "literacy_rate"
+    assert "answer" in res
+    assert "structured_query" in res
+    assert res["structured_query"]["is_valid"] is True
 
 
-def test_indic_nlp_processor_hindi():
+def test_indic_nlp_processor_english_districts_ranking():
     nlp = IndicNLPProcessor()
-    res = nlp.parse_query("उत्तर प्रदेश में बेरोजगारी दर और साक्षरता क्या है?")
+    res = nlp.parse_query("Which districts have the highest literacy rate?")
+    assert res["detected_language"] == "en"
+    assert res["prediction"] in ["ranking", "top_k"]
+    assert res["indicator"] == "literacy_rate"
+    assert len(res["data_points"]) >= 3
+    assert "answer" in res
+
+
+def test_indic_nlp_processor_english_growth():
+    nlp = IndicNLPProcessor()
+    res = nlp.parse_query("What was the literacy growth in Tamil Nadu over the last 5 years?")
+    assert res["detected_language"] == "en"
+    assert res["prediction"] in ["growth", "trend"]
+    assert res["region_entity"] == "Tamil Nadu"
+    assert res["indicator"] == "literacy_rate"
+    assert "80.09%" in res["answer"] or "80.09" in res["answer"]
+
+
+def test_indic_nlp_processor_hindi_trend():
+    nlp = IndicNLPProcessor()
+    res = nlp.parse_query("तमिलनाडु में साक्षरता दर दिखाइए")
     assert res["detected_language"] == "hi"
-    assert res["intent"] in ["employment_query", "demographic_query"]
-    assert res["region_entity"] == "uttar_pradesh"
+    assert res["indicator"] == "literacy_rate"
+    assert res["region_entity"] == "Tamil Nadu"
+    assert "साक्षरता" in res["answer"]
+
+
+def test_indic_nlp_processor_hindi_growth():
+    nlp = IndicNLPProcessor()
+    res = nlp.parse_query("पिछले 5 साल में तमिलनाडु की साक्षरता दर में कितनी बढ़ोतरी हुई?")
+    assert res["detected_language"] == "hi"
+    assert res["indicator"] == "literacy_rate"
+    assert res["prediction"] in ["growth", "trend"]
+    assert "साक्षरता" in res["answer"]
+
+
+def test_indic_nlp_processor_tamil_lookup():
+    nlp = IndicNLPProcessor()
+    res = nlp.parse_query("தமிழ்நாட்டின் கல்வியறிவு விகிதத்தை காட்டுங்கள்")
+    assert res["detected_language"] == "ta"
+    assert res["indicator"] == "literacy_rate"
+    assert res["region_entity"] == "Tamil Nadu"
+    assert "கல்வியறிவு" in res["answer"]
+
+
+def test_indic_nlp_processor_tamil_districts_ranking():
+    nlp = IndicNLPProcessor()
+    res = nlp.parse_query("தமிழ்நாட்டில் அதிக கல்வியறிவு விகிதம் கொண்ட மாவட்டங்கள் எவை?")
+    assert res["detected_language"] == "ta"
+    assert res["indicator"] == "literacy_rate"
+    assert res["prediction"] in ["ranking", "top_k"]
+    assert "கல்வியறிவு" in res["answer"]
+
+
+def test_indic_nlp_processor_unknown_indicator():
+    nlp = IndicNLPProcessor()
+    res = nlp.parse_query("What is the average rainfall in Tamil Nadu?")
+    assert res["structured_query"]["is_valid"] is False
+    assert res["prediction"] == "clarification_needed"
+    assert "clarify" in res["answer"].lower() or "unsupported" in res["answer"].lower() or "statistical indicator" in res["answer"].lower()
+
+
+def test_indic_nlp_processor_empty_query():
+    nlp = IndicNLPProcessor()
+    res = nlp.parse_query("")
+    assert res["structured_query"]["is_valid"] is False
+    assert res["prediction"] == "clarification_needed"
+
 
 
 # --- 7. FastAPI Route Handler Tests ---
@@ -191,11 +258,15 @@ def test_api_predict_classify():
     assert len(res["shap_explanation"]) == 3
 
 
-def test_api_nlp_query():
+def test_api_nlp_query_endpoint():
     req = NLPQueryRequest(query="Analyze IIP manufacturing trends in Gujarat")
     res = parse_nlp_query(req)
-    assert res["prediction"] == "industrial_query"
-    assert res["region_entity"] == "gujarat"
+    assert res["prediction"] in ["trend", "growth", "point_lookup"]
+    assert res["region_entity"] == "Gujarat"
+    assert res["indicator"] == "iip_growth"
+    assert "answer" in res
+    assert res["structured_query"]["is_valid"] is True
+
 
 
 def test_api_clean_pipeline():
@@ -208,3 +279,4 @@ def test_api_clean_pipeline():
     res = clean_dataset(req)
     assert "quality_metrics" in res
     assert res["quality_metrics"]["quality_score"] > 80
+

@@ -34,6 +34,7 @@ import AuditTrailViewer from '../components/analytics/AuditTrailViewer';
 import CostSavingsCalculator from '../components/analytics/CostSavingsCalculator';
 import ScalabilityMetrics from '../components/analytics/ScalabilityMetrics';
 import ModelMetrics from '../components/analytics/ModelMetrics';
+import NaturalLanguageQueryBar from '../components/analytics/NaturalLanguageQueryBar';
 import { CensusDistrictData } from '../services/api/types';
 
 export const StatisticalIntelligenceDashboard: React.FC = () => {
@@ -106,8 +107,12 @@ export const StatisticalIntelligenceDashboard: React.FC = () => {
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 space-y-6">
+        {/* Multilingual Natural Language Analytics Query Bar */}
+        <NaturalLanguageQueryBar onNavigateTab={(tab) => setActiveTab(tab as any)} />
+
         {/* KPI Cards Strip (always visible at top of dashboard) */}
         <KPICards />
+
 
         {/* Dynamic Tab Views */}
         {activeTab === 'overview' && (
