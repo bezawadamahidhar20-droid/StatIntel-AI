@@ -6,11 +6,11 @@
 
 ## 1. Executive Summary & Scientific Integrity Guarantee
 
-Feature C introduces **Explainable AI (XAI)** and **Bounded Counterfactual Perturbation Search** into StatIntel-AI without introducing unverified causal claims, fake attribution values, or simulated metrics.
+Feature C introduces **Local Model Feature Attribution (Baseline Contribution)** and **Bounded Model Counterfactual Search** into StatIntel-AI without introducing unverified causal claims, fake attribution values, or fabricated statistics.
 
 ### Mandatory Scientific Disclaimers
 > **Explainability:**
-> *"Feature contributions describe how the model arrived at its prediction; they do not establish causation."*
+> *"Feature contributions describe how the model arrived at its prediction relative to baseline; they do not establish causation."*
 
 > **Counterfactual:**
 > *"Counterfactual results show what the model predicts under changed inputs. They are not causal policy impact estimates."*
@@ -25,7 +25,8 @@ Feature C introduces **Explainable AI (XAI)** and **Bounded Counterfactual Pertu
   1. `Aspirational` (Tier 0 — Priority development districts)
   2. `Developing` (Tier 1 — Moderate socio-economic capacity)
   3. `High-Performing` (Tier 2 — High developmental maturity)
-- **Training Accuracy:** >94% on MoSPI Census & PLFS statistical distributions.
+- **Confidence & Probability:** Derived directly from `model.predict_proba(X)[pred_idx]` (uncalibrated softmax ensemble output).
+- **Training Accuracy:** Evaluated on MoSPI Census & PLFS statistical benchmark distributions.
 
 ### Real Model Features & Bounding Constraints
 
@@ -38,13 +39,14 @@ Feature C introduces **Explainable AI (XAI)** and **Bounded Counterfactual Pertu
 
 ---
 
-## 3. SHAP Explainability Engine
+## 3. Feature Attribution Engine
 
-### Implementation: `ml_backend/explainability/shap_explainer.py`
+### Methodology: Normalized Baseline Difference Feature Attribution
 Local feature attributions $\phi_i$ are computed relative to the empirical national baseline vector:
 $$\mathbf{z}_0 = [75.0, 92.0, 45.0, 38.0]$$
 $$\phi_i = \frac{x_i - z_{0,i}}{\sum_{j} |x_j - z_{0,j}|}$$
 
+- **Attribution Status:** Custom Model Feature Attribution (Normalized Baseline Deviation), NOT TreeSHAP or Shapley value library calculation.
 - **Positive Contribution ($\phi_i > 0$):** Indicates feature value pushed prediction towards higher development classification.
 - **Negative Contribution ($\phi_i < 0$):** Indicates feature value constrained classification or pulled it towards Aspirational status.
 - **Ordering:** Factors are strictly sorted descending by absolute magnitude $|\phi_i|$.

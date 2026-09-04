@@ -1,17 +1,18 @@
 /**
- * StatIntel-AI Counterfactual & Explainable AI (XAI) Service.
+ * StatIntel-AI Model Feature Attribution & Counterfactual Analytics Service.
  * Connects frontend to ML Backend microservice (/explain and /counterfactual/generate).
- * Provides verified client-side fallback with real district statistics and SHAP attribution models.
+ * Implements transparent model feature attribution (baseline deviation) and model-evaluated counterfactuals.
  * 
  * Scientific Integrity:
- * - Feature contributions describe how the model arrived at its prediction; they do not establish causation.
+ * - Feature contributions describe how the model arrived at its prediction relative to baseline; they do not establish causation.
  * - Counterfactual results show what the model predicts under changed inputs. They are not causal policy impact estimates.
  */
 
 export interface ContributingFactor {
   feature: string;
   value: number;
-  shap_value: number;
+  attribution_score: number; // Local attribution score (baseline deviation)
+  shap_value?: number;      // Backward-compatible alias
   impact: 'positive' | 'negative';
   importance_pct: number;
 }
@@ -163,6 +164,7 @@ function executeClientSideExplain(payload: ExplainRequestPayload): ExplainResult
     {
       feature: 'Literacy Rate (%)',
       value: literacy_rate,
+      attribution_score: +(dLit / totalDiff).toFixed(4),
       shap_value: +(dLit / totalDiff).toFixed(4),
       impact: dLit >= 0 ? 'positive' : 'negative',
       importance_pct: +(Math.abs(dLit / totalDiff) * 100).toFixed(1),
@@ -170,6 +172,7 @@ function executeClientSideExplain(payload: ExplainRequestPayload): ExplainResult
     {
       feature: 'Sex Ratio (F/1000M)',
       value: sex_ratio,
+      attribution_score: +(dSex / totalDiff).toFixed(4),
       shap_value: +(dSex / totalDiff).toFixed(4),
       impact: dSex >= 0 ? 'positive' : 'negative',
       importance_pct: +(Math.abs(dSex / totalDiff) * 100).toFixed(1),
@@ -177,6 +180,7 @@ function executeClientSideExplain(payload: ExplainRequestPayload): ExplainResult
     {
       feature: 'Urbanization Rate (%)',
       value: urbanization_rate,
+      attribution_score: +(dUrb / totalDiff).toFixed(4),
       shap_value: +(dUrb / totalDiff).toFixed(4),
       impact: dUrb >= 0 ? 'positive' : 'negative',
       importance_pct: +(Math.abs(dUrb / totalDiff) * 100).toFixed(1),
@@ -184,6 +188,7 @@ function executeClientSideExplain(payload: ExplainRequestPayload): ExplainResult
     {
       feature: 'Worker Participation Rate (%)',
       value: worker_participation_rate,
+      attribution_score: +(dWork / totalDiff).toFixed(4),
       shap_value: +(dWork / totalDiff).toFixed(4),
       impact: dWork >= 0 ? 'positive' : 'negative',
       importance_pct: +(Math.abs(dWork / totalDiff) * 100).toFixed(1),

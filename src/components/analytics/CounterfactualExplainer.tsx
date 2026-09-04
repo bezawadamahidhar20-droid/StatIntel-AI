@@ -158,7 +158,7 @@ export const CounterfactualExplainer: React.FC = () => {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 tracking-wide uppercase">
-                Feature C • XAI & Counterfactual Engine
+                Feature C • Model Feature Attribution & Counterfactuals
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
                 MoSPI PS-1628
@@ -168,13 +168,13 @@ export const CounterfactualExplainer: React.FC = () => {
               Explainable AI & Counterfactual Decision Support
             </h2>
             <p className="text-slate-400 text-sm mt-1 max-w-3xl">
-              Transparent, model-backed SHAP attribution vectors paired with bounded counterfactual search to evaluate what minimal feasible metric adjustments alter socio-economic tier classifications.
+              Transparent, model-backed local feature attribution vectors paired with bounded counterfactual search to evaluate what minimal feasible metric adjustments alter socio-economic tier classifications.
             </p>
           </div>
           <button
             onClick={runAnalysis}
             disabled={loading}
-            className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
           >
             {loading ? (
               <>
@@ -189,7 +189,7 @@ export const CounterfactualExplainer: React.FC = () => {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                Re-Evaluate SHAP & Perturbations
+                Re-Evaluate Attributions & Perturbations
               </>
             )}
           </button>
@@ -201,10 +201,10 @@ export const CounterfactualExplainer: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-slate-300">
-              1. Select Benchmark District or Fine-Tune Observation Vector
+              1. Select Census 2011 Benchmark District or Fine-Tune Observation Vector
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
-              Choose an empirical district benchmark or adjust variables within verified bounds.
+              Choose official Census 2011 / PLFS benchmark indicators or adjust variables within verified bounds.
             </p>
           </div>
           {/* Preset Buttons */}
@@ -341,7 +341,7 @@ export const CounterfactualExplainer: React.FC = () => {
                   Why did the model predict this?
                 </h3>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  SHAP feature attributions relative to national empirical baseline
+                  Local model feature attributions relative to national empirical baseline
                 </p>
               </div>
               {explainData && (
@@ -361,7 +361,7 @@ export const CounterfactualExplainer: React.FC = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-xs text-slate-400">Model Confidence</div>
+                  <div className="text-xs text-slate-400">Model Probability</div>
                   <div className="text-lg font-bold font-mono text-emerald-400">
                     {(explainData.confidence * 100).toFixed(1)}%
                   </div>
@@ -369,15 +369,16 @@ export const CounterfactualExplainer: React.FC = () => {
               </div>
             )}
 
-            {/* Horizontal SHAP Contribution Bars */}
+            {/* Horizontal Feature Contribution Bars */}
             <div className="space-y-4">
               <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                Top Contributing Factors (SHAP Local Vectors)
+                Top Contributing Factors (Model Feature Attribution)
               </div>
 
               {explainData?.contributing_factors.map((factor, idx) => {
                 const isPositive = factor.impact === 'positive';
                 const barWidth = Math.min(100, factor.importance_pct * 1.5);
+                const score = (factor.attribution_score !== undefined ? factor.attribution_score : factor.shap_value) || 0;
 
                 return (
                   <div key={idx} className="space-y-1.5 bg-slate-950/40 p-3 rounded-xl border border-slate-800/60">
@@ -402,7 +403,7 @@ export const CounterfactualExplainer: React.FC = () => {
                           }`}
                         >
                           {isPositive ? '+' : ''}
-                          {factor.shap_value.toFixed(3)}
+                          {score.toFixed(3)}
                         </span>
                       </div>
                     </div>
@@ -430,7 +431,7 @@ export const CounterfactualExplainer: React.FC = () => {
 
           {/* Scientific Disclaimer Footer */}
           <div className="mt-6 p-3 rounded-xl bg-indigo-950/30 border border-indigo-800/30 text-xs text-indigo-300/90 leading-relaxed">
-            <span className="font-semibold text-indigo-200">Scientific Note:</span> These factors contributed to the model's prediction according to SHAP feature attribution; they describe how the model arrived at its outcome and do not establish causation.
+            <span className="font-semibold text-indigo-200">Scientific Note:</span> These factors contributed to the model's prediction according to model feature attribution (baseline deviation); they describe how the model arrived at its outcome and do not establish causation.
           </div>
         </div>
 
