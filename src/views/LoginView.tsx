@@ -36,6 +36,8 @@ const POPULAR_SKILL_CHIPS = [
   'AWS',
 ];
 
+import { DISCORD_AVATAR_PRESETS, DEFAULT_AVATAR } from '../constants/avatars';
+
 export const LoginView: React.FC = () => {
   const { loginAsStudent, loginAsAdmin, navigate } = useApp();
   const [mode, setMode] = useState<'demo' | 'login' | 'admin'>('demo');
@@ -46,7 +48,8 @@ export const LoginView: React.FC = () => {
   const [degree, setDegree] = useState('');
   const [year, setYear] = useState('3rd Year (Semester 5-6)');
   const [targetRole, setTargetRole] = useState('Frontend Developer');
-  const [email, setEmail] = useState('');
+  const [selectedAvatar, setSelectedAvatar] = useState(DEFAULT_AVATAR);
+  const [avatarCategory, setAvatarCategory] = useState<'ALL' | 'ANIMALS' | 'BOYS' | 'GIRLS'>('ALL');
 
   // Groq AI Skills state
   const [skillsInputText, setSkillsInputText] = useState('');
@@ -123,6 +126,7 @@ export const LoginView: React.FC = () => {
       year,
       targetRole,
       email: email.trim(),
+      avatar: selectedAvatar,
       knownSkills: selectedSkills,
     });
   };
@@ -223,6 +227,70 @@ export const LoginView: React.FC = () => {
           {/* MODE 1: Student Registration */}
           {mode === 'demo' && (
             <form onSubmit={handleDemoSubmit} className="space-y-4 text-xs">
+              {/* Discord-Style Animated Avatar Selection */}
+              <div className="space-y-2 p-3 bg-slate-50/80 rounded-xl border border-slate-200">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <label className="block text-xs font-bold text-slate-800">
+                    Choose Animated Avatar *
+                  </label>
+                  {/* Category Pills */}
+                  <div className="flex items-center gap-1">
+                    {[
+                      { id: 'ALL', label: 'All' },
+                      { id: 'ANIMALS', label: '🐶 Dogs & Pets' },
+                      { id: 'BOYS', label: '👦 Boys' },
+                      { id: 'GIRLS', label: '👧 Girls' },
+                    ].map((cat) => (
+                      <button
+                        type="button"
+                        key={cat.id}
+                        onClick={() => setAvatarCategory(cat.id as any)}
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-semibold transition-colors ${
+                          avatarCategory === cat.id
+                            ? 'bg-blue-600 text-white shadow-2xs'
+                            : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-5 sm:grid-cols-5 gap-2 pt-1">
+                  {DISCORD_AVATAR_PRESETS.filter(
+                    (av) => avatarCategory === 'ALL' || av.category === avatarCategory
+                  ).map((av) => (
+                    <button
+                      type="button"
+                      key={av.id}
+                      onClick={() => setSelectedAvatar(av.url)}
+                      className={`relative rounded-xl overflow-hidden border-2 transition-all p-1 flex flex-col items-center gap-1 group bg-white ${
+                        selectedAvatar === av.url
+                          ? 'border-indigo-600 ring-2 ring-indigo-200 scale-105 shadow-md'
+                          : 'border-slate-200 hover:border-indigo-300 opacity-80 hover:opacity-100 hover:scale-102'
+                      }`}
+                    >
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 flex items-center justify-center relative">
+                        <img
+                          src={av.url}
+                          alt={av.name}
+                          className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                        />
+                        {selectedAvatar === av.url && (
+                          <div className="absolute inset-0 bg-indigo-600/30 flex items-center justify-center">
+                            <CheckCircle2 className="w-4 h-4 text-white stroke-[2.5]" />
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-[9.5px] font-medium text-slate-700 truncate w-full text-center group-hover:text-indigo-600">
+                        {av.name.split(' ')[0]}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">

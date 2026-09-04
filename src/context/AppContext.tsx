@@ -29,6 +29,7 @@ export type AppView =
   | 'digital-twin'
   | 'skill-gaps'
   | 'learning-path'
+  | 'skill-learning'
   | 'courses'
   | 'course-detail'
   | 'quiz-generator'
@@ -77,6 +78,9 @@ interface AppContextType {
   whyRecommendedCourse: Course | null;
   setWhyRecommendedCourse: (course: Course | null) => void;
 
+  activeSkillName: string | null;
+  setActiveSkillName: (name: string | null) => void;
+
   activeCourseId: string | null;
   setActiveCourseId: (id: string | null) => void;
 
@@ -111,10 +115,13 @@ interface AppContextType {
     year: string;
     targetRole: string;
     email?: string;
+    avatar?: string;
     knownSkills?: string[];
   }) => void;
   loginAsAdmin: (passcode: string) => boolean;
   logout: () => void;
+  updateUserAvatar: (avatarUrl: string) => void;
+  updateCompetencyScore: (skillOrCompName: string, newScore: number) => void;
 
   enrollCourse: (courseId: string) => void;
   submitAssessmentAttempt: (assessmentId: string, userAnswers: number[], timeSpentSeconds: number) => void;
@@ -200,6 +207,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [selectedCompetency, setSelectedCompetency] = useState<Competency | null>(null);
   const [whyRecommendedCourse, setWhyRecommendedCourse] = useState<Course | null>(null);
+  const [activeSkillName, setActiveSkillName] = useState<string | null>('Figma & Design Systems');
   const [activeCourseId, setActiveCourseId] = useState<string | null>('crs-001');
   const [activeAssessmentId, setActiveAssessmentId] = useState<string | null>('asmt-001');
   const [lastQuizResult, setLastQuizResult] = useState<QuizResult | null>(null);
@@ -284,6 +292,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       degree: data.degree?.trim() || 'Degree Program',
       academicYear: data.year || 'Undergraduate',
       targetGoal: data.targetRole || 'Data Analyst',
+      avatar: data.avatar || initialUser.avatar,
       cadre: `Student Roll #STU-${Math.floor(1000 + Math.random() * 9000)} • ${data.year || 'Student'}`,
       employeeId: `STU-${Math.floor(1000 + Math.random() * 9000)}`,
       email: data.email?.trim() || `${studentName.toLowerCase().replace(/\s+/g, '.')}@university.edu`,
@@ -307,6 +316,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('statintel_role', 'LEARNER');
     setIsAuthModalOpen(false);
     setActiveView('dashboard');
+  };
+
+  const updateUserAvatar = (avatarUrl: string) => {
+    setCurrentUser((prev) => {
+      const updated = { ...prev, avatar: avatarUrl };
+      localStorage.setItem('statintel_user', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const updateCompetencyScore = (skillOrCompName: string, newScore: number) => {
+    setCompetencies((prev) =>
+      prev.map((c) =>
+        c.name.toLowerCase().includes(skillOrCompName.toLowerCase()) || skillOrCompName.toLowerCase().includes(c.name.toLowerCase())
+          ? { ...c, currentScore: Math.min(100, Math.max(c.currentScore, newScore)) }
+          : c
+      )
+    );
+    setCurrentUser((prev) => {
+      const nextScore = Math.min(98, (prev.overallCompetency || 60) + 4);
+      const nextReadiness = Math.min(98, (prev.roleReadiness || 65) + 5);
+      const updated = { ...prev, overallCompetency: nextScore, roleReadiness: nextReadiness };
+      localStorage.setItem('statintel_user', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const loginAsAdmin = (passcode: string): boolean => {
@@ -336,7 +370,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsAuthModalOpen(true);
   };
 
-  const navigate = (view: AppView, params?: { courseId?: string; assessmentId?: string }) => {
+  const navigate = (view: AppView, params?: { courseId?: string; assessmentId?: string; skillName?: string }) => {
     const isAuth = isAuthenticated || localStorage.getItem('statintel_auth') === 'true';
     // If not authenticated and attempting to view internal dashboard routes
     if (!isAuth && view !== 'landing' && view !== 'login') {
@@ -355,8 +389,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (params?.assessmentId) {
       setActiveAssessmentId(params.assessmentId);
     }
+    if (params?.skillName) {
+      setActiveSkillName(params.skillName);
+    }
     setActiveView(view);
-    // Scroll the window to top as a safety net (main resets naturally via key remount)
     window.scrollTo(0, 0);
   };
 
@@ -648,6 +684,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setSelectedCompetency,
         whyRecommendedCourse,
         setWhyRecommendedCourse,
+        activeSkillName,
+        setActiveSkillName,
         activeCourseId,
         setActiveCourseId,
         activeAssessmentId,
@@ -673,6 +711,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loginAsStudent,
         loginAsAdmin,
         logout,
+        updateUserAvatar,
+        updateCompetencyScore,
         enrollCourse,
         submitAssessmentAttempt,
         addNewGeneratedAssessment,

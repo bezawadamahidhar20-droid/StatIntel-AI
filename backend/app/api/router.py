@@ -15,6 +15,7 @@ from app.api.v1 import (
     workforce,
     analytics,
     admin,
+    catalog,
 )
 
 api_router = APIRouter()
@@ -33,3 +34,5 @@ api_router.include_router(integrations.router)
 api_router.include_router(workforce.router)
 api_router.include_router(analytics.router)
 api_router.include_router(admin.router)
+api_router.include_router(catalog.router)
+

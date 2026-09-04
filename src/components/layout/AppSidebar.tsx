@@ -57,7 +57,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
       badgeColor: 'bg-rose-100 text-rose-800 border-rose-200',
     },
     { id: 'learning-path', label: 'Adaptive Path', icon: Route },
-    { id: 'courses', label: 'MoSPI / NSSTA Catalog', icon: BookOpen },
+    { id: 'courses', label: 'Skill Learning', icon: BookOpen },
     {
       id: 'quiz-generator',
       label: 'AI Quiz Studio',
@@ -119,46 +119,190 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
       </div>
 
       {/* Navigation List */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-        <p className="px-3 pb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-          {userRole === 'ADMIN' ? 'Cadre Intelligence' : 'Officer Competency Journey'}
-        </p>
-
-        {currentItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeView === item.id;
-
-          return (
-            <button
-              key={item.id}
-              onClick={() => handleNav(item.id)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-colors group ${
-                isActive
-                  ? 'bg-blue-50 text-blue-800 font-semibold border-l-3 border-blue-600 shadow-2xs'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-normal'
-              }`}
-            >
-              <div className="flex items-center gap-3 truncate">
-                <Icon
-                  className={`w-4 h-4 shrink-0 transition-colors ${
-                    isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-700'
-                  }`}
-                />
-                <span className="truncate">{item.label}</span>
+      <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-4">
+        {userRole === 'ADMIN' ? (
+          <div>
+            <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Cadre Intelligence
+            </p>
+            <div className="space-y-0.5">
+              {adminNavItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeView === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    id={`nav-${item.id}`}
+                    data-testid={`nav-${item.id}`}
+                    onClick={() => handleNav(item.id)}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-colors group ${
+                      isActive
+                        ? 'bg-blue-50 text-blue-800 font-semibold border-l-3 border-blue-600 shadow-2xs'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 truncate">
+                      <Icon
+                        className={`w-4 h-4 shrink-0 transition-colors ${
+                          isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-700'
+                        }`}
+                      />
+                      <span className="truncate">{item.label}</span>
+                    </div>
+                    {item.badge && (
+                      <span
+                        className={`px-1.5 py-0.5 text-[9.5px] font-semibold rounded-full shrink-0 ml-2 border ${
+                          item.badgeColor || 'bg-slate-100 text-slate-700 border-slate-200'
+                        }`}
+                      >
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Section 1: MY DEVELOPMENT */}
+            <div>
+              <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                My Development
+              </p>
+              <div className="space-y-0.5">
+                {[
+                  learnerNavItems[0], // dashboard
+                  learnerNavItems[1], // digital-twin
+                  learnerNavItems[2], // skill-gaps
+                  learnerNavItems[3], // learning-path
+                  learnerNavItems[4], // courses (Skill Learning)
+                ].map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeView === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      id={`nav-${item.id}`}
+                      data-testid={`nav-${item.id}`}
+                      onClick={() => handleNav(item.id)}
+                      className={`w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-colors group ${
+                        isActive
+                          ? 'bg-blue-50 text-blue-800 font-semibold border-l-3 border-blue-600 shadow-2xs'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 truncate">
+                        <Icon
+                          className={`w-4 h-4 shrink-0 transition-colors ${
+                            isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-700'
+                          }`}
+                        />
+                        <span className="truncate">{item.label}</span>
+                      </div>
+                      {item.badge && (
+                        <span
+                          className={`px-1.5 py-0.5 text-[9.5px] font-semibold rounded-full shrink-0 ml-2 border ${
+                            item.badgeColor || 'bg-slate-100 text-slate-700 border-slate-200'
+                          }`}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
+            </div>
 
-              {item.badge && (
-                <span
-                  className={`px-2 py-0.5 text-[10px] font-semibold rounded-full shrink-0 ml-2 border ${
-                    item.badgeColor || 'bg-slate-100 text-slate-700 border-slate-200'
-                  }`}
-                >
-                  {item.badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
+            {/* Section 2: ASSESSMENT */}
+            <div>
+              <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Assessment & Validation
+              </p>
+              <div className="space-y-0.5">
+                {[
+                  learnerNavItems[5], // quiz-generator
+                  learnerNavItems[6], // assessment
+                ].map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeView === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      id={`nav-${item.id}`}
+                      data-testid={`nav-${item.id}`}
+                      onClick={() => handleNav(item.id)}
+                      className={`w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-colors group ${
+                        isActive
+                          ? 'bg-blue-50 text-blue-800 font-semibold border-l-3 border-blue-600 shadow-2xs'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 truncate">
+                        <Icon
+                          className={`w-4 h-4 shrink-0 transition-colors ${
+                            isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-700'
+                          }`}
+                        />
+                        <span className="truncate">{item.label}</span>
+                      </div>
+                      {item.badge && (
+                        <span
+                          className={`px-1.5 py-0.5 text-[9.5px] font-semibold rounded-full shrink-0 ml-2 border ${
+                            item.badgeColor || 'bg-slate-100 text-slate-700 border-slate-200'
+                          }`}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Section 3: SUPPORT & RECORDS */}
+            <div>
+              <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Support & Records
+              </p>
+              <div className="space-y-0.5">
+                {[
+                  learnerNavItems[7], // assistant
+                  learnerNavItems[8], // history
+                  learnerNavItems[9], // certificates
+                  learnerNavItems[10], // profile
+                ].map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeView === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      id={`nav-${item.id}`}
+                      data-testid={`nav-${item.id}`}
+                      onClick={() => handleNav(item.id)}
+                      className={`w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-colors group ${
+                        isActive
+                          ? 'bg-blue-50 text-blue-800 font-semibold border-l-3 border-blue-600 shadow-2xs'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 truncate">
+                        <Icon
+                          className={`w-4 h-4 shrink-0 transition-colors ${
+                            isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-700'
+                          }`}
+                        />
+                        <span className="truncate">{item.label}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
       </nav>
 
       {/* Closed Loop Intelligence Mini-Widget */}

@@ -39,3 +39,69 @@ async def update_learning_progress(
         "success": True,
         "data": course.model_dump(),
     }
+
+
+@router.post("/topics/{topic_id}/complete")
+async def complete_topic(
+    topic_id: str,
+    req: Optional[dict] = None,
+    current_user: Optional[User] = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.services.learning_service import learning_service
+    user_id = current_user.id if current_user else "usr-10492"
+    time_spent = req.get("time_spent_seconds", 300) if req else 300
+    res = await learning_service.mark_topic_complete(db, topic_id, user_id, time_spent)
+    return {
+        "success": True,
+        "data": res.model_dump(),
+    }
+
+
+@router.post("/resources/{resource_id}/progress")
+async def track_resource_progress(
+    resource_id: str,
+    req: Optional[dict] = None,
+    current_user: Optional[User] = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.services.learning_service import learning_service
+    user_id = current_user.id if current_user else "usr-10492"
+    is_done = req.get("is_completed", True) if req else True
+    await learning_service.update_resource_progress(db, resource_id, user_id, is_done)
+    return {
+        "success": True,
+        "data": {"resource_id": resource_id, "is_completed": is_done},
+    }
+
+
+@router.post("/topics/{topic_id}/generate-notes")
+async def generate_topic_notes(
+    topic_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    from app.services.learning_service import learning_service
+    notes = await learning_service.generate_study_notes(db, topic_id)
+    return {
+        "success": True,
+        "data": notes.model_dump(),
+    }
+
+
+@router.post("/modules/{module_id}/assessment")
+async def submit_module_assessment(
+    module_id: str,
+    req: dict,
+    current_user: Optional[User] = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.services.learning_service import learning_service
+    user_id = current_user.id if current_user else "usr-10492"
+    answers = req.get("user_answers", [1, 0, 2, 3, 1])
+    time_spent = req.get("time_spent_seconds", 180)
+    result = await learning_service.submit_module_assessment(db, module_id, user_id, answers, time_spent)
+    return {
+        "success": True,
+        "data": result.model_dump(),
+    }
+

@@ -58,7 +58,25 @@ async def get_workforce_readiness(
         "success": True,
         "data": {
             "overallReadiness": overview.overallReadiness,
-            "activeLearners": overview.activeLearners,
             "totalLearners": overview.totalLearners,
+            "activeLearners": overview.activeLearners,
         },
+    }
+
+
+@router.get("/placement-readiness")
+async def get_placement_readiness(
+    target_role: str = "Senior Statistical Officer",
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.services.placement_readiness_service import PlacementReadinessService
+    data = PlacementReadinessService.calculate_placement_readiness(
+        db=db,
+        user=current_user,
+        target_role=target_role
+    )
+    return {
+        "success": True,
+        "data": data,
     }

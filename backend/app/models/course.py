@@ -36,6 +36,7 @@ class Course(Base, UUIDMixin, TimestampMixin):
     why_recommended: Mapped[Any] = mapped_column(JSON, default=dict)  # Structured explainable factors breakdown
 
     enrollments: Mapped[List["Enrollment"]] = relationship("Enrollment", back_populates="course")
+    learning_modules = relationship("LearningModule", back_populates="course", cascade="all, delete-orphan", order_by="LearningModule.order_index")
 
 
 class Enrollment(Base, UUIDMixin, TimestampMixin):

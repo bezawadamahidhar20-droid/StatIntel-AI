@@ -16,6 +16,7 @@ import { LearnerDashboardView } from './views/LearnerDashboardView';
 import { CompetencyDigitalTwinView } from './views/CompetencyDigitalTwinView';
 import { SkillGapView } from './views/SkillGapView';
 import { LearningPathView } from './views/LearningPathView';
+import { SkillLearningView } from './views/SkillLearningView';
 import { CoursesView } from './views/CoursesView';
 import { CourseDetailView } from './views/CourseDetailView';
 import { QuizGeneratorView } from './views/QuizGeneratorView';
@@ -72,6 +73,7 @@ const MainLayout: React.FC = () => {
       case 'digital-twin':        return <CompetencyDigitalTwinView />;
       case 'skill-gaps':          return <SkillGapView />;
       case 'learning-path':       return <LearningPathView />;
+      case 'skill-learning':      return <SkillLearningView />;
       case 'courses':             return <CoursesView />;
       case 'course-detail':       return <CourseDetailView />;
       case 'quiz-generator':      return <QuizGeneratorView />;
@@ -94,9 +96,6 @@ const MainLayout: React.FC = () => {
     <div className="h-full flex flex-col font-sans text-slate-900 bg-slate-50 selection:bg-blue-600 selection:text-white overflow-hidden">
       {/* Persistent App Header */}
       <AppHeader onMobileMenuToggle={() => setMobileMenuOpen(true)} />
-
-      {/* SIH Workflow Stepper Navigator */}
-      <FlowStepper />
 
       {isFullPageView ? (
         <main

@@ -447,20 +447,27 @@ export const StudentSkillProfiler: React.FC = () => {
           </div>
 
           {guidance?.skillsToLearn && guidance.skillsToLearn.length > 0 ? (
-            <div className="space-y-3">
-              {guidance.skillsToLearn.map((st, idx) => (
-                <div
-                  key={idx}
-                  className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white hover:border-indigo-300 transition-all flex items-start justify-between gap-3 shadow-2xs hover:shadow-xs"
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[10px] font-bold flex items-center justify-center">
-                        {idx + 1}
-                      </span>
-                      <p className="text-xs font-bold text-slate-900">{st.name}</p>
+            <div className="space-y-4">
+              {guidance.skillsToLearn.map((st, idx) => {
+                const projectedImpact = st.importance === 'High' ? 12 : 8;
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => navigate('skill-learning', { skillName: st.name })}
+                    className="p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-400 hover:shadow-md cursor-pointer transition-all space-y-3 group"
+                  >
+                    {/* Header: Number, Name, and Priority Badge */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="w-6 h-6 rounded-md bg-indigo-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                          {idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
+                        </span>
+                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
+                          {st.name}
+                        </h4>
+                      </div>
                       <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
                           st.importance === 'High'
                             ? 'bg-rose-50 text-rose-700 border border-rose-200'
                             : 'bg-blue-50 text-blue-700 border border-blue-200'
@@ -469,17 +476,72 @@ export const StudentSkillProfiler: React.FC = () => {
                         {st.importance} Priority
                       </span>
                     </div>
-                    <p className="text-xs text-slate-600 pl-7">{st.description}</p>
-                  </div>
 
-                  <div className="text-right shrink-0">
-                    <span className="text-[11px] text-slate-500 flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-slate-400" />
-                      ~{st.estimatedHours} hrs
-                    </span>
+                    {/* Visual Competency Progression Bar L1 -> L4 */}
+                    <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                      <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 mb-1.5">
+                        <span className="text-rose-600 flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-rose-500" />
+                          L1 (Current)
+                        </span>
+                        <span className="text-slate-400 font-normal">Bridge 3 Levels Gap</span>
+                        <span className="text-emerald-600 flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                          L4 (Target Specialist)
+                        </span>
+                      </div>
+                      <div className="relative flex items-center justify-between px-2 pt-1 pb-0.5">
+                        <div className="absolute left-3 right-3 top-1/2 -translate-y-1/2 h-1 bg-slate-200 rounded-full" />
+                        <div className="absolute left-3 w-1/4 top-1/2 -translate-y-1/2 h-1 bg-indigo-500 rounded-full" />
+                        <span className="relative z-10 w-4 h-4 rounded-full bg-indigo-600 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
+                          1
+                        </span>
+                        <span className="relative z-10 w-3 h-3 rounded-full bg-slate-300 text-transparent flex items-center justify-center ring-2 ring-white" />
+                        <span className="relative z-10 w-3 h-3 rounded-full bg-slate-300 text-transparent flex items-center justify-center ring-2 ring-white" />
+                        <span className="relative z-10 w-4 h-4 rounded-full bg-emerald-600 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
+                          4
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Explainable Why This Skill Description */}
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      {st.description || `Core competency gap identified for your selected ${selectedRole} pathway.`}
+                    </p>
+
+                    {/* Metadata & Role Readiness Impact */}
+                    <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+                      <div className="flex items-center gap-3 text-slate-500 text-[11px]">
+                        <span className="flex items-center gap-1 font-medium">
+                          <Clock className="w-3.5 h-3.5 text-slate-400" />
+                          ⏱ {st.estimatedHours} hours
+                        </span>
+                        <span>•</span>
+                        <span>8 topics</span>
+                        <span>•</span>
+                        <span>3 modules</span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 text-[10.5px] font-semibold border border-purple-200 flex items-center gap-1">
+                          <Sparkles className="w-3 h-3 text-purple-500" />
+                          Impact: +{projectedImpact}% Readiness
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate('skill-learning', { skillName: st.name });
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors"
+                        >
+                          <span>Start Learning</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="p-8 text-center bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-800">
@@ -530,47 +592,26 @@ export const StudentSkillProfiler: React.FC = () => {
             </p>
           </div>
 
-          {/* API Key Configuration Input */}
-          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+          {/* AI Advisor Actions */}
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
             <div className="flex items-center justify-between text-xs">
-              <label className="font-semibold text-slate-700 flex items-center gap-1.5">
-                <KeyRound className="w-3.5 h-3.5 text-slate-500" />
-                <span>Google Gemini API Key (Optional)</span>
-              </label>
-              <span className="text-[10px] text-slate-400">Stored locally</span>
+              <span className="font-semibold text-slate-700 flex items-center gap-1.5">
+                <Shield className="w-3.5 h-3.5 text-blue-600" />
+                <span>Enterprise AI Career Diagnostics</span>
+              </span>
+              <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3" /> Secure Backend Engine
+              </span>
             </div>
-
-            <div className="flex gap-2">
-              <input
-                type="password"
-                value={apiKeyInput}
-                onChange={(e) => setApiKeyInput(e.target.value)}
-                placeholder="Paste Gemini API key (AIzaSy...)"
-                className="flex-1 px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-mono"
-              />
-              <button
-                type="button"
-                onClick={handleSaveApiKey}
-                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold transition-colors"
-              >
-                Save
-              </button>
-            </div>
-
-            {apiKeySaved && (
-              <p className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
-                <Check className="w-3.5 h-3.5" /> API Key saved successfully!
-              </p>
-            )}
 
             <button
               type="button"
               onClick={handleAskGemini}
               disabled={loadingAi}
-              className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
+              className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs"
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Search 2026 Job Requirements with AI</span>
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <span>{loadingAi ? 'Synthesizing...' : 'Refresh 2026 Job Requirements with AI'}</span>
             </button>
           </div>
         </div>

@@ -4,6 +4,19 @@ from app.models.competency import Competency, UserCompetency, CompetencyDomainEn
 from app.models.assessment import Assessment, Question, AssessmentAttempt, QuestionTypeEnum, DifficultyEnum
 from app.models.skill_gap import SkillGap
 from app.models.course import Course, Enrollment, LearningPath
+from app.models.learning import (
+    LearningModule,
+    LearningTopic,
+    LearningResource,
+    TopicProgress,
+    ResourceProgress,
+    ModuleAssessment,
+    CatalogCourse,
+    SourceClassEnum,
+    VerificationStatusEnum,
+    CourseStatusEnum,
+    TopicProgressStatusEnum,
+)
 from app.models.certificate import Certificate
 from app.models.document import Document, DocumentChunk
 from app.models.ai_interaction import AIInteraction
@@ -30,6 +43,17 @@ __all__ = [
     "Course",
     "Enrollment",
     "LearningPath",
+    "LearningModule",
+    "LearningTopic",
+    "LearningResource",
+    "TopicProgress",
+    "ResourceProgress",
+    "ModuleAssessment",
+    "CatalogCourse",
+    "SourceClassEnum",
+    "VerificationStatusEnum",
+    "CourseStatusEnum",
+    "TopicProgressStatusEnum",
     "Certificate",
     "Document",
     "DocumentChunk",

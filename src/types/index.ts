@@ -225,3 +225,97 @@ export interface LearningPathResponse {
   steps: LearningPathStep[];
 }
 
+export type SourceClass = 
+  | 'OFFICIAL_GOVERNMENT' 
+  | 'OFFICIAL_DOCUMENTATION' 
+  | 'UNIVERSITY' 
+  | 'EDUCATIONAL_PLATFORM' 
+  | 'YOUTUBE' 
+  | 'GENERATED' 
+  | 'OTHER';
+
+export type VerificationStatus = 'VERIFIED' | 'UNVERIFIED' | 'DISABLED';
+
+export type CourseStatus = 'CURRENT' | 'HISTORICAL' | 'VERIFIED' | 'UNVERIFIED' | 'DISABLED';
+
+export type ResourceType = 'DOCUMENTATION' | 'TUTORIAL' | 'VIDEO' | 'EXERCISE' | 'OFFICIAL_DOC' | 'NOTES';
+
+export interface LearningResource {
+  id: string;
+  topic_id: string;
+  title: string;
+  url: string;
+  source_domain: string;
+  provider: string;
+  source_class: SourceClass;
+  resource_type: ResourceType;
+  verification_status: VerificationStatus;
+  last_verified?: string;
+  quality_score?: number;
+  download_url?: string;
+  estimated_mins: number;
+  order_index: number;
+  completed?: boolean;
+}
+
+export interface LearningTopic {
+  id: string;
+  module_id: string;
+  title: string;
+  description: string;
+  order_index: number;
+  estimated_mins: number;
+  importance_reason: string;
+  practical_exercise?: string;
+  competency_addressed?: string;
+  completed?: boolean;
+  score?: number;
+  resources?: LearningResource[];
+}
+
+export interface LearningModule {
+  id: string;
+  course_id: string;
+  title: string;
+  description?: string;
+  duration?: string;
+  order_index: number;
+  completed?: boolean;
+  topics?: LearningTopic[];
+}
+
+export interface StudyNotes {
+  topic_id: string;
+  topic_title: string;
+  course_id: string;
+  markdown_notes: string;
+  provenance: {
+    title: string;
+    url: string;
+    domain: string;
+    source_class: string;
+  }[];
+  generated_at: string;
+  attribution: string;
+}
+
+export interface CatalogCourse {
+  id: string;
+  title: string;
+  provider: string;
+  source_type: string;
+  source_class: SourceClass;
+  status: CourseStatus;
+  domain: string;
+  target_roles: string[];
+  duration: string;
+  level: string;
+  source_url: string;
+  official_url?: string;
+  accredited_by: string;
+  competencies_covered: string[];
+  description: string;
+  last_verified: string;
+  quality_score: number;
+}
+

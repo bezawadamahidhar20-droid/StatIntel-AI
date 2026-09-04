@@ -35,6 +35,23 @@ async def get_course_by_id(id: str, db: AsyncSession = Depends(get_db)):
     }
 
 
+@router.get("/{id}/curriculum")
+async def get_course_curriculum(
+    id: str,
+    current_user: Optional[User] = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.services.learning_service import learning_service
+    user_id = current_user.id if current_user else "usr-10492"
+    curriculum = await learning_service.get_course_curriculum(db, id, user_id)
+    if not curriculum:
+        raise HTTPException(status_code=404, detail="Course curriculum not found")
+    return {
+        "success": True,
+        "data": curriculum.model_dump(),
+    }
+
+
 @router.post("/{id}/enroll")
 async def enroll_course(
     id: str,
@@ -47,3 +64,4 @@ async def enroll_course(
         "success": True,
         "data": course.model_dump(),
     }
+

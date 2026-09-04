@@ -183,6 +183,64 @@ class APIClient {
       body: JSON.stringify({ message }),
     });
   }
+
+  // Course Curriculum & Detailed Learning APIs
+  async getCourseCurriculum(courseId: string): Promise<any> {
+    await this.ensureAuth('LEARNER');
+    return this.request<any>(`/courses/${courseId}/curriculum`);
+  }
+
+  async completeTopic(topicId: string, score: number = 100): Promise<any> {
+    await this.ensureAuth('LEARNER');
+    return this.request<any>(`/learning/topics/${topicId}/complete`, {
+      method: 'POST',
+      body: JSON.stringify({ score }),
+    });
+  }
+
+  async trackResourceProgress(resourceId: string, completed: boolean = true, timeSpentMins: number = 5): Promise<any> {
+    await this.ensureAuth('LEARNER');
+    return this.request<any>(`/learning/resources/${resourceId}/progress`, {
+      method: 'POST',
+      body: JSON.stringify({ completed, time_spent_mins: timeSpentMins }),
+    });
+  }
+
+  async generateTopicNotes(topicId: string): Promise<any> {
+    await this.ensureAuth('LEARNER');
+    return this.request<any>(`/learning/topics/${topicId}/generate-notes`, {
+      method: 'POST',
+    });
+  }
+
+  async submitModuleAssessment(moduleId: string, score: number, answers: any = {}): Promise<any> {
+    await this.ensureAuth('LEARNER');
+    return this.request<any>(`/learning/modules/${moduleId}/assessment`, {
+      method: 'POST',
+      body: JSON.stringify({ score, answers }),
+    });
+  }
+
+  // MoSPI / NSSTA Catalog APIs
+  async getNsstaCatalog(params?: { role?: string; domain?: string; level?: string }): Promise<any[]> {
+    const query = new URLSearchParams();
+    if (params?.role) query.set('role', params.role);
+    if (params?.domain) query.set('domain', params.domain);
+    if (params?.level) query.set('level', params.level);
+    const qs = query.toString() ? `?${query.toString()}` : '';
+    return this.request<any[]>(`/catalog/nssta${qs}`);
+  }
+
+  async getNsstaRoleCourses(roleName: string): Promise<any[]> {
+    return this.request<any[]>(`/catalog/nssta/roles/${encodeURIComponent(roleName)}`);
+  }
+
+  async verifyResourceUrl(url: string): Promise<any> {
+    return this.request<any>('/catalog/verify-url', {
+      method: 'POST',
+      body: JSON.stringify({ url }),
+    });
+  }
 }
 
 export const apiClient = new APIClient();

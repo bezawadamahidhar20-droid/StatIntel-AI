@@ -242,33 +242,20 @@ export const QuizGeneratorView: React.FC = () => {
           </p>
         </div>
 
-        {/* Gemini API Key Widget in Header */}
-        <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-xs space-y-1.5 shrink-0 max-w-xs">
-          <div className="flex items-center justify-between text-[11px]">
-            <span className="font-bold text-slate-700 flex items-center gap-1">
-              <BrainCircuit className="w-3.5 h-3.5 text-blue-600" />
-              <span>Google Gemini AI</span>
+        {/* Secure AI Quiz Engine Badge */}
+        <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-xs space-y-1 shrink-0">
+          <div className="flex items-center justify-between gap-3 text-[11px]">
+            <span className="font-bold text-slate-800 flex items-center gap-1.5">
+              <BrainCircuit className="w-4 h-4 text-blue-600" />
+              <span>Grounded AI Quiz Subsystem</span>
             </span>
-            <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
+            <span className="text-[10.5px] text-emerald-600 font-semibold flex items-center gap-0.5">
               <CheckCircle2 className="w-3 h-3" /> Live Engine
             </span>
           </div>
-          <div className="flex gap-1.5">
-            <input
-              type="password"
-              value={localApiKey}
-              onChange={(e) => setLocalApiKey(e.target.value)}
-              placeholder="Paste Gemini API Key..."
-              className="px-2.5 py-1 text-xs border border-slate-300 rounded bg-slate-50 focus:bg-white focus:outline-hidden text-xs w-44 font-mono"
-            />
-            <button
-              onClick={handleSaveKey}
-              className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold"
-            >
-              Save
-            </button>
-          </div>
-          {keySaved && <p className="text-[10px] text-emerald-600 font-medium">✓ Key active</p>}
+          <p className="text-[11px] text-slate-500 font-medium">
+            RAG verified questions grounded against syllabus standards
+          </p>
         </div>
       </div>
 
