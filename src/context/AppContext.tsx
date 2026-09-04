@@ -181,6 +181,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [activeView, setActiveView] = useState<AppView>(() => {
     const isAuth = localStorage.getItem('statintel_auth') === 'true';
+    const initialHash = window.location.hash.replace('#/', '') as AppView;
+    if (initialHash) {
+      if (initialHash === 'landing' || initialHash === 'login') return initialHash;
+      if (isAuth) return initialHash;
+    }
     if (!isAuth) return 'landing';
     return 'dashboard';
   });

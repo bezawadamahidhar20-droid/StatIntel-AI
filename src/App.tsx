@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { AppHeader } from './components/layout/AppHeader';
 import { AppSidebar } from './components/layout/AppSidebar';
@@ -37,29 +37,31 @@ const MainLayout: React.FC = () => {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // ── Hash sync ──────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#/', '');
-      const isAuth = isAuthenticated || localStorage.getItem('statintel_auth') === 'true';
-      if (hash && hash !== activeView) {
-        if (isAuth || hash === 'landing' || hash === 'login') {
-          navigate(hash as AppView);
-        }
-      }
-    };
+  const activeViewRef = useRef<AppView>(activeView);
+  activeViewRef.current = activeView;
 
-    window.addEventListener('hashchange', handleHashChange);
-    const initialHash = window.location.hash.replace('#/', '');
-    if (initialHash && initialHash !== activeView) handleHashChange();
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [activeView, navigate, isAuthenticated]);
-
+  // ── Sync URL hash with activeView ──────────────────────────────────────────
   useEffect(() => {
     if (window.location.hash !== `#/${activeView}`) {
       window.location.hash = `#/${activeView}`;
     }
   }, [activeView]);
+
+  // ── Listen for browser Back/Forward navigation ─────────────────────────────
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#/', '') as AppView;
+      const isAuth = isAuthenticated || localStorage.getItem('statintel_auth') === 'true';
+      if (hash && hash !== activeViewRef.current) {
+        if (isAuth || hash === 'landing' || hash === 'login') {
+          navigate(hash);
+        }
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [navigate, isAuthenticated]);
 
   // ── View renderer ──────────────────────────────────────────────────────────
   const renderView = (view: AppView) => {
