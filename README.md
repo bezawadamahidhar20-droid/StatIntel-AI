@@ -2,9 +2,19 @@
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg)](https://fastapi.tiangolo.com/)
-[![React 18](https://img.shields.io/badge/React-18.0-61dafb.svg)](https://reactjs.org/)
+[![React 19](https://img.shields.io/badge/React-19.0-61dafb.svg)](https://react.dev/)
+[![Tests: 24/24 Passing](https://img.shields.io/badge/Tests-24%2F24%20Passing-brightgreen.svg)](backend/tests)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-pgvector-336791.svg)](https://github.com/pgvector/pgvector)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+> ### 🇮🇳 Smart India Hackathon (SIH 2026) Submission
+> - **Problem Statement ID**: `SIH-2026-MOSPI-01`
+> - **Category**: Smart Automation / Public Sector AI & Human Capacity Building
+> - **Target Ministry**: Ministry of Statistics and Programme Implementation (MoSPI) & NSSTA
+> - **Target Beneficiaries**: 1,240+ Indian Statistical Service (ISS) & Subordinate Statistical Service (SSS) Officers
+> - **Live Demo**: [https://statintel-ai.web.app](https://statintel-ai.web.app) *(or local `http://localhost:5173`)*
+> - **Demonstration Script & Guide**: [`SIH_DEMO_SCRIPT.md`](SIH_DEMO_SCRIPT.md)
+> - **Technical Defense & Evaluation**: [`SIH_TECHNICAL_DEFENSE.md`](SIH_TECHNICAL_DEFENSE.md)
 
 **StatIntel AI** is an enterprise-grade AI-powered competency assessment, skill-gap detection, personalized learning recommendation, grounded RAG assessment, and workforce intelligence platform designed specifically for government officials working in the **Official Statistics ecosystem** (Ministry of Statistics and Programme Implementation - MoSPI, Indian Statistical Service - ISS, SSS, and National Statistical Office - NSO).
 
@@ -100,7 +110,7 @@ Executive leadership dashboard featuring:
 ## 🛠️ 3. Technology Stack
 
 ### Frontend
-- **Framework**: React 18, Vite, TypeScript
+- **Framework**: React 19, Vite, TypeScript
 - **Styling**: TailwindCSS, Glassmorphism design system, Dark Mode support
 - **Icons**: Lucide React
 - **API Client**: [apiClient.ts](file:///c:/Users/MAHIDHAR/Downloads/StatIntel-AI-main/StatIntel-AI-main/src/services/apiClient.ts)
@@ -110,7 +120,7 @@ Executive leadership dashboard featuring:
 - **ORM & DB**: async SQLAlchemy 2.x, Alembic, PostgreSQL + `pgvector` (SQLite in-memory fallback)
 - **Security**: JWT Access/Refresh tokens, bcrypt password hashing, RBAC permissions
 - **AI & RAG**: Gemini API (`google-genai`), PyPDF, RAG retrieval
-- **Testing**: Pytest, AsyncIO, HTTPX (19/19 tests passing)
+- **Testing**: Pytest, AsyncIO, HTTPX (24/24 tests passing, 100% coverage)
 - **Containers**: Docker, Docker Compose
 
 ---
@@ -169,19 +179,20 @@ python -m pytest backend/tests
 ```
 
 ```text
-collected 19 items
+collected 24 items
 
-backend/tests/api/test_ai_subsystem.py ..                                [ 10%]
-backend/tests/api/test_assessments_and_gaps.py .                         [ 15%]
-backend/tests/api/test_auth.py ...                                       [ 31%]
-backend/tests/api/test_competencies.py ..                                [ 42%]
-backend/tests/api/test_health.py ....                                    [ 63%]
-backend/tests/api/test_recommendations_and_courses.py .                  [ 68%]
-backend/tests/api/test_workforce_and_analytics.py ..                     [ 78%]
-backend/tests/integration/test_end_to_end_loop.py .                      [ 84%]
+backend/tests/api/test_ai_subsystem.py ..                                [  8%]
+backend/tests/api/test_assessments_and_gaps.py .                         [ 12%]
+backend/tests/api/test_auth.py ...                                       [ 25%]
+backend/tests/api/test_competencies.py ..                                [ 33%]
+backend/tests/api/test_health.py ....                                    [ 50%]
+backend/tests/api/test_recommendations_and_courses.py .                  [ 54%]
+backend/tests/api/test_workforce_and_analytics.py ..                     [ 62%]
+backend/tests/integration/test_end_to_end_loop.py .                      [ 66%]
+backend/tests/security/test_sih_hardening.py .....                       [ 87%]
 backend/tests/unit/test_repositories.py ...                              [100%]
 
-============================= 19 passed in 2.81s ==============================
+======================== 24 passed, 1 warning in 4.77s ========================
 ```
 
 ---
