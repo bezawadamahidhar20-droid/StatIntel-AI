@@ -206,7 +206,110 @@ def test_indic_nlp_processor_empty_query():
 
 
 
-# --- 7. FastAPI Route Handler Tests ---
+from models.scenario import PolicyScenarioEngine
+from main import (
+    health_check,
+    predict_forecast,
+    predict_anomaly,
+    predict_tier,
+    parse_nlp_query,
+    simulate_scenario,
+    clean_dataset,
+    ForecastRequest,
+    AnomalyRequest,
+    ClassifyRequest,
+    NLPQueryRequest,
+    ScenarioSimulateRequest,
+    DataQualityRequest,
+)
+
+
+# --- 7. Policy Scenario Engine Tests (Feature B) ---
+
+def test_scenario_engine_valid_simulation():
+    engine = PolicyScenarioEngine()
+    res = engine.validate_and_simulate(
+        geography="Tamil Nadu",
+        indicator="literacy_rate",
+        target_value=85.0,
+        target_year=2030,
+        base_year=2026,
+    )
+    assert res["success"] is True
+    assert res["geography"] == "Tamil Nadu"
+    assert res["indicator"] == "literacy_rate"
+    assert res["target_value"] == 85.0
+    assert res["target_year"] == 2030
+    assert len(res["historical_observations"]) >= 5
+    assert len(res["baseline_forecast"]) == 4  # 2027, 2028, 2029, 2030
+    assert len(res["target_trajectory"]) == 5  # 2026 to 2030
+    assert len(res["priority_districts"]) > 0
+    assert res["metrics"]["total_change_required"] > 0
+    assert res["metrics"]["annual_average_change_required"] > 0
+    assert "scientific_disclaimer" in res["methodology"]
+
+
+def test_scenario_engine_invalid_geography():
+    engine = PolicyScenarioEngine()
+    with pytest.raises(ValueError, match="Unsupported geography"):
+        engine.validate_and_simulate(
+            geography="Atlantis",
+            indicator="literacy_rate",
+            target_value=85.0,
+            target_year=2030,
+        )
+
+
+def test_scenario_engine_invalid_indicator():
+    engine = PolicyScenarioEngine()
+    with pytest.raises(ValueError, match="Unsupported indicator"):
+        engine.validate_and_simulate(
+            geography="Tamil Nadu",
+            indicator="rainfall_index",
+            target_value=85.0,
+            target_year=2030,
+        )
+
+
+def test_scenario_engine_target_year_out_of_range():
+    engine = PolicyScenarioEngine()
+    with pytest.raises(ValueError, match="Target year"):
+        engine.validate_and_simulate(
+            geography="Tamil Nadu",
+            indicator="literacy_rate",
+            target_value=85.0,
+            target_year=2024,
+            base_year=2026,
+        )
+
+
+def test_scenario_engine_target_value_out_of_bounds():
+    engine = PolicyScenarioEngine()
+    with pytest.raises(ValueError, match="outside valid percentage bounds"):
+        engine.validate_and_simulate(
+            geography="Tamil Nadu",
+            indicator="literacy_rate",
+            target_value=150.0,
+            target_year=2030,
+        )
+
+
+def test_scenario_engine_priority_districts_ranking():
+    engine = PolicyScenarioEngine()
+    res = engine.validate_and_simulate(
+        geography="Tamil Nadu",
+        indicator="literacy_rate",
+        target_value=95.0,
+        target_year=2030,
+    )
+    districts = res["priority_districts"]
+    assert len(districts) >= 3
+    # Verify sorted descending by gap
+    for i in range(len(districts) - 1):
+        assert districts[i]["gap"] >= districts[i + 1]["gap"]
+
+
+# --- 8. FastAPI Route Handler Tests ---
 
 def test_api_health():
     res = health_check()
@@ -268,6 +371,19 @@ def test_api_nlp_query_endpoint():
     assert res["structured_query"]["is_valid"] is True
 
 
+def test_api_scenario_simulate_endpoint():
+    req = ScenarioSimulateRequest(
+        geography="Tamil Nadu",
+        indicator="literacy_rate",
+        target_value=86.5,
+        target_year=2030,
+    )
+    res = simulate_scenario(req)
+    assert res["success"] is True
+    assert res["target_value"] == 86.5
+    assert len(res["priority_districts"]) > 0
+    assert "metrics" in res
+
 
 def test_api_clean_pipeline():
     req = DataQualityRequest(
@@ -279,4 +395,5 @@ def test_api_clean_pipeline():
     res = clean_dataset(req)
     assert "quality_metrics" in res
     assert res["quality_metrics"]["quality_score"] > 80
+
 

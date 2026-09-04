@@ -25,11 +25,18 @@ from tests.test_ml_backend import (
     test_indic_nlp_processor_tamil_districts_ranking,
     test_indic_nlp_processor_unknown_indicator,
     test_indic_nlp_processor_empty_query,
+    test_scenario_engine_valid_simulation,
+    test_scenario_engine_invalid_geography,
+    test_scenario_engine_invalid_indicator,
+    test_scenario_engine_target_year_out_of_range,
+    test_scenario_engine_target_value_out_of_bounds,
+    test_scenario_engine_priority_districts_ranking,
     test_api_health,
     test_api_predict_forecast,
     test_api_predict_anomaly,
     test_api_predict_classify,
     test_api_nlp_query_endpoint,
+    test_api_scenario_simulate_endpoint,
     test_api_clean_pipeline,
 )
 
@@ -50,13 +57,21 @@ def run_all():
         ("NLP: Tamil District Ranking", test_indic_nlp_processor_tamil_districts_ranking),
         ("NLP: Unknown Indicator Clarification", test_indic_nlp_processor_unknown_indicator),
         ("NLP: Empty Query Clarification", test_indic_nlp_processor_empty_query),
+        ("Scenario: Valid Target Trajectory Simulation", test_scenario_engine_valid_simulation),
+        ("Scenario: Invalid Geography Validation", test_scenario_engine_invalid_geography),
+        ("Scenario: Invalid Indicator Validation", test_scenario_engine_invalid_indicator),
+        ("Scenario: Target Year Bounding Validation", test_scenario_engine_target_year_out_of_range),
+        ("Scenario: Percentage Bounds Validation", test_scenario_engine_target_value_out_of_bounds),
+        ("Scenario: Priority Districts Gap Ranking", test_scenario_engine_priority_districts_ranking),
         ("FastAPI: /health Endpoint", test_api_health),
         ("FastAPI: /predict/forecast + SHAP", test_api_predict_forecast),
         ("FastAPI: /predict/anomaly + SHAP", test_api_predict_anomaly),
         ("FastAPI: /predict/classify + SHAP", test_api_predict_classify),
         ("FastAPI: /nlp/query Multilingual API", test_api_nlp_query_endpoint),
+        ("FastAPI: /scenario/simulate API", test_api_scenario_simulate_endpoint),
         ("FastAPI: /pipeline/clean Scoring", test_api_clean_pipeline),
     ]
+
 
     print("================================================================")
     print(">> Running StatIntel-AI ML Backend Verification Suite")

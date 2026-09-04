@@ -35,11 +35,13 @@ import CostSavingsCalculator from '../components/analytics/CostSavingsCalculator
 import ScalabilityMetrics from '../components/analytics/ScalabilityMetrics';
 import ModelMetrics from '../components/analytics/ModelMetrics';
 import NaturalLanguageQueryBar from '../components/analytics/NaturalLanguageQueryBar';
+import PolicyScenarioPlanner from '../components/analytics/PolicyScenarioPlanner';
 import { CensusDistrictData } from '../services/api/types';
+import { Sliders } from 'lucide-react';
 
 export const StatisticalIntelligenceDashboard: React.FC = () => {
   const { t } = useLanguage();
-  const [activeTab, setActiveTab] = useState<'overview' | 'map' | 'forecasting' | 'anomalies' | 'comparison' | 'reports' | 'upload' | 'audit' | 'metrics'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'map' | 'forecasting' | 'scenario' | 'anomalies' | 'comparison' | 'reports' | 'upload' | 'audit' | 'metrics'>('overview');
   const [selectedDistrict, setSelectedDistrict] = useState<CensusDistrictData | null>(null);
 
   return (
@@ -78,6 +80,7 @@ export const StatisticalIntelligenceDashboard: React.FC = () => {
             { id: 'overview', label: 'National Overview', icon: Activity },
             { id: 'map', label: t('indiaMap'), icon: MapPin },
             { id: 'forecasting', label: t('forecasting'), icon: TrendingUp },
+            { id: 'scenario', label: 'Policy Scenario Planner', icon: Sliders },
             { id: 'anomalies', label: t('anomalies'), icon: ShieldAlert },
             { id: 'comparison', label: 'Comparison Mode', icon: ArrowLeftRight },
             { id: 'reports', label: t('reports'), icon: FileSpreadsheet },
@@ -113,7 +116,6 @@ export const StatisticalIntelligenceDashboard: React.FC = () => {
         {/* KPI Cards Strip (always visible at top of dashboard) */}
         <KPICards />
 
-
         {/* Dynamic Tab Views */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
@@ -140,9 +142,17 @@ export const StatisticalIntelligenceDashboard: React.FC = () => {
         {activeTab === 'forecasting' && (
           <div className="space-y-6">
             <TimeSeriesChart />
+            <PolicyScenarioPlanner />
             <ComparisonMode />
           </div>
         )}
+
+        {activeTab === 'scenario' && (
+          <div className="space-y-6">
+            <PolicyScenarioPlanner />
+          </div>
+        )}
+
 
         {activeTab === 'anomalies' && (
           <div className="space-y-6">

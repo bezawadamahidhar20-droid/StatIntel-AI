@@ -22,11 +22,13 @@ from models.forecasting import TimeSeriesForecaster
 from models.anomaly import AnomalyDetector
 from models.classifier import SocioEconomicClassifier
 from models.nlp import IndicNLPProcessor
+from models.scenario import PolicyScenarioEngine
 
+# Initialize FastAPI App
 app = FastAPI(
-    title="StatIntel-AI ML Microservice",
-    version="1.0.0",
-    description="Production-grade AI/ML backend for Indian statistical intelligence and econometric analysis",
+    title="StatIntel-AI Machine Learning Microservice",
+    description="Statistical Forecasting, Anomaly Detection, SHAP Explainability & Multilingual NLP Engine",
+    version="2.4.0",
 )
 
 # Enable CORS for frontend applications
@@ -45,6 +47,7 @@ forecaster = TimeSeriesForecaster()
 anomaly_detector = AnomalyDetector()
 classifier = SocioEconomicClassifier()
 nlp_processor = IndicNLPProcessor()
+scenario_engine = PolicyScenarioEngine()
 
 
 # --- Request/Response Models ---
@@ -73,6 +76,15 @@ class NLPQueryRequest(BaseModel):
     query: str = Field(..., min_length=2, description="Analytical question in English or Hindi")
 
 
+class ScenarioSimulateRequest(BaseModel):
+    geography: str = Field(default="Tamil Nadu", description="State or District name")
+    indicator: str = Field(default="literacy_rate", description="Statistical indicator key")
+    target_value: float = Field(default=85.0, description="Target metric value to reach")
+    target_year: int = Field(default=2030, ge=2027, le=2035, description="Target planning year")
+    current_value: Optional[float] = Field(default=None, description="Optional custom baseline value")
+    base_year: int = Field(default=2026, description="Base year of observation")
+
+
 class DataQualityRequest(BaseModel):
     records: List[Dict[str, Any]] = Field(..., min_items=1, description="Uploaded dataset rows")
 
@@ -85,8 +97,27 @@ def health_check():
         "status": "online",
         "service": "StatIntel-AI ML Backend",
         "timestamp": datetime.utcnow().isoformat(),
-        "models_loaded": ["Prophet-LSTM-Hybrid", "IsolationForest", "XGBoost-Classifier", "IndicBERT-V2"],
+        "models_loaded": ["Prophet-LSTM-Hybrid", "IsolationForest", "XGBoost-Classifier", "IndicBERT-V2", "PolicyScenarioPlanner"],
     }
+
+
+@app.post("/scenario/simulate")
+def simulate_scenario(req: ScenarioSimulateRequest):
+    try:
+        res = scenario_engine.validate_and_simulate(
+            geography=req.geography,
+            indicator=req.indicator,
+            target_value=req.target_value,
+            target_year=req.target_year,
+            current_value=req.current_value,
+            base_year=req.base_year,
+        )
+        res["timestamp"] = datetime.utcnow().isoformat()
+        return res
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/predict/forecast")
