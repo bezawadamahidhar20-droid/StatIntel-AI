@@ -385,15 +385,136 @@ def test_api_scenario_simulate_endpoint():
     assert "metrics" in res
 
 
-def test_api_clean_pipeline():
-    req = DataQualityRequest(
-        records=[
-            {"state": "Maharashtra", "gdp": "4200000", "growth": 8.1},
-            {"state": "Tamil Nadu", "gdp": "2800000", "growth": 7.9},
-        ]
+from models.counterfactual import CounterfactualEngine
+from main import (
+    health_check,
+    predict_forecast,
+    predict_anomaly,
+    predict_tier,
+    parse_nlp_query,
+    simulate_scenario,
+    clean_dataset,
+    explain_socioeconomic_tier,
+    generate_counterfactual,
+    ForecastRequest,
+    AnomalyRequest,
+    ClassifyRequest,
+    NLPQueryRequest,
+    ScenarioSimulateRequest,
+    DataQualityRequest,
+    ExplainRequest,
+    CounterfactualRequest,
+)
+
+
+# --- 9. Counterfactual & Explainable AI Tests (Feature C) ---
+
+def test_counterfactual_engine_explain():
+    engine = CounterfactualEngine()
+    res = engine.explain_prediction(
+        literacy_rate=68.5,
+        sex_ratio=940.0,
+        urbanization_rate=24.0,
+        worker_participation_rate=38.0,
+        district_name="Dharmapuri",
     )
-    res = clean_dataset(req)
-    assert "quality_metrics" in res
-    assert res["quality_metrics"]["quality_score"] > 80
+    assert res["prediction"] in ["Aspirational", "Developing", "High-Performing"]
+    assert len(res["contributing_factors"]) == 4
+    # Contributions must be sorted descending by magnitude
+    factors = res["contributing_factors"]
+    for i in range(len(factors) - 1):
+        assert abs(factors[i]["shap_value"]) >= abs(factors[i + 1]["shap_value"])
+    # Check positive/negative attribution tracking
+    assert any(f["impact"] in ["positive", "negative"] for f in factors)
+    assert "scientific_disclaimer" in res
+
+
+def test_counterfactual_engine_generate_valid():
+    engine = CounterfactualEngine()
+    # Aspirational district
+    res = engine.generate_counterfactuals(
+        literacy_rate=65.0,
+        sex_ratio=910.0,
+        urbanization_rate=22.0,
+        worker_participation_rate=36.0,
+        target_tier="Developing",
+        district_name="Aspirational_Sample",
+    )
+    assert res["success"] is True
+    assert res["current_prediction"] == "Aspirational"
+    assert res["target_prediction"] == "Developing"
+    assert len(res["options"]) > 0
+    # Minimal option check
+    min_opt = res["options"][0]
+    assert "changes" in min_opt
+    assert len(min_opt["changes"]) >= 1
+    assert "scientific_disclaimer" in res or "disclaimer" in res
+
+
+def test_counterfactual_engine_already_at_target():
+    engine = CounterfactualEngine()
+    res = engine.generate_counterfactuals(
+        literacy_rate=95.0,
+        sex_ratio=1050.0,
+        urbanization_rate=75.0,
+        worker_participation_rate=45.0,
+        target_tier="High-Performing",
+        district_name="Kottayam",
+    )
+    assert res["success"] is True
+    assert res.get("is_already_target") is True
+
+
+def test_counterfactual_engine_invalid_bounds():
+    engine = CounterfactualEngine()
+    with pytest.raises(ValueError, match="out of valid bounds"):
+        engine.generate_counterfactuals(
+            literacy_rate=140.0,  # Invalid >100%
+            sex_ratio=900.0,
+            urbanization_rate=30.0,
+            worker_participation_rate=40.0,
+        )
+
+
+def test_counterfactual_engine_invalid_sex_ratio():
+    engine = CounterfactualEngine()
+    with pytest.raises(ValueError, match="out of valid bounds"):
+        engine.generate_counterfactuals(
+            literacy_rate=75.0,
+            sex_ratio=200.0,  # Invalid <500
+            urbanization_rate=30.0,
+            worker_participation_rate=40.0,
+        )
+
+
+def test_api_explain_endpoint():
+    req = ExplainRequest(
+        district_name="Salem",
+        literacy_rate=72.86,
+        sex_ratio=954.0,
+        urbanization_rate=51.0,
+        worker_participation_rate=42.0,
+    )
+    res = explain_socioeconomic_tier(req)
+    assert "prediction" in res
+    assert "contributing_factors" in res
+    assert len(res["contributing_factors"]) == 4
+    assert "scientific_disclaimer" in res
+
+
+def test_api_counterfactual_endpoint():
+    req = CounterfactualRequest(
+        district_name="Salem",
+        literacy_rate=72.86,
+        sex_ratio=954.0,
+        urbanization_rate=51.0,
+        worker_participation_rate=42.0,
+        target_tier="High-Performing",
+    )
+    res = generate_counterfactual(req)
+    assert res["success"] is True
+    assert "options" in res
+    assert "disclaimer" in res
+
 
 

@@ -23,7 +23,7 @@ import {
 import { submitNLPQuery, NLPQueryResponse, StructuredQueryData } from '../../services/nlpService';
 
 interface NaturalLanguageQueryBarProps {
-  onNavigateTab?: (tab: 'overview' | 'map' | 'forecasting' | 'anomalies' | 'comparison' | 'reports') => void;
+  onNavigateTab?: (tab: 'overview' | 'map' | 'forecasting' | 'scenario' | 'explainability' | 'anomalies' | 'comparison' | 'reports') => void;
 }
 
 export const NaturalLanguageQueryBar: React.FC<NaturalLanguageQueryBarProps> = ({ onNavigateTab }) => {
@@ -154,6 +154,18 @@ export const NaturalLanguageQueryBar: React.FC<NaturalLanguageQueryBarProps> = (
       label: '📊 5-Year Growth Delta',
     },
     {
+      lang: 'en',
+      badge: 'English',
+      text: 'What factors influenced the prediction for Dharmapuri?',
+      label: '🔬 Explain Prediction (SHAP)',
+    },
+    {
+      lang: 'en',
+      badge: 'English',
+      text: 'What would need to change to improve the district tier?',
+      label: '⚡ Counterfactual Analysis',
+    },
+    {
       lang: 'hi',
       badge: 'हिन्दी',
       text: 'तमिलनाडु में साक्षरता दर दिखाइए',
@@ -162,8 +174,8 @@ export const NaturalLanguageQueryBar: React.FC<NaturalLanguageQueryBarProps> = (
     {
       lang: 'hi',
       badge: 'हिन्दी',
-      text: 'पिछले 5 साल में तमिलनाडु की साक्षरता दर में कितनी बढ़ोतरी हुई?',
-      label: '📊 5 साल में साक्षरता वृद्धि',
+      text: 'मॉडल भविष्यवाणी के मुख्य कारक क्या हैं?',
+      label: '🔬 भविष्यवाणी के कारक (SHAP)',
     },
     {
       lang: 'ta',
@@ -174,8 +186,8 @@ export const NaturalLanguageQueryBar: React.FC<NaturalLanguageQueryBarProps> = (
     {
       lang: 'ta',
       badge: 'தமிழ்',
-      text: 'தமிழ்நாட்டில் அதிக கல்வியறிவு விகிதம் கொண்ட மாவட்டங்கள் எவை?',
-      label: '🏆 முதன்மை மாவட்டங்கள்',
+      text: 'கணிப்புக்கு காரணமான முக்கிய காரணிகள் என்ன?',
+      label: '🔬 கணிப்பு காரணிகள் (SHAP)',
     },
   ];
 
@@ -385,6 +397,10 @@ export const NaturalLanguageQueryBar: React.FC<NaturalLanguageQueryBarProps> = (
                       onNavigateTab('map');
                     } else if (result.suggested_action === 'view_forecast') {
                       onNavigateTab('forecasting');
+                    } else if (result.suggested_action === 'view_scenario') {
+                      onNavigateTab('scenario');
+                    } else if (result.suggested_action === 'view_explainability') {
+                      onNavigateTab('explainability');
                     } else {
                       onNavigateTab('overview');
                     }
@@ -396,6 +412,10 @@ export const NaturalLanguageQueryBar: React.FC<NaturalLanguageQueryBarProps> = (
                       ? 'View District Heatmap'
                       : result.suggested_action === 'view_forecast'
                       ? 'Explore Forecasts & SHAP'
+                      : result.suggested_action === 'view_scenario'
+                      ? 'Open Policy Scenario Planner'
+                      : result.suggested_action === 'view_explainability'
+                      ? 'View SHAP & Counterfactuals'
                       : 'View on Dashboard'}
                   </span>
                   <ChevronRight className="w-3.5 h-3.5" />

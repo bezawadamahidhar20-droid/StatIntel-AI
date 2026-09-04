@@ -31,7 +31,7 @@ export interface NLPQueryResponse {
   structured_query?: StructuredQueryData;
   data_points?: any[];
   visualization_type?: 'time_series' | 'district_heatmap' | 'kpi_metric' | 'none';
-  suggested_action?: 'view_map' | 'view_forecast' | 'explore_dashboard';
+  suggested_action?: 'view_map' | 'view_forecast' | 'view_scenario' | 'view_explainability' | 'explore_dashboard';
   shap_explanation?: Array<{ feature: string; importance_pct: number }>;
   model_metrics?: {
     engine: string;
@@ -105,10 +105,26 @@ function executeClientSideNLP(query: string): NLPQueryResponse {
   // Intent detection
   let intent = 'point_lookup';
   let operation = 'lookup';
-  let action: 'view_map' | 'view_forecast' | 'explore_dashboard' = 'explore_dashboard';
+  let action: 'view_map' | 'view_forecast' | 'view_scenario' | 'view_explainability' | 'explore_dashboard' = 'explore_dashboard';
   let vizType: 'time_series' | 'district_heatmap' | 'kpi_metric' | 'none' = 'kpi_metric';
 
   if (
+    qLower.includes('why') ||
+    qLower.includes('factors') ||
+    qLower.includes('explain') ||
+    qLower.includes('counterfactual') ||
+    qLower.includes('influence') ||
+    qLower.includes('change to improve') ||
+    qLower.includes('காரண') ||
+    qLower.includes('காரணி') ||
+    qLower.includes('कारक') ||
+    qLower.includes('प्रभावित')
+  ) {
+    intent = 'explainability';
+    operation = 'shap_counterfactual';
+    action = 'view_explainability';
+    vizType = 'kpi_metric';
+  } else if (
     qLower.includes('highest') ||
     qLower.includes('top') ||
     qLower.includes('district') ||
@@ -232,7 +248,21 @@ function executeClientSideNLP(query: string): NLPQueryResponse {
   let answer = '';
   let dataPoints: any[] = [];
 
-  if (operation === 'top_k') {
+  if (operation === 'shap_counterfactual') {
+    dataPoints = [
+      { feature: 'Literacy Rate (%)', shap_value: 0.42, impact: 'positive' },
+      { feature: 'Sex Ratio (F/1000M)', shap_value: 0.28, impact: 'positive' },
+      { feature: 'Urbanization Rate (%)', shap_value: -0.15, impact: 'negative' },
+      { feature: 'Worker Participation (%)', shap_value: 0.08, impact: 'positive' },
+    ];
+    if (lang === 'ta') {
+      answer = `மாதிரி கணிப்புக்கு கல்வி விகிதம் (+0.42) மற்றும் பாலின விகிதம் (+0.28) முக்கிய நேர்மறையான காரணிகளாக பங்களித்தன. கீழ்நிலை மாவட்டங்களை 'வளரும்' நிலைக்கு மாற்ற கல்வி விகிதத்தை உயர்த்தும் இலக்குகள் பரிந்துரைக்கப்படுகின்றன.`;
+    } else if (lang === 'hi') {
+      answer = `मॉडल की भविष्यवाणी में साक्षरता दर (+0.42) और लिंगानुपात (+0.28) ने मुख्य सकारात्मक योगदान दिया। मॉडल के अनुसार टियर सुधार के लिए साक्षरता में वृद्धि सबसे प्रभावी कारक है।`;
+    } else {
+      answer = `Under the classification model, Literacy Rate (+0.42) and Sex Ratio (+0.28) are the primary positive drivers for the district classification. Counterfactual analysis indicates targeted literacy improvements yield the most responsive tier advancement.`;
+    }
+  } else if (operation === 'top_k') {
     dataPoints = [
       { district: 'Kottayam', state: 'Kerala', value: 97.21 },
       { district: 'Kanyakumari', state: 'Tamil Nadu', value: 91.75 },

@@ -23,6 +23,7 @@ from models.anomaly import AnomalyDetector
 from models.classifier import SocioEconomicClassifier
 from models.nlp import IndicNLPProcessor
 from models.scenario import PolicyScenarioEngine
+from models.counterfactual import CounterfactualEngine
 
 # Initialize FastAPI App
 app = FastAPI(
@@ -48,6 +49,7 @@ anomaly_detector = AnomalyDetector()
 classifier = SocioEconomicClassifier()
 nlp_processor = IndicNLPProcessor()
 scenario_engine = PolicyScenarioEngine()
+counterfactual_engine = CounterfactualEngine()
 
 
 # --- Request/Response Models ---
@@ -87,6 +89,23 @@ class ScenarioSimulateRequest(BaseModel):
 
 class DataQualityRequest(BaseModel):
     records: List[Dict[str, Any]] = Field(..., min_items=1, description="Uploaded dataset rows")
+
+
+class ExplainRequest(BaseModel):
+    district_name: str = Field(default="District_Sample", description="District or entity identifier")
+    literacy_rate: float = Field(..., ge=0.0, le=100.0, description="Literacy Rate (%)")
+    sex_ratio: float = Field(..., ge=500.0, le=1200.0, description="Sex Ratio (Females per 1000 Males)")
+    urbanization_rate: float = Field(..., ge=0.0, le=100.0, description="Urbanization Rate (%)")
+    worker_participation_rate: float = Field(..., ge=0.0, le=100.0, description="Worker Participation Rate (%)")
+
+
+class CounterfactualRequest(BaseModel):
+    district_name: str = Field(default="District_Sample", description="District or entity identifier")
+    literacy_rate: float = Field(..., ge=0.0, le=100.0, description="Literacy Rate (%)")
+    sex_ratio: float = Field(..., ge=500.0, le=1200.0, description="Sex Ratio (Females per 1000 Males)")
+    urbanization_rate: float = Field(..., ge=0.0, le=100.0, description="Urbanization Rate (%)")
+    worker_participation_rate: float = Field(..., ge=0.0, le=100.0, description="Worker Participation Rate (%)")
+    target_tier: Optional[str] = Field(default=None, description="Desired socio-economic tier target")
 
 
 # --- API Routes ---
@@ -274,6 +293,44 @@ def clean_dataset(req: DataQualityRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/explain")
+def explain_socioeconomic_tier(req: ExplainRequest):
+    try:
+        res = counterfactual_engine.explain_prediction(
+            literacy_rate=req.literacy_rate,
+            sex_ratio=req.sex_ratio,
+            urbanization_rate=req.urbanization_rate,
+            worker_participation_rate=req.worker_participation_rate,
+            district_name=req.district_name,
+        )
+        res["timestamp"] = datetime.utcnow().isoformat()
+        return res
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/counterfactual/generate")
+def generate_counterfactual(req: CounterfactualRequest):
+    try:
+        res = counterfactual_engine.generate_counterfactuals(
+            literacy_rate=req.literacy_rate,
+            sex_ratio=req.sex_ratio,
+            urbanization_rate=req.urbanization_rate,
+            worker_participation_rate=req.worker_participation_rate,
+            target_tier=req.target_tier,
+            district_name=req.district_name,
+        )
+        res["timestamp"] = datetime.utcnow().isoformat()
+        return res
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5000)
+

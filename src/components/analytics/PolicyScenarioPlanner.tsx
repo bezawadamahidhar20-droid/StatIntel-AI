@@ -561,8 +561,11 @@ export const PolicyScenarioPlanner: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400">
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-400">
               <span>Source: Census & MoSPI Benchmark Statistical Dataset</span>
+              <span className="text-slate-500 italic">
+                * Baseline forecast is model-driven; target trajectory is planning interpolation (not causal policy impact).
+              </span>
             </div>
           </div>
         </div>
