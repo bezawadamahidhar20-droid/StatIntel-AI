@@ -25,11 +25,11 @@ export const TRANSLATIONS = {
     iipTitle: 'Index of Industrial Production',
     repoRateTitle: 'RBI Policy Repo Rate',
     workforceReadiness: 'Workforce Competency Index',
-    datasetsAnalyzed: 'Datasets Analyzed Live',
+    datasetsAnalyzed: 'Census District Baselines',
     
     // Analytics & Charts
     timeSeriesTitle: 'Time-Series Forecast & Uncertainty Bounds',
-    forecastModel: 'Prophet + LSTM Hybrid Model',
+    forecastModel: 'Trend-Decomposition Forecast (Prophet/LSTM-style)',
     confidenceInterval: '95% Confidence Band',
     upperBound: 'Upper Bound',
     lowerBound: 'Lower Bound',
@@ -82,11 +82,11 @@ export const TRANSLATIONS = {
     iipTitle: 'औद्योगिक उत्पादन सूचकांक (IIP)',
     repoRateTitle: 'आरबीआई नीतिगत रेपो दर',
     workforceReadiness: 'कार्यबल सांख्यिकी दक्षता सूचकांक',
-    datasetsAnalyzed: 'विश्लेषित राष्ट्रीय डेटासेट',
+    datasetsAnalyzed: 'जनगणना जिला आधार डेटा',
     
     // Analytics & Charts
     timeSeriesTitle: 'समय-श्रृंखला पूर्वानुमान एवं 95% विश्वास बैंड',
-    forecastModel: 'प्रॉफेट + एलएसटीएम हाइब्रिड मॉडल',
+    forecastModel: 'ट्रेंड विघटन-आधारित पूर्वानुमान (प्रॉफेट/एलएसटीएम-शैली)',
     confidenceInterval: '95% विश्वास अंतराल',
     upperBound: 'उच्चतम सीमा',
     lowerBound: 'न्यूनतम सीमा',

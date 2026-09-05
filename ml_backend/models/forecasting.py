@@ -10,8 +10,9 @@ import numpy as np
 class TimeSeriesForecaster:
     def __init__(self, horizon: int = 6):
         self.horizon = horizon
-        self.rmse: float = 0.42
-        self.r2_score: float = 0.96
+        # Filled in during fit_predict from the supplied training series.
+        self.rmse: float = 0.0
+        self.r2_score: float = 0.0
 
     def fit_predict(
         self,
@@ -61,16 +62,21 @@ class TimeSeriesForecaster:
                 "confidence": round(float(confidence_level), 2),
             })
 
-        # Calculate RMSE on training series
+        # Calculate in-sample fit metrics on the training series.
+        # Note: these describe fit quality on the supplied historical values,
+        # not out-of-sample forecast accuracy on unseen data.
         train_rmse = float(np.sqrt(np.mean(residuals**2)))
+        ss_res = float(np.sum(residuals**2))
+        ss_tot = float(np.sum((y - np.mean(y)) ** 2))
         self.rmse = round(train_rmse, 3)
+        self.r2_score = round(1.0 - ss_res / ss_tot, 3) if ss_tot > 0 else 1.0
 
         return {
             "forecast": forecast_items,
             "metrics": {
                 "rmse": self.rmse,
                 "r2_score": self.r2_score,
-                "model_type": "Prophet-LSTM-Hybrid",
+                "model_type": "Trend-Decomposition-Simulation",
                 "training_samples": n,
             },
             "trend_direction": "increasing" if poly_coeffs[0] > 0 else "decreasing",

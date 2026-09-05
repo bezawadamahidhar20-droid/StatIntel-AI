@@ -117,8 +117,9 @@ Every field is validated against in-memory whitelisted schemas of:
     { "feature": "Tamil Nadu", "importance_pct": 50.0 }
   ],
   "model_metrics": {
-    "engine": "IndicBERT-V2-Multilingual",
-    "accuracy": 0.968
+    "engine": "Multilingual-Semantic-Parser (Unicode Script Detection + MoSPI Entity Mapping)",
+    "supported_languages": ["English", "Hindi", "Tamil"],
+    "parser_type": "Rule & Lexical Entity Resolver"
   },
   "timestamp": "2026-09-04T16:20:41.931629"
 }
@@ -180,7 +181,7 @@ Executed all 21 tests in `ml_backend/tests/test_ml_backend.py` via `run_tests.py
 
 ## 7. Files Changed / Created
 
-1. **`ml_backend/models/nlp.py`**: Upgraded IndicBERT-V2 engine, trilingual indicator & geography mappings, safe `StructuredQuery` schema, and localized answer generator.
+1. **`ml_backend/models/nlp.py`**: Implemented the rule & lexical multilingual semantic parser (replacing the placeholder IndicBERT-V2 engine label), trilingual indicator & geography mappings, safe `StructuredQuery` schema, and localized answer generator.
 2. **`ml_backend/main.py`**: Updated `/nlp/query` route handler to return structured queries, localized answers, and dashboard actions.
 3. **`ml_backend/tests/test_ml_backend.py`**: Added 9 dedicated unit tests covering English, Hindi, Tamil, Top-K rankings, 5-year growth deltas, and clarification cases.
 4. **`ml_backend/tests/run_tests.py`**: Updated test runner to verify all 21 ML backend and NLP test cases.
@@ -193,5 +194,5 @@ Executed all 21 tests in `ml_backend/tests/test_ml_backend.py` via `run_tests.py
 
 ## 8. Known Limitations & Future Enhancements
 
-1. **Additional Regional Languages:** IndicBERT supports 22 Scheduled Indian Languages. Telugu, Bengali, and Marathi can be added in subsequent phases by expanding the keyword dictionaries.
+1. **Additional Regional Languages:** The parser is dictionary-driven. Telugu, Bengali, and Marathi can be added in subsequent phases by expanding the keyword dictionaries.
 2. **Offline Speech Recognition:** Web Speech API relies on browser-level speech engines; integration with offline Whisper / Bhashini API can be evaluated in subsequent releases.

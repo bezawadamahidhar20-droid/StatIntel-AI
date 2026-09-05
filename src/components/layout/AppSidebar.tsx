@@ -22,6 +22,8 @@ import {
   LogOut,
   ChevronRight,
   ShieldAlert,
+  FlaskConical,
+  ShieldCheck,
 } from 'lucide-react';
 import { useApp, AppView } from '../../context/AppContext';
 
@@ -59,6 +61,13 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     { id: 'learning-path', label: 'Adaptive Path', icon: Route },
     { id: 'courses', label: 'Skill Learning', icon: BookOpen },
     {
+      id: 'virtual-labs',
+      label: 'Virtual Laboratories',
+      icon: FlaskConical,
+      badge: 'R6 Lab',
+      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+    },
+    {
       id: 'quiz-generator',
       label: 'AI Quiz Studio',
       icon: Sparkles,
@@ -69,6 +78,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     { id: 'assistant', label: 'Karmayogi AI Assistant', icon: Bot },
     { id: 'history', label: 'Learning History', icon: History },
     { id: 'certificates', label: 'Verified Certificates', icon: Award },
+    { id: 'compliance', label: 'Security & Compliance', icon: ShieldCheck, badge: 'DPDP', badgeColor: 'bg-slate-100 text-slate-700 border-slate-200' },
     { id: 'profile', label: 'Officer Profile', icon: User },
   ];
 
@@ -90,6 +100,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
       badgeColor: 'bg-purple-100 text-purple-800 border-purple-200',
     },
     { id: 'admin-training-planner', label: 'AI Training Planner', icon: CalendarDays },
+    { id: 'compliance', label: 'Security & Compliance', icon: ShieldCheck, badge: 'CERT-In', badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
   ];
 
   const currentItems = userRole === 'ADMIN' ? adminNavItems : learnerNavItems;

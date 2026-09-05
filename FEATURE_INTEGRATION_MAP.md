@@ -13,7 +13,7 @@
 |---|---|---|---|---|---|---|
 | **1. Government Data Connectors** | `src/services/api/dataGovIn.ts`, `mospi.ts`, `rbi.ts`, `census.ts`, `http.ts`, `cache.ts` | External `api.data.gov.in`, `/api/v1/mospi/*`, `/api/v1/rbi/*`, `/api/v1/census/*` | In-memory + localStorage cache entries | `KPICards.tsx`, `IndiaMap.tsx`, `TimeSeriesChart.tsx` | Native fetch, AbortController | **SAFE** &mdash; Connectors are modular with built-in fallbacks. |
 | **2. Time-Series Forecasting + Bands** | `ml_backend/models/forecasting.py`, `ml_backend/main.py`, `src/components/analytics/TimeSeriesChart.tsx` | `POST /predict/forecast` | None (Stateless ML Pipeline) | `TimeSeriesChart.tsx`, `ExplainAIModal.tsx` | `numpy`, `scipy`, `pydantic`, `fastapi`, `lucide-react` | **SAFE** &mdash; Pure mathematical forecasting with standard JSON contracts. |
-| **3. TreeSHAP Explainability (XAI)** | `ml_backend/explainability/shap_explainer.py`, `src/components/modals/ExplainAIModal.tsx` | Embedded in all `/predict/*` responses | None (Feature vectors) | `ExplainAIModal.tsx` | `numpy`, `lucide-react`, `motion` | **SAFE** &mdash; Isolated modal component accepting standardized `ShapFeature[]`. |
+| **3. SHAP-style Explainability (XAI)** | `ml_backend/explainability/shap_explainer.py`, `src/components/modals/ExplainAIModal.tsx` | Embedded in all `/predict/*` responses | None (Feature vectors) | `ExplainAIModal.tsx` | `numpy`, `lucide-react`, `motion` | **SAFE** &mdash; Isolated modal component accepting standardized `ShapFeature[]`. |
 | **4. District Geospatial Heatmap** | `src/components/analytics/IndiaMap.tsx`, `src/services/api/census.ts` | `/api/v1/census/districts`, `/national-overview` | `census_districts` payload | `IndiaMap.tsx`, `DrillDown.tsx` | `lucide-react`, `tailwind` | **SAFE** &mdash; Pure client-side reactive rendering with 788 district coordinates. |
 | **5. Anomaly Detection & Alerts** | `ml_backend/models/anomaly.py`, `src/services/alertService.ts`, `src/components/analytics/AnomalyAlert.tsx`, `AlertThresholdSettings.tsx` | `POST /predict/anomaly` | `statintel_alert_threshold_config`, `recent_alerts` | `AnomalyAlert.tsx`, `AlertThresholdSettings.tsx` | `scikit-learn` (IsolationForest), `numpy` | **SAFE** &mdash; Threshold configuration stored in local storage and synced with UI. |
 | **6. Comparative Macroeconomic Analytics** | `src/components/analytics/ComparisonMode.tsx`, `src/components/analytics/DrillDown.tsx` | Client state + API aggregators | None | `ComparisonMode.tsx`, `DrillDown.tsx` | `lucide-react` | **SAFE** &mdash; Fully decoupled view component. |
@@ -32,7 +32,7 @@
 - **Concept:** Conversational policy advisor that answers complex econometric questions, summarizes district discrepancies, and suggests fiscal/sampling interventions based on real data feeds.
 - **Files Involved:**
   - `src/components/copilot/PolicyCopilotDrawer.tsx` (New interactive drawer / floating widget)
-  - `src/services/copilotService.ts` (Connects to Groq Qwen-3.6 / Gemini / IndicBERT with domain prompt)
+  - `src/services/copilotService.ts` (Connects to Groq Qwen-3.6 / Gemini with domain prompt)
   - `ml_backend/models/nlp.py` (Entity and query intent extraction)
   - `ml_backend/main.py` (Adds `/copilot/query` endpoint)
 - **API Endpoints:** `POST /api/v1/copilot/chat` or `POST /copilot/query`
@@ -74,7 +74,7 @@
 ### Feature D: Multilingual Natural Language Analytics (Indic Voice/Text to Visual Query)
 - **Concept:** Allows an officer to type or speak in Hindi (e.g., *"महाराष्ट्र में औद्योगिक उत्पादन और मुद्रास्फीति का रुझान दिखाएं"*) and automatically renders the exact filtered chart and district card with Hindi narration synthesis.
 - **Files Involved:**
-  - `ml_backend/models/nlp.py` (Enhanced IndicBERT entity extraction for all 28 states & 788 districts)
+  - `ml_backend/models/nlp.py` (Multilingual semantic parser with rule/lexical indicator & geography mappings)
   - `src/components/analytics/NaturalLanguageQueryBar.tsx` (Smart search input with instant voice/text suggestions)
   - `src/services/i18n.tsx` (Devanagari query mapping)
 - **API Endpoints:** `POST /nlp/query` (Already built and tested in Phase 3!)

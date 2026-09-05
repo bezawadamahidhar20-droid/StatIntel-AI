@@ -26,7 +26,7 @@ Feature C introduces **Local Model Feature Attribution (Baseline Contribution)**
   2. `Developing` (Tier 1 — Moderate socio-economic capacity)
   3. `High-Performing` (Tier 2 — High developmental maturity)
 - **Confidence & Probability:** Derived directly from `model.predict_proba(X)[pred_idx]` (uncalibrated softmax ensemble output).
-- **Training Accuracy:** Evaluated on MoSPI Census & PLFS statistical benchmark distributions.
+- **Training Accuracy:** In-sample fit on synthetic reference vectors drawn around Census/PLFS benchmark distributions — not a claim of accuracy on real MoSPI data.
 
 ### Real Model Features & Bounding Constraints
 

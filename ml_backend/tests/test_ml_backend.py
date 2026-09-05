@@ -6,7 +6,7 @@ Tests:
 - TimeSeriesForecaster (Prophet + LSTM simulation with confidence bands & RMSE)
 - AnomalyDetector (Isolation Forest)
 - SocioEconomicClassifier (GradientBoosting multi-class)
-- IndicNLPProcessor (English & Hindi query parsing)
+- Multilingual Semantic Parser (English, Hindi & Tamil query parsing)
 - FastAPI Endpoints (/health, /predict/forecast, /predict/anomaly, /predict/classify, /nlp/query, /pipeline/clean)
 """
 
@@ -120,7 +120,7 @@ def test_socio_economic_classifier():
     assert high_perf["metrics"]["training_accuracy"] > 0.85
 
 
-# --- 6. IndicBERT Multilingual NLP & Structured Query Tests ---
+# --- 6. Multilingual Semantic Parser & Structured Query Tests ---
 
 def test_indic_nlp_processor_english_trend():
     nlp = IndicNLPProcessor()

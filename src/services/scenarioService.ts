@@ -30,8 +30,9 @@ export interface ScenarioSimulationResult {
     percentage_change_required: number;
     baseline_forecast_target_year: number;
     gap_to_baseline_forecast: number;
-    model_rmse: number;
-    model_r2: number;
+    /** Present when the response comes from the ML backend; the client-side fallback does not assert measured model metrics. */
+    model_rmse?: number;
+    model_r2?: number;
   };
   historical_observations: Array<{ year: number; value: number; type: string }>;
   baseline_forecast: Array<{
@@ -220,8 +221,6 @@ function executeClientSideScenario(payload: ScenarioRequestPayload): ScenarioSim
       percentage_change_required: pctChange,
       baseline_forecast_target_year: baselineFinal,
       gap_to_baseline_forecast: gapToBaseline,
-      model_rmse: 0.42,
-      model_r2: 0.96,
     },
     historical_observations: hist,
     baseline_forecast: baseline,
@@ -229,7 +228,7 @@ function executeClientSideScenario(payload: ScenarioRequestPayload): ScenarioSim
     priority_districts: priorityDistricts,
     methodology: {
       type: 'Target Trajectory & Planning Scenario Model',
-      baseline_model: 'Prophet-LSTM-Hybrid (Autoregressive Polynomial Decomposition)',
+      baseline_model: 'Linear Trend Extrapolation with Confidence Bounds (Client-Side Fallback)',
       planning_method: 'Linear Target Interpolation & Differential Gap Analysis',
       scientific_disclaimer:
         'Scenario results are model-based planning estimates and should not be interpreted as causal policy impact estimates unless supported by a verified causal model.',

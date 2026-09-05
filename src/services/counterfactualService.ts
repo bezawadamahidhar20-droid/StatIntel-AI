@@ -219,8 +219,8 @@ function executeClientSideExplain(payload: ExplainRequestPayload): ExplainResult
     contributing_factors: rawFactors,
     top_drivers: rawFactors.slice(0, 3),
     model_metrics: {
-      algorithm: 'GradientBoostingClassifier (Ensemble Decision Trees)',
-      accuracy: 0.942,
+      algorithm: 'Client-Side Deterministic Weighted-Indicator Tier Scorer',
+      note: 'Offline fallback heuristic; no trained-model accuracy claim.',
     },
     scientific_disclaimer:
       'Feature contributions describe how the model arrived at its prediction; they do not establish causation.',

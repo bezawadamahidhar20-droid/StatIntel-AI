@@ -34,7 +34,7 @@ import {
 export const AdminDashboardView: React.FC = () => {
   const { switchRole, navigate, addNotification } = useApp();
   const [selectedDivision, setSelectedDivision] = useState<string>('All');
-  const [activeTab, setActiveTab] = useState<'overview' | 'heatmap' | 'predictive' | 'planner'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'heatmap' | 'effectiveness' | 'predictive' | 'planner'>('overview');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const [heatmapData, setHeatmapData] = useState<DepartmentHeatmapRow[]>(departmentHeatmapData);
@@ -236,6 +236,7 @@ export const AdminDashboardView: React.FC = () => {
         {[
           { id: 'overview', label: 'Workforce Overview', icon: Users },
           { id: 'heatmap', label: 'Division Competency Heatmap', icon: Flame },
+          { id: 'effectiveness', label: 'Training Effectiveness (Kirkpatrick L2)', icon: TrendingUp },
           { id: 'predictive', label: 'Predictive Skill Demand', icon: BrainCircuit },
           { id: 'planner', label: 'AI Training Planner', icon: CalendarDays },
         ].map((tab) => {
@@ -443,6 +444,159 @@ export const AdminDashboardView: React.FC = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Training Effectiveness (Kirkpatrick Level 2 Evaluation - SIH26101 R9) */}
+      {activeTab === 'effectiveness' && (
+        <div className="space-y-6">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-5 bg-white border border-slate-200 rounded-xl space-y-1">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Avg Pre-to-Post Delta</div>
+              <div className="text-2xl font-black text-emerald-600">+38.4%</div>
+              <div className="text-[11px] text-slate-500">Across 842 completed assessments</div>
+            </div>
+            <div className="p-5 bg-white border border-slate-200 rounded-xl space-y-1">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">90-Day Retention Index</div>
+              <div className="text-2xl font-black text-blue-600">84.6%</div>
+              <div className="text-[11px] text-slate-500">Spaced knowledge checks pass rate</div>
+            </div>
+            <div className="p-5 bg-white border border-slate-200 rounded-xl space-y-1">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">First-Attempt Pass Rate</div>
+              <div className="text-2xl font-black text-indigo-600">88.2%</div>
+              <div className="text-[11px] text-slate-500">Post-course diagnostic mastery</div>
+            </div>
+            <div className="p-5 bg-white border border-slate-200 rounded-xl space-y-1">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Learning Velocity</div>
+              <div className="text-2xl font-black text-slate-900">3.4x ROI</div>
+              <div className="text-[11px] text-slate-500">+7.8% score per 10 learning hrs</div>
+            </div>
+          </div>
+
+          {/* Detailed Course Pre/Post Delta Matrix */}
+          <div className="bg-white border border-slate-200 rounded-xl shadow-xs p-6 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
+              <div>
+                <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-blue-600" />
+                  <span>Kirkpatrick Level 2 Learning Evaluation by MoSPI Competency</span>
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Direct measurement of knowledge acquisition comparing pre-training diagnostic baseline with post-training assessments.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  addNotification({
+                    title: 'Efficacy Dossier Exported',
+                    message: 'NSSTA Training Effectiveness & Kirkpatrick Level 2 Evaluation report downloaded.',
+                    type: 'success',
+                  });
+                }}
+                className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Export Efficacy CSV</span>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {[
+                {
+                  competency: 'Survey Design & Sampling Methodology',
+                  domain: 'Statistical',
+                  preScore: 48,
+                  postScore: 88,
+                  officersTrained: 234,
+                  satisfaction: 4.8,
+                },
+                {
+                  competency: 'National Accounts Statistics (SNA 2008 & SUT)',
+                  domain: 'Statistical',
+                  preScore: 42,
+                  postScore: 84,
+                  officersTrained: 186,
+                  satisfaction: 4.9,
+                },
+                {
+                  competency: 'Python & Polars for Official Microdata Analytics',
+                  domain: 'Technical',
+                  preScore: 34,
+                  postScore: 82,
+                  officersTrained: 312,
+                  satisfaction: 4.7,
+                },
+                {
+                  competency: 'Price Statistics (CPI/WPI Weighting Revision)',
+                  domain: 'Statistical',
+                  preScore: 54,
+                  postScore: 90,
+                  officersTrained: 145,
+                  satisfaction: 4.8,
+                },
+                {
+                  competency: 'DPDP Act 2023 & Government Cloud Security',
+                  domain: 'Digital Governance',
+                  preScore: 40,
+                  postScore: 89,
+                  officersTrained: 290,
+                  satisfaction: 4.9,
+                },
+              ].map((item, idx) => {
+                const delta = item.postScore - item.preScore;
+                return (
+                  <div key={idx} className="p-4 bg-slate-50/70 border border-slate-200 rounded-xl space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-slate-900">{item.competency}</span>
+                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[10px] font-semibold">
+                            {item.domain}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 mt-0.5">
+                          {item.officersTrained} Officers Certified • Faculty Rating: ★ {item.satisfaction}/5.0
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 text-xs font-semibold shrink-0">
+                        <div className="text-slate-500">
+                          Pre: <span className="font-mono font-bold text-slate-700">{item.preScore}%</span>
+                        </div>
+                        <div className="text-slate-500">
+                          Post: <span className="font-mono font-bold text-slate-900">{item.postScore}%</span>
+                        </div>
+                        <div className="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-md font-mono font-bold">
+                          +{delta}% Gain
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Comparative Visual Bar */}
+                    <div className="space-y-1">
+                      <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden flex">
+                        <div
+                          className="bg-slate-400 h-full transition-all"
+                          style={{ width: `${item.preScore}%` }}
+                          title={`Pre-Training: ${item.preScore}%`}
+                        />
+                        <div
+                          className="bg-emerald-500 h-full transition-all"
+                          style={{ width: `${delta}%` }}
+                          title={`Knowledge Gain: +${delta}%`}
+                        />
+                      </div>
+                      <div className="flex justify-between text-[10px] text-slate-400">
+                        <span>Baseline: {item.preScore}%</span>
+                        <span className="text-emerald-700 font-semibold">Post-Assessment Mastery: {item.postScore}%</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

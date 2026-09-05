@@ -1,6 +1,11 @@
 """
 Multi-Class Classifier Module for StatIntel-AI.
 Categorizes districts / states into development tiers (Aspirational, Developing, High-Performing).
+
+Scientific Integrity Note:
+The classifier is fitted on synthetic reference vectors drawn around Census-derived
+indicator distributions. Reported metrics are in-sample training fits on those synthetic
+vectors and are NOT claims of out-of-sample accuracy on real MoSPI data.
 """
 
 from typing import List, Dict, Any, Tuple
@@ -19,8 +24,8 @@ class SocioEconomicClassifier:
             max_depth=3,
             random_state=random_state,
         )
-        self.accuracy = 0.934
-        self.f1_macro = 0.928
+        self.accuracy = 0.0
+        self.f1_macro = 0.0
         self._is_trained = False
         self._init_benchmark_model()
 
@@ -60,8 +65,9 @@ class SocioEconomicClassifier:
                 name: round(float(prob), 3) for name, prob in zip(self.CLASSES, probabilities)
             },
             "metrics": {
-                "model_name": "GradientBoosting-XGB-Classifier",
+                "model_name": "GradientBoostingClassifier",
                 "training_accuracy": self.accuracy,
                 "f1_score": self.f1_macro,
+                "evaluation_basis": "in-sample fit on synthetic reference vectors",
             },
         }

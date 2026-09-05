@@ -23,6 +23,8 @@ import {
 import { isTechnicalSoftwareSkill } from '../services/groqService';
 import { generateCompetenciesAndGapsForRole } from '../services/geminiService';
 
+import { InferredProfileResult, OfficialProfileInput } from '../services/autoProfileService';
+
 export type AppView =
   | 'landing'
   | 'login'
@@ -40,6 +42,8 @@ export type AppView =
   | 'history'
   | 'certificates'
   | 'profile'
+  | 'virtual-labs'
+  | 'compliance'
   | 'admin-dashboard'
   | 'admin-heatmap'
   | 'admin-training-effectiveness'
@@ -123,7 +127,7 @@ interface AppContextType {
   logout: () => void;
   updateUserAvatar: (avatarUrl: string) => void;
   updateCompetencyScore: (skillOrCompName: string, newScore: number) => void;
-
+  applyInferredProfile?: (inferred: InferredProfileResult, profileData: OfficialProfileInput) => void;
   enrollCourse: (courseId: string) => void;
   submitAssessmentAttempt: (assessmentId: string, userAnswers: number[], timeSpentSeconds: number) => void;
   addNewGeneratedAssessment: (newAssessment: Assessment) => void;
@@ -360,6 +364,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.setItem('statintel_user', JSON.stringify(updated));
       return updated;
     });
+  };
+
+  const applyInferredProfile = (inferred: InferredProfileResult, profileData: OfficialProfileInput) => {
+    setCompetencies(inferred.competencies);
+    setSkillGaps(inferred.skillGaps);
+    const updatedUser: User = {
+      ...currentUser,
+      name: profileData.name || currentUser.name,
+      designation: profileData.designation || currentUser.designation,
+      department: profileData.department || currentUser.department,
+      cadre: profileData.cadre || currentUser.cadre,
+      institution: profileData.education?.institution || currentUser.institution,
+      degree: profileData.education?.degree || currentUser.degree,
+      overallCompetency: inferred.overallCompetency,
+      roleReadiness: inferred.roleReadiness,
+      criticalGapsCount: inferred.criticalGapsCount,
+    };
+    setCurrentUser(updatedUser);
+    localStorage.setItem('statintel_user', JSON.stringify(updatedUser));
   };
 
   const loginAsAdmin = (passcode: string): boolean => {
@@ -732,6 +755,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         logout,
         updateUserAvatar,
         updateCompetencyScore,
+        applyInferredProfile,
         enrollCourse,
         submitAssessmentAttempt,
         addNewGeneratedAssessment,

@@ -88,12 +88,12 @@ export async function submitNLPQuery(query: string): Promise<NLPQueryResponse> {
     console.warn('[NLP Microservice Offline] Falling back to verified client-side NLP processor:', err);
   }
 
-  // Graceful client-side fallback matching IndicBERT NLP specification
+  // Graceful client-side fallback mirroring the Multilingual Semantic Parser behaviour
   return executeClientSideNLP(query.trim());
 }
 
 /**
- * Fallback verified client-side resolver (identical schema to Python IndicNLPProcessor)
+ * Fallback client-side resolver (identical schema to the Python multilingual parser)
  */
 function executeClientSideNLP(query: string): NLPQueryResponse {
   const isTamil = /[\u0B80-\u0BFF]/.test(query);
@@ -342,9 +342,9 @@ function executeClientSideNLP(query: string): NLPQueryResponse {
       { feature: state, importance_pct: 35.0 },
     ],
     model_metrics: {
-      engine: 'IndicBERT-V2-Multilingual',
+      engine: 'Multilingual-Semantic-Parser (Unicode Script Detection + MoSPI Entity Mapping)',
       supported_languages: ['English', 'Hindi', 'Tamil'],
-      accuracy: 0.968,
+      parser_type: 'Rule & Lexical Entity Resolver',
     },
     timestamp: new Date().toISOString(),
   };

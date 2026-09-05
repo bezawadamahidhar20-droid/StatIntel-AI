@@ -7,7 +7,7 @@
 
 ### Nature of the Model Implementation
 > **Explicit Scientific Distinction:**
-> This feature implements a **Target Planning Trajectory & Model-Based Baseline Forecasting Engine (Prophet-LSTM Hybrid)** with **Differential Gap Analysis and Priority District Interventions**.
+> This feature implements a **Target Planning Trajectory & Model-Based Baseline Forecasting Engine (Trend-Decomposition / Prophet-LSTM-style simulation)** with **Differential Gap Analysis and Priority District Interventions**.
 >
 > **It is NOT a causal policy impact simulator.** It does not claim that adjusting a slider "causes" an econometric outcome. Instead, it computes what mathematical velocity (annual average change) is required to bridge the gap between observed reality, model-based baseline trajectory, and policy milestone objectives.
 
@@ -16,12 +16,12 @@
 ## 2. Existing Model & Dataset Used
 
 ### 1. Existing Model:
-- **Model:** `TimeSeriesForecaster` (`Prophet-LSTM-Hybrid`) located in `ml_backend/models/forecasting.py`.
-- **Methodology:** Quadratic trend fitting + autoregressive decomposition + Bayesian 95% upper/lower confidence bounds ($z = 1.96 \cdot \sigma \sqrt{1 + 0.15 \cdot t}$).
-- **Performance:** RMSE = $0.42$, $R^2 = 0.96$.
+- **Model:** `TimeSeriesForecaster` (trend-decomposition simulation; Prophet/LSTM-style) located in `ml_backend/models/forecasting.py`.
+- **Methodology:** Polynomial trend fitting + residual-based 95% confidence bounds ($z = 1.96 \cdot \sigma \sqrt{1 + 0.15 \cdot t}$).
+- **Performance:** In-sample RMSE and R² are computed on the supplied historical series; no fixed accuracy claim is made.
 
 ### 2. Existing Dataset & Variables:
-- **Dataset:** Official MoSPI NSO Economic Time-Series & Census District Development Data.
+- **Dataset:** Curated reference registries of Census 2011 district baselines and MoSPI/RBI indicator values.
 - **Genuine Model Input Variables:**
   - `geography`: Indian State (e.g. Tamil Nadu, Maharashtra, Kerala, Karnataka, Gujarat, Uttar Pradesh, Delhi) or District.
   - `indicator`: `literacy_rate`, `cpi_inflation`, `iip_growth`, `unemployment_rate`, `urbanization_rate`, `gdp_growth`.
@@ -87,8 +87,8 @@
     "percentage_change_required": 8.0,
     "baseline_forecast_target_year": 83.49,
     "gap_to_baseline_forecast": 3.01,
-    "model_rmse": 0.42,
-    "model_r2": 0.96
+    "model_rmse": 0.02,
+    "model_r2": 0.99
   },
   "historical_observations": [
     { "year": 2021, "value": 75.99, "type": "historical" },
@@ -121,7 +121,7 @@
   ],
   "methodology": {
     "type": "Target Trajectory & Planning Scenario Model",
-    "baseline_model": "Prophet-LSTM-Hybrid (Autoregressive Polynomial Decomposition)",
+    "baseline_model": "Trend-Decomposition (Prophet/LSTM-style Simulation)",
     "planning_method": "Linear Target Interpolation & Differential Gap Analysis",
     "scientific_disclaimer": "Scenario results are model-based planning estimates and should not be interpreted as causal policy impact estimates unless supported by a verified causal model."
   }

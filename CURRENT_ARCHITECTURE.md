@@ -11,9 +11,9 @@
 ## 1. Executive Summary & Architectural Overview
 
 StatIntel-AI is architected as a **dual-engine statistical intelligence and competency platform**. It combines:
-1. **A React 19 Frontend Single Page Application (SPA)** with responsive layouts, dark mode, bilingual English/Hindi i18n, interactive Leaflet district heatmaps, Recharts time-series forecasting with 95% confidence bands, TreeSHAP explainability modals, and official PDF report generation.
+1. **A React 19 Frontend Single Page Application (SPA)** with responsive layouts, dark mode, bilingual English/Hindi i18n, interactive Leaflet district heatmaps, Recharts time-series forecasting with 95% confidence bands, SHAP-style explainability modals, and official PDF report generation.
 2. **A Core Enterprise Backend (Python FastAPI + SQLAlchemy Async + SQLite/PostgreSQL)** providing user management, competency tracking, skill gap diagnostics, course cataloging, assessment generation, and audit logging.
-3. **A Machine Learning & Econometric Microservice (Python FastAPI)** running hybrid Prophet+LSTM forecasting, Isolation Forest anomaly detection, XGBoost socio-economic development tier classification, IndicBERT bilingual NLP, and local TreeSHAP feature attributions.
+3. **A Machine Learning & Econometric Microservice (Python FastAPI)** running trend-decomposition (Prophet/LSTM-style) forecasting, Isolation Forest anomaly detection, GradientBoosting socio-economic development tier classification, a rule-based multilingual semantic parser (EN/HI/TA), and SHAP-style local feature attributions.
 4. **Resilient Government Data Connectors (`src/services/api/`)** interfacing with `api.data.gov.in`, MoSPI feeds (CPI, IIP, PLFS, ASI), Reserve Bank of India (RBI DBIE), and Census India (788 districts) with 3-attempt exponential backoff, rate limit handling, and dual-tier TTL caching.
 
 ```mermaid
@@ -27,7 +27,7 @@ flowchart TD
         VIEW_ASSESS["Adaptive Quiz Studio & Learning Paths"]
         COMP_HEATMAP["Geospatial District Heatmap (788 Districts)"]
         COMP_SERIES["TimeSeries Forecasting + 95% Bounds"]
-        COMP_SHAP["TreeSHAP Waterfall Explainability Modal"]
+        COMP_SHAP["SHAP-style Attribution Modal"]
         COMP_REPORTS["Official Executive Brief (PDF + Watermark)"]
         COMP_AUTH["DigiLocker / Aadhaar SSO Modal"]
     end
@@ -52,11 +52,11 @@ flowchart TD
 
     subgraph MLMicroservice["🤖 ML Analytics Microservice (FastAPI / Port 5000)"]
         ML_ROUTER["FastAPI Endpoints (/predict/*, /nlp/*, /pipeline/*)"]
-        PROP_LSTM["Prophet + LSTM Hybrid Forecaster"]
+        PROP_LSTM["Trend-Decomposition Forecaster (Prophet/LSTM-style)"]
         ISOFOREST["Isolation Forest Anomaly Detector"]
-        XGB_CLASS["XGBoost Socio-Economic Classifier"]
-        INDIC_BERT["IndicBERT Multilingual Query Parser"]
-        TREESHAP["TreeSHAP Feature Attribution Engine"]
+        XGB_CLASS["GradientBoosting Socio-Economic Classifier"]
+        INDIC_BERT["Multilingual Semantic Parser (EN/HI/TA)"]
+        TREESHAP["SHAP-style Feature Attribution Engine"]
         PREPROC["Data Preprocessor & Quality Scorer"]
     end
 
@@ -138,16 +138,16 @@ Every endpoint adheres to the strict contract:
 - `prediction`: Computed point prediction / classification / entity.
 - `confidence_score`: Normalized score between 0.0 and 1.0.
 - `shap_explanation`: Top 3 feature attribution vectors `[{feature, shap_value, impact, importance_pct}]`.
-- `model_metrics`: Training benchmark telemetry (`rmse`, `r2_score`, `accuracy`, `f1_score`).
+- `model_metrics`: Metric telemetry (`rmse`, `r2_score`, `training_accuracy`, `f1_score`). Basis varies per component — in-sample fit on supplied series (forecasting) or in-sample fit on synthetic reference vectors (classifier).
 - `timestamp`: ISO-8601 UTC timestamp.
 
 | Endpoint | Method | Models / Logic Used | Input Schema | Output Schema |
 |---|---|---|---|---|
 | `/health` | `GET` | Service & Model Registry Health | None | `status, models_loaded, timestamp` |
-| `/predict/forecast` | `POST` | Prophet + LSTM Hybrid + Polynomial Trend | `ForecastRequest(series_name, historical_values, periods_ahead)` | `forecast_series, prediction, confidence_score, shap_explanation, model_metrics` |
+| `/predict/forecast` | `POST` | Trend decomposition (Prophet/LSTM-style simulation) | `ForecastRequest(series_name, historical_values, periods_ahead)` | `forecast_series, prediction, confidence_score, shap_explanation, model_metrics` |
 | `/predict/anomaly` | `POST` | Isolation Forest (Scikit-Learn) | `AnomalyRequest(records, feature_keys)` | `anomalies, anomaly_count, shap_explanation, model_metrics` |
-| `/predict/classify` | `POST` | GradientBoosting / XGBoost Multi-Class | `ClassifyRequest(district_name, literacy_rate, sex_ratio, urban_pct, worker_pct)` | `tier, confidence_score, class_probabilities, shap_explanation, model_metrics` |
-| `/nlp/query` | `POST` | IndicBERT Bilingual Query Intent Parser | `NLPQueryRequest(query)` | `intent, detected_language, region_entity, matched_keywords, confidence_score` |
+| `/predict/classify` | `POST` | GradientBoostingClassifier (sklearn) | `ClassifyRequest(district_name, literacy_rate, sex_ratio, urban_pct, worker_pct)` | `tier, confidence_score, class_probabilities, shap_explanation, model_metrics` |
+| `/nlp/query` | `POST` | Multilingual Semantic Parser (EN/HI/TA, rule & lexical) | `NLPQueryRequest(query)` | `intent, detected_language, region_entity, matched_keywords, confidence_score, model_metrics` |
 | `/pipeline/clean` | `POST` | Quantile Clipper + Mean Imputer | `DataQualityRequest(records)` | `cleanliness_grade, quality_score, completeness_pct, uniqueness_pct, cleaned_sample` |
 
 ---

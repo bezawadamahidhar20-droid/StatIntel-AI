@@ -122,11 +122,12 @@ class PolicyScenarioEngine:
                 )
 
         # 6. Generate Historical Observation Series (2021 to base_year)
+        # Reconstructs an illustrative historical path by back-casting from the latest
+        # reference value at a fixed annual step; it is not sourced from a time-series dataset.
         years_span = base_year - 2021 + 1
         hist_values = []
         for i in range(years_span):
             yr = 2021 + i
-            # Historical slope calculation from verified benchmarks
             val = round(actual_current - (years_span - 1 - i) * 0.82, 2)
             hist_values.append({"year": yr, "value": val, "type": "historical"})
 
@@ -166,7 +167,7 @@ class PolicyScenarioEngine:
         baseline_target_year_val = baseline_series[-1]["baseline_forecast"] if baseline_series else actual_current
         gap_to_baseline = round(target_value - baseline_target_year_val, 2)
 
-        # 9. Priority Districts Gap Ranking (Official Census / MoSPI benchmark data)
+        # 9. Priority Districts Gap Ranking (curated district reference registry)
         state_districts = [d for d in self.nlp.DISTRICT_METRICS if d["state_code"] == state_code]
         priority_districts = []
 
@@ -212,7 +213,7 @@ class PolicyScenarioEngine:
             "priority_districts": priority_districts,
             "methodology": {
                 "type": "Target Trajectory & Planning Scenario Model",
-                "baseline_model": "Prophet-LSTM-Hybrid (Autoregressive Polynomial Decomposition)",
+                "baseline_model": "Trend-Decomposition (Prophet/LSTM-style Simulation)",
                 "planning_method": "Linear Target Interpolation & Differential Gap Analysis",
                 "scientific_disclaimer": (
                     "Scenario results are model-based planning estimates and should not be interpreted as "

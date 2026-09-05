@@ -24,6 +24,8 @@ import { QuizGeneratorView } from './views/QuizGeneratorView';
 import { AssessmentView } from './views/AssessmentView';
 import { AssessmentResultView } from './views/AssessmentResultView';
 import { AdminDashboardView } from './views/AdminDashboardView';
+import { VirtualLabView } from './views/VirtualLabView';
+import { ComplianceView } from './views/ComplianceView';
 import type { AppView } from './context/AppContext';
 
 const MainLayout: React.FC = () => {
@@ -80,6 +82,8 @@ const MainLayout: React.FC = () => {
       case 'quiz-generator':      return <QuizGeneratorView />;
       case 'assessment':          return <AssessmentView />;
       case 'assessment-result':   return <AssessmentResultView />;
+      case 'virtual-labs':        return <VirtualLabView />;
+      case 'compliance':          return <ComplianceView />;
       case 'admin-dashboard':
       case 'admin-heatmap':
       case 'admin-training-effectiveness':

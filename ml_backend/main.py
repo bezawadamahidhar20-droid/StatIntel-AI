@@ -1,10 +1,10 @@
 """
 FastAPI Microservice for StatIntel-AI Machine Learning & Analytics.
 Endpoints:
-- POST /predict/forecast -> Time-Series forecasting with Prophet/LSTM + SHAP
+- POST /predict/forecast -> Trend-decomposition forecasting (Prophet/LSTM-style simulation) + attribution
 - POST /predict/anomaly  -> Isolation Forest Anomaly Detection + SHAP
 - POST /predict/classify -> Socio-Economic Tier Classifier + SHAP
-- POST /nlp/query        -> IndicBERT Bilingual Query Parser (Hindi + English)
+- POST /nlp/query        -> Multilingual Semantic Parser (English + Hindi + Tamil)
 - POST /pipeline/clean   -> Data Preprocessing & Quality Cleanliness Scoring
 - GET  /health           -> Service health check
 """
@@ -28,7 +28,7 @@ from models.counterfactual import CounterfactualEngine
 # Initialize FastAPI App
 app = FastAPI(
     title="StatIntel-AI Machine Learning Microservice",
-    description="Statistical Forecasting, Anomaly Detection, SHAP Explainability & Multilingual NLP Engine",
+    description="Statistical Forecasting, Anomaly Detection, Attribution & Multilingual NLP Engine",
     version="2.4.0",
 )
 
@@ -75,7 +75,7 @@ class ClassifyRequest(BaseModel):
 
 
 class NLPQueryRequest(BaseModel):
-    query: str = Field(..., min_length=2, description="Analytical question in English or Hindi")
+    query: str = Field(..., min_length=2, description="Analytical question in English, Hindi, or Tamil")
 
 
 class ScenarioSimulateRequest(BaseModel):
@@ -116,7 +116,7 @@ def health_check():
         "status": "online",
         "service": "StatIntel-AI ML Backend",
         "timestamp": datetime.utcnow().isoformat(),
-        "models_loaded": ["Prophet-LSTM-Hybrid", "IsolationForest", "GradientBoosting-Classifier", "Multilingual-Semantic-Parser", "PolicyScenarioPlanner"],
+        "models_loaded": ["TrendDecomposition-Forecaster", "IsolationForest", "GradientBoosting-Classifier", "Multilingual-Semantic-Parser", "PolicyScenarioPlanner"],
     }
 
 

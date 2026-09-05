@@ -75,12 +75,12 @@ export const KPICards: React.FC = () => {
     },
     {
       title: t('datasetsAnalyzed'),
-      value: '1,428,940',
-      change: '+18.4% Live Feeds',
+      value: '788',
+      change: 'Census 2011 Registry',
       positive: true,
       icon: Database,
       color: 'from-amber-500 to-orange-500',
-      tag: '788 Districts Synced',
+      tag: 'District Baselines',
     },
   ];
 

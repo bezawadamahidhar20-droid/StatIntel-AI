@@ -29,11 +29,11 @@ flowchart TD
     end
 
     subgraph MLBackend["🤖 FastAPI ML Microservice (Port 5000)"]
-        FORECAST["Prophet + LSTM Hybrid Forecaster"]
+        FORECAST["Trend-Decomposition Forecaster (Prophet/LSTM-style)"]
         ANOMALY["Isolation Forest Outlier Detector"]
-        CLASSIFIER["XGBoost Socio-Economic Classifier"]
-        INDICBERT["IndicBERT Multilingual NLP (EN + HI)"]
-        SHAP["TreeSHAP Explainability Engine"]
+        CLASSIFIER["GradientBoosting Socio-Economic Classifier"]
+        NLP["Multilingual Semantic Parser (EN + HI + TA)"]
+        SHAP["SHAP-style Feature Attribution Engine"]
     end
 
     subgraph Frontend["💻 React 19 Frontend UI (Port 3000)"]
@@ -56,8 +56,8 @@ flowchart TD
 ## 🌟 Key Innovations & Technical Highlights
 
 1. **Zero Mock Data:** Fully connected to official datasets (`api.data.gov.in`, `MoSPI`, `RBI`, and `Census India`) with resilient exponential retry and fallback caching.
-2. **Prophet + LSTM Time-Series Forecasting:** Generates point estimates with 95% Bayesian upper/lower confidence bounds (RMSE = 0.42).
-3. **TreeSHAP Explainable AI:** Every prediction is broken down into top 3 game-theoretic feature attribution contributions with waterfall visualization.
+2. **Trend-Decomposition Forecasting (Prophet/LSTM-style simulation):** Generates point estimates with 95% upper/lower confidence bounds; in-sample RMSE/R² metrics are computed per request on the supplied historical series.
+3. **SHAP-style Explainable AI:** Every model prediction is paired with its top 3 feature contribution vectors (normalized baseline deviation attribution) with waterfall visualization.
 4. **Interactive District Heatmap:** Visualizes demographic, literacy, and industrial output metrics across all 788 Indian districts.
 5. **Bilingual Support (i18next):** Instant toggle between English and Hindi across all views, indicators, and report summaries.
 6. **Student SSO & RBAC:** Visual role-based security simulation (Admin, Student, Viewer) with immutable audit trail logging.
@@ -70,10 +70,10 @@ flowchart TD
 | Domain | Technologies Used |
 |---|---|
 | **Frontend UI** | React 19, TypeScript, Vite 6, TailwindCSS, Motion, Lucide Icons, Canvas Confetti |
-| **Bilingual NLP & i18n** | IndicBERT-V2, i18next (English & Hindi) |
+| **Multilingual NLP & i18n** | Rule-based multilingual semantic parser (EN/HI/TA), i18next (English & Hindi) |
 | **Data Connectors** | Open Government Data Platform India, MoSPI Open APIs, RBI DBIE, Census India |
 | **ML Microservice** | Python 3.11, FastAPI, Uvicorn, Scikit-Learn, NumPy, Pandas, Scipy |
-| **Explainable AI (XAI)** | TreeSHAP / Model-Agnostic Feature Attribution |
+| **Explainable AI (XAI)** | SHAP-style baseline-deviation feature attribution |
 | **Database & Cache** | PostgreSQL 16, Redis 7, LocalStorage fallback |
 | **DevOps & Containers** | Docker (Multi-stage), Docker Compose, GitHub Actions CI/CD, Vercel, Railway, Render |
 

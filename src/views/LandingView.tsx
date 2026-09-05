@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Shield,
   Sparkles,
@@ -35,15 +35,6 @@ export const LandingView: React.FC = () => {
   } = useApp();
   const { t } = useLanguage();
   const [isVideoModalOpen, setIsVideoModalOpen] = useState<boolean>(false);
-  const [liveDatasetsCount, setLiveDatasetsCount] = useState<number>(1428940);
-
-  // Simulate live telemetry counter increment
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setLiveDatasetsCount((prev) => prev + Math.floor(Math.random() * 3) + 1);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, []);
 
   const handleStudentStart = () => {
     if (isAuthenticated) {
@@ -72,8 +63,8 @@ export const LandingView: React.FC = () => {
 
           <div className="flex items-center gap-3">
             <span className="text-emerald-400 flex items-center gap-1 font-mono font-bold">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              {liveDatasetsCount.toLocaleString('en-IN')} Datasets Ingested Live
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              Census 2011 District Baselines · Reference Datasets
             </span>
             <LanguageToggle />
           </div>
@@ -97,7 +88,7 @@ export const LandingView: React.FC = () => {
             </h1>
 
             <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-normal max-w-2xl mx-auto">
-              Real-time econometric time-series forecasting, Isolation Forest anomaly detection, district-level geospatial heatmaps, and SHAP explainability for 1.4B citizen data streams.
+              Econometric time-series forecasting, Isolation Forest anomaly detection, district-level geospatial heatmaps, and model feature attribution over Census 2011 district baselines and MoSPI/RBI reference indicators.
             </p>
 
             {/* Core CTAs */}
@@ -128,23 +119,23 @@ export const LandingView: React.FC = () => {
               </button>
             </div>
 
-            {/* Live Trust Metrics Strip */}
+            {/* Reference Metrics Strip */}
             <div className="pt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center border-t border-slate-100 dark:border-slate-800">
               <div className="p-2">
-                <p className="text-2xl font-black text-slate-900 dark:text-white font-mono">{liveDatasetsCount.toLocaleString('en-IN')}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{t('datasetsAnalyzed')}</p>
+                <p className="text-2xl font-black text-slate-900 dark:text-white font-mono">1.4B+</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Citizens (Census 2011 Reference)</p>
               </div>
               <div className="p-2">
                 <p className="text-2xl font-black text-blue-600 dark:text-blue-400 font-mono">788</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Districts Synced (Census India)</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Districts (Census Registry)</p>
               </div>
               <div className="p-2">
-                <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">0.42</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Prophet-LSTM RMSE Benchmark</p>
+                <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">8</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Core MoSPI / RBI Indicators</p>
               </div>
               <div className="p-2">
-                <p className="text-2xl font-black text-purple-600 dark:text-purple-400 font-mono">100%</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">SHAP Explainability Coverage</p>
+                <p className="text-2xl font-black text-purple-600 dark:text-purple-400 font-mono">EN · हि · த</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Natural-Language Query Languages</p>
               </div>
             </div>
           </div>
@@ -183,7 +174,7 @@ export const LandingView: React.FC = () => {
               AI/ML Predictive Models
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              FastAPI backend running Prophet+LSTM time-series forecasting, Isolation Forest anomaly outlier detection, and XGBoost development tier classification.
+              FastAPI backend running trend-decomposition (Prophet/LSTM-style) time-series forecasting, Isolation Forest anomaly outlier detection, and GradientBoosting development tier classification.
             </p>
           </div>
 
@@ -195,7 +186,7 @@ export const LandingView: React.FC = () => {
               SHAP Explainable AI
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Every prediction is paired with game-theoretic Shapley feature attribution vectors, delivering transparency for ministry policy makers and analysts.
+              Every model prediction is paired with SHAP-style feature attribution vectors (normalized baseline deviation), delivering transparency for ministry policy makers and analysts.
             </p>
           </div>
         </div>

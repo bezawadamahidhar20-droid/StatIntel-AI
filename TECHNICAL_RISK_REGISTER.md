@@ -26,7 +26,7 @@ To maximize **hackathon judge scoring**, **technical depth**, **visual wow facto
 
 ```mermaid
 flowchart TD
-    STEP1["1. Feature D: Multilingual Natural Language Analytics (Indic Voice/Text Search)"] -->|Instant Win - Backend Already Built| STEP2["2. Feature B: Scenario & Policy Target Planner (Interactive What-If Simulation)"]
+    STEP1["1. Feature D: Multilingual Natural Language Analytics (Voice/Text Search)"] -->|Instant Win - Backend Already Built| STEP2["2. Feature B: Scenario & Policy Target Planner (Interactive What-If Simulation)"]
     STEP2 -->|High Judge Wow Factor| STEP3["3. Feature C: Counterfactual Explainable AI (Prescriptive Intervention Vectors)"]
     STEP3 -->|Technical Depth & XAI Innovation| STEP4["4. Feature A: AI Policy Copilot (Interactive MoSPI Decision Advisor)"]
     STEP4 -->|Domain Mastery & LLM Copilot| STEP5["5. Feature E: Data Quality & Auto-Clean Studio (NSSO Microdata Ingestion)"]
@@ -36,8 +36,8 @@ flowchart TD
 
 ### 🥇 Step 1: Feature D &mdash; Multilingual Natural Language Analytics (Indic Voice/Text)
 - **Why First?** 
-  - **Fastest Implementation Speed:** The backend route `POST /nlp/query` with IndicBERT intent parsing is already 100% built and passing tests in `ml_backend/models/nlp.py`.
-  - **Massive India Differentiation:** Demonstrates bilingual governance across English and Hindi (e.g., typing *"उत्तर प्रदेश में मुद्रास्फीति और बेरोजगारी दर"* instantly highlights UP on the map and renders the inflation curve).
+  - **Fastest Implementation Speed:** The backend route `POST /nlp/query` with the multilingual semantic parser (rule & lexical resolution) is already 100% built and passing tests in `ml_backend/models/nlp.py`.
+  - **Massive India Differentiation:** Demonstrates trilingual governance across English, Hindi, and Tamil (e.g., typing *"उत्तर प्रदेश में मुद्रास्फीति और बेरोजगारी दर"* instantly highlights UP on the map and renders the inflation curve).
   - **Zero Regression Risk:** Adds a floating search bar `<NaturalLanguageQueryBar />` without touching core navigation.
 
 ---

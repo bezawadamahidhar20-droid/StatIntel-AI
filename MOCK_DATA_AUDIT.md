@@ -24,7 +24,7 @@ This audit catalogues every instance of mock data, dummy fallbacks, hardcoded da
 | **Lines 475–751** | `allCourses` | 14 hardcoded course objects with static enrollments, ratings, and syllabus. | Real iGOT Karmayogi API & NSSTA Course Catalog Connector via `services/api/mospi.js` and `/api/v1/courses`. |
 | **Lines 753–820** | `learningPathSteps` | Static 7-step career progression path. | Adaptive AI Learning Path Generator (`/api/v1/learning/path`) adjusting dynamically to user's diagnosed skill gaps. |
 | **Lines 822–854** | `sampleUploadDocuments` | Hardcoded metadata and summaries for 4 MoSPI official survey manuals (PLFS, CPI, ASI, SUT). | Live document ingestion system accepting CSV/Excel/PDF uploads + MoSPI Open Data Portal direct ingestor (`/api/v1/documents/upload`). |
-| **Lines 856–1061** | `initialAssessments` | Static multiple-choice questions for 8 exams. | Live GenAI / IndicBERT-powered Quiz Engine with difficulty scaling & dynamic generation via `/api/v1/quiz/generate`. |
+| **Lines 856–1061** | `initialAssessments` | Static multiple-choice questions for 8 exams. | Live GenAI-powered Quiz Engine with difficulty scaling & dynamic generation via `/api/v1/quiz/generate`. |
 | **Lines 1063–1112** | `initialTimelineEvents` | Hardcoded timeline activity log. | Real PostgreSQL Audit Trail & Telemetry event log (`/api/v1/analytics/timeline`). |
 | **Lines 1114–1152** | `initialCertificates` | 4 hardcoded digital certificates. | Digitally signed cryptographic credentials / DigiLocker Issuer API (`/api/v1/certificates`). |
 | **Lines 1154–1239** | `departmentHeatmapData` | Static 6-division competency matrix across MoSPI directorates (NSSO, CSO, FOD, SDRD, NAD, ESD). | Real-time Department Workforce Analytics aggregation engine from backend database (`/api/v1/admin/heatmap`). |
@@ -52,7 +52,7 @@ This audit catalogues every instance of mock data, dummy fallbacks, hardcoded da
 
 | File Path | Line Numbers | Mock Data Usage | Proposed Real Data Source Replacement |
 |---|---|---|---|
-| `src/services/geminiService.ts` | Lines 148–315, 486–620 | Hardcoded fallback skill taxonomies, default quiz questions, and offline mock explanations. | Real FastAPI ML backend endpoints (`/models/forecast`, `/models/anomaly`, `/explain/shap`) + IndicBERT / Groq API with robust retry. |
+| `src/services/geminiService.ts` | Lines 148–315, 486–620 | Hardcoded fallback skill taxonomies, default quiz questions, and offline mock explanations. | Real FastAPI ML backend endpoints (`/predict/forecast`, `/predict/anomaly`, `/predict/classify`, `/explain`) + multilingual semantic parser / Groq API with robust retry. |
 | `src/services/groqService.ts` | Lines 50–120 | Hardcoded fallback competency responses when API key is missing. | Dynamic fallback to local ML FastAPI microservice with clear indicator of backend connectivity. |
 
 ---
@@ -79,11 +79,11 @@ This audit catalogues every instance of mock data, dummy fallbacks, hardcoded da
    - Provide complete `.env.example` setup.
 
 2. **Phase 3 (AI/ML Backend - FastAPI):**
-   - Implement `Prophet + LSTM` time-series forecasting.
+   - Implement trend-decomposition time-series forecasting (Prophet/LSTM-style simulation).
    - Implement `Isolation Forest` anomaly detection.
-   - Implement `XGBoost` multi-class classification.
-   - Implement `IndicBERT` bilingual NLP query engine (Hindi + English).
-   - Implement `SHAP Explainer` generating top 3 feature importance vectors for all predictions.
+   - Implement `GradientBoosting` multi-class classification.
+   - Implement a multilingual natural-language query engine (EN/HI/TA) as a rule & lexical semantic parser.
+   - Implement `SHAP-style Explainer` generating top 3 feature contribution vectors for all predictions.
 
 3. **Phases 4–8 (UI Overhaul, RBAC, Reports, SIH Pitch & Deployment):**
    - Interactive India Map (District-level GeoJSON heatmap), Recharts with confidence bands, SHAP waterfall modal, Language Toggle (i18next English/Hindi), Cost Savings Calculator, and Pitch documentation.

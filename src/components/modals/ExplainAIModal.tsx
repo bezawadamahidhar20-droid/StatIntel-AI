@@ -44,9 +44,9 @@ export const ExplainAIModal: React.FC<ExplainAIModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                SHAP Explainable AI Breakdown
+                SHAP-style Explainable AI Breakdown
                 <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-semibold rounded-full">
-                  TreeSHAP Engine
+                  Baseline-Deviation Attribution
                 </span>
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -145,10 +145,9 @@ export const ExplainAIModal: React.FC<ExplainAIModalProps> = ({
           </div>
 
           <div className="p-3 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-900/50 flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-            <HelpCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-            <p>
-              <strong>Methodological Note:</strong> SHAP (SHapley Additive exPlanations) uses game theoretic Shapley values to fairly allocate the contribution of each economic indicator to the model's output deviation.
-            </p>
+            <HelpCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />              <p>
+                <strong>Methodological Note:</strong> These contributions are computed as normalized baseline deviation of each indicator relative to a national reference value. They describe how the model arrived at its prediction — they are not game-theoretic Shapley values and do not establish causation.
+              </p>
           </div>
         </div>
 

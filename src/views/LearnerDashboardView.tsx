@@ -24,6 +24,7 @@ import { useApp } from '../context/AppContext';
 import { MetricCard } from '../components/common/MetricCard';
 import { CompetencyRadar } from '../components/common/CompetencyRadar';
 import { apiClient } from '../services/apiClient';
+import { AutoProfileModal } from '../components/modals/AutoProfileModal';
 
 export const LearnerDashboardView: React.FC = () => {
   const {
@@ -39,6 +40,7 @@ export const LearnerDashboardView: React.FC = () => {
     enrollCourse,
   } = useApp();
 
+  const [autoProfileModalOpen, setAutoProfileModalOpen] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [placementData, setPlacementData] = useState<{
     readiness_score: number;
@@ -137,6 +139,14 @@ export const LearnerDashboardView: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => setAutoProfileModalOpen(true)}
+            className="px-3.5 py-2 text-xs font-bold rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white flex items-center gap-1.5 shadow-sm transition-all animate-pulse"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            <span>⚡ Auto-Create Profile (R1)</span>
+          </button>
+
           <button
             onClick={handleExportPdf}
             disabled={downloadingPdf}
@@ -421,6 +431,11 @@ export const LearnerDashboardView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <AutoProfileModal
+        isOpen={autoProfileModalOpen}
+        onClose={() => setAutoProfileModalOpen(false)}
+      />
     </div>
   );
 };

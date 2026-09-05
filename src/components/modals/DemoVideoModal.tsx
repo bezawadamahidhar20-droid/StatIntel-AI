@@ -50,14 +50,14 @@ export const DemoVideoModal: React.FC<DemoVideoModalProps> = ({ isOpen, onClose 
                 AI Statistical Intelligence in Action
               </h4>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Real-time ingestion of 1.4B citizen demographic records, Prophet+LSTM econometric forecasting, Isolation Forest anomaly alerts, and SHAP explainability.
+                Interactive walkthrough of trend-decomposition (Prophet/LSTM-style) forecasting, Isolation Forest anomaly alerts, SHAP-style feature attribution, and multilingual natural-language querying over Census 2011 district baselines and MoSPI reference indicators.
               </p>
               <div className="flex items-center justify-center gap-3 pt-2">
                 <span className="text-[11px] font-bold px-2.5 py-1 bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 rounded-full flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3" /> Real MoSPI Connectors
+                  <CheckCircle2 className="w-3 h-3" /> Census / MoSPI Reference Data
                 </span>
                 <span className="text-[11px] font-bold px-2.5 py-1 bg-blue-950/80 border border-blue-500/40 text-blue-400 rounded-full flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3" /> TreeSHAP Verified
+                  <ShieldCheck className="w-3 h-3" /> Explainable Predictions
                 </span>
               </div>
             </div>

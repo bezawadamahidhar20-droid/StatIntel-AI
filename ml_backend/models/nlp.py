@@ -1,8 +1,9 @@
 """
-IndicBERT-V2 & Multilingual Natural Language Analytics Engine for StatIntel-AI.
+Multilingual Natural Language Semantic Parser for StatIntel-AI.
 Supports English (en), Hindi (hi), and Tamil (ta).
-Translates natural language questions into safe, validated intermediate structured query representations,
-resolves queries against official MoSPI/Census/RBI statistics, and generates localized answers.
+Translates natural language questions into safe, validated intermediate structured query representations
+via rule & lexical entity resolution (Unicode script detection + MoSPI indicator/geography mappings),
+and generates localized answers from curated reference statistics.
 """
 
 from typing import Dict, Any, List, Optional

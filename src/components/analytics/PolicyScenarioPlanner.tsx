@@ -341,7 +341,7 @@ export const PolicyScenarioPlanner: React.FC<PolicyScenarioPlannerProps> = ({ on
               {scenarioData.current_value}%
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Official {scenarioData.geography} (2026)
+              Reference {scenarioData.geography} value (2026)
             </p>
           </div>
 
@@ -354,7 +354,7 @@ export const PolicyScenarioPlanner: React.FC<PolicyScenarioPlannerProps> = ({ on
               {scenarioData.metrics.baseline_forecast_target_year}%
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Prophet/LSTM Projected Path
+              Prophet/LSTM-style Projected Path
             </p>
           </div>
 
@@ -578,7 +578,7 @@ export const PolicyScenarioPlanner: React.FC<PolicyScenarioPlannerProps> = ({ on
             </div>
 
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-400">
-              <span>Source: Census & MoSPI Benchmark Statistical Dataset</span>
+              <span>Source: Census 2011 & MoSPI reference data (curated)</span>
               <span className="text-slate-500 italic">
                 * Baseline forecast is model-driven; target trajectory is planning interpolation (not causal policy impact).
               </span>

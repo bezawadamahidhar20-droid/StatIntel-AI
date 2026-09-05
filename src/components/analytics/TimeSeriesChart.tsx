@@ -8,7 +8,7 @@ export const TimeSeriesChart: React.FC = () => {
   const [selectedSeries, setSelectedSeries] = useState<'cpi' | 'iip'>('cpi');
   const [isExplainModalOpen, setIsExplainModalOpen] = useState<boolean>(false);
 
-  // Time-series dataset with Prophet/LSTM forecast and 95% upper/lower bounds
+  // Time-series dataset with trend-decomposition forecast and 95% upper/lower bounds
   const cpiData = [
     { period: 'Jan 26', value: 189.4, type: 'historical' },
     { period: 'Feb 26', value: 190.1, type: 'historical' },
@@ -65,7 +65,7 @@ export const TimeSeriesChart: React.FC = () => {
             </h3>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            {t('forecastModel')} with RMSE = 0.42 and 95% Bayesian upper/lower confidence bounds
+            {t('forecastModel')} with 95% confidence bounds
           </p>
         </div>
 
