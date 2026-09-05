@@ -3,6 +3,8 @@ import {
   Route,
   Sparkles,
   CheckCircle2,
+  XCircle,
+  AlertTriangle,
   Clock,
   ArrowRight,
   BookOpen,
@@ -10,6 +12,9 @@ import {
   Award,
   Play,
   Lock,
+  Target,
+  UserCheck,
+  Zap,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { apiClient } from '../services/apiClient';
@@ -19,6 +24,11 @@ import { StudentSkillProfiler } from '../components/common/StudentSkillProfiler'
 
 export const LearningPathView: React.FC = () => {
   const {
+    currentUser,
+    targetCareerRole,
+    userSkills,
+    competencies,
+    skillGaps,
     courses,
     navigate,
     setWhyRecommendedCourse,
@@ -38,6 +48,26 @@ export const LearningPathView: React.FC = () => {
     overallProgress: 35,
   });
   const [isLiveConnected, setIsLiveConnected] = useState<boolean>(false);
+
+  const activeTargetRole = targetCareerRole || currentUser.designation || 'Data Analyst';
+
+  // Acquired / Known Skills (Skills user has)
+  const skillsYouHave = competencies.filter(
+    (c) => c.currentScore >= c.requiredScore || (userSkills && userSkills.some((s) => s.toLowerCase() === c.name.toLowerCase()))
+  );
+
+  // Missing Skills / Gaps (Skills user does not have yet)
+  const skillsYouNeed = skillGaps.length > 0
+    ? skillGaps
+    : competencies.filter((c) => c.gap < 0).map((c) => ({
+        id: `gap-${c.id}`,
+        competencyName: c.name,
+        severity: c.status === 'Critical Gap' ? 'Critical' : 'Medium',
+        currentScore: c.currentScore,
+        requiredScore: c.requiredScore,
+        gapLevels: 1,
+        estimatedTimeToBridge: '8-12 hours',
+      }));
 
   useEffect(() => {
     let isMounted = true;
@@ -70,32 +100,159 @@ export const LearningPathView: React.FC = () => {
   const completedCount = pathSteps.filter((s) => s.status === 'Completed').length;
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto font-sans text-slate-800">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
+            <span className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
               <Route className="w-5 h-5" />
             </span>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Your Personalized Learning Path
+              Personalized Adaptive Skill Roadmap
             </h1>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Synthesized dynamically using your ISS cadre role requirements, active skill gap diagnostics, and MoSPI modernization priorities.
+            Welcome, <strong>{currentUser.name}</strong> • AI Competency Gap Analysis & Guided Curricula for{' '}
+            <strong className="text-blue-700 dark:text-blue-400">{activeTargetRole}</strong>.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-mono rounded">
-            <span className={`w-2 h-2 rounded-full ${isLiveConnected ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-amber-400'}`} />
-            <span className="text-slate-600 dark:text-slate-300 font-semibold">{isLiveConnected ? 'FASTAPI LIVE SYNC' : 'OFFLINE CACHED'}</span>
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isLiveConnected ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-amber-400'
+              }`}
+            />
+            <span className="text-slate-600 dark:text-slate-300 font-semibold">
+              {isLiveConnected ? 'FASTAPI LIVE SYNC' : 'OFFLINE CACHED'}
+            </span>
           </div>
 
           <span className="text-xs font-semibold text-slate-500">
-            Path Progress: <strong className="text-blue-600">{pathMeta.overallProgress}%</strong> ({completedCount} of {pathSteps.length} completed)
+            Roadmap Progress: <strong className="text-blue-600">{pathMeta.overallProgress}%</strong> ({completedCount} of{' '}
+            {pathSteps.length} completed)
           </span>
+        </div>
+      </div>
+
+      {/* ── SKILLS YOU HAVE VS SKILLS YOU DO NOT HAVE CARD ───────────────────── */}
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="p-5 bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-200">
+                AI Competency Diagnostics Overview
+              </span>
+            </div>
+            <h2 className="text-lg font-bold text-white mt-0.5">
+              Role Target: {activeTargetRole}
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-4 text-xs font-semibold">
+            <div className="bg-white/10 px-3 py-1.5 rounded-xl border border-white/10 text-center">
+              <span className="text-emerald-400 text-sm font-black">{skillsYouHave.length}</span>
+              <span className="text-[10px] text-slate-300 block uppercase">Skills Mastered</span>
+            </div>
+            <div className="bg-white/10 px-3 py-1.5 rounded-xl border border-white/10 text-center">
+              <span className="text-rose-400 text-sm font-black">{skillsYouNeed.length}</span>
+              <span className="text-[10px] text-slate-300 block uppercase">Missing Gaps</span>
+            </div>
+            <div className="bg-white/10 px-3 py-1.5 rounded-xl border border-white/10 text-center">
+              <span className="text-amber-400 text-sm font-black">{currentUser.roleReadiness || 68}%</span>
+              <span className="text-[10px] text-slate-300 block uppercase">Readiness</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 p-5 gap-5">
+          {/* Left: Skills You Have */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>Skills You Have ({skillsYouHave.length})</span>
+              </h3>
+              <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                Verified Proficient
+              </span>
+            </div>
+
+            {skillsYouHave.length === 0 ? (
+              <p className="text-xs text-slate-400 italic">No skills registered yet. Enter your known skills below.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {skillsYouHave.map((s, idx) => (
+                  <div
+                    key={idx}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-semibold text-emerald-900 shadow-xs"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>{s.name}</span>
+                    <span className="text-[10px] bg-emerald-200/80 text-emerald-800 px-1.5 py-0.2 rounded font-mono font-bold">
+                      {s.currentScore ? `${s.currentScore}%` : 'L3'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Right: Skills You Do NOT Have (Missing Skills) */}
+          <div className="space-y-3 md:pl-5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-rose-700 flex items-center gap-1.5">
+                <XCircle className="w-4 h-4 text-rose-600" />
+                <span>Skills You Need / Missing Gaps ({skillsYouNeed.length})</span>
+              </h3>
+              <span className="text-[10px] text-rose-700 font-semibold bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
+                In Roadmap Below
+              </span>
+            </div>
+
+            {skillsYouNeed.length === 0 ? (
+              <div className="p-3 bg-emerald-50 text-emerald-800 text-xs rounded-xl font-medium flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>Congratulations! You meet all competency standards for {activeTargetRole}.</span>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {skillsYouNeed.slice(0, 4).map((g: any, idx: number) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-2.5 bg-rose-50/60 border border-rose-200 rounded-xl text-xs"
+                  >
+                    <div className="flex items-center gap-2 truncate mr-2">
+                      <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+                      <span className="font-bold text-rose-950 truncate">{g.competencyName}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                          g.severity === 'Critical'
+                            ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                            : 'bg-amber-100 text-amber-800 border border-amber-300'
+                        }`}
+                      >
+                        {g.severity || 'Gap'}
+                      </span>
+                      <button
+                        onClick={() => navigate('courses')}
+                        className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-[11px] flex items-center gap-1 transition-colors shadow-2xs"
+                      >
+                        <span>Learn</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

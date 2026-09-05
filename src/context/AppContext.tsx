@@ -338,7 +338,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('statintel_user', JSON.stringify(studentUser));
     localStorage.setItem('statintel_role', 'LEARNER');
     setIsAuthModalOpen(false);
-    setActiveView('dashboard');
+    setActiveView('learning-path');
   };
 
   const updateUserAvatar = (avatarUrl: string) => {
