@@ -564,9 +564,9 @@ class IndicNLPProcessor:
             "visualization_type": res.get("visualization_type", "none"),
             "suggested_action": res.get("suggested_action", "explore_dashboard"),
             "model_metrics": {
-                "engine": "IndicBERT-V2-Multilingual",
+                "engine": "Multilingual-Semantic-Parser (Unicode Script Detection + MoSPI Entity Mapping)",
                 "supported_languages": ["English", "Hindi", "Tamil"],
-                "accuracy": 0.968,
+                "parser_type": "Rule & Lexical Entity Resolver",
             },
             "timestamp": datetime.utcnow().isoformat(),
         }

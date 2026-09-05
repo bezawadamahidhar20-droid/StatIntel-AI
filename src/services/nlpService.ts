@@ -1,6 +1,6 @@
 /**
  * StatIntel-AI Multilingual Natural Language Analytics Service.
- * Connects frontend to the IndicBERT-V2 ML Backend microservice (/nlp/query).
+ * Connects frontend to the Multilingual Semantic Parser ML Backend microservice (/nlp/query).
  * Implements client-side graceful fallback with official benchmark statistics.
  */
 
@@ -36,7 +36,7 @@ export interface NLPQueryResponse {
   model_metrics?: {
     engine: string;
     supported_languages: string[];
-    accuracy: number;
+    parser_type?: string;
   };
   timestamp: string;
 }

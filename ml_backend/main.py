@@ -116,7 +116,7 @@ def health_check():
         "status": "online",
         "service": "StatIntel-AI ML Backend",
         "timestamp": datetime.utcnow().isoformat(),
-        "models_loaded": ["Prophet-LSTM-Hybrid", "IsolationForest", "XGBoost-Classifier", "IndicBERT-V2", "PolicyScenarioPlanner"],
+        "models_loaded": ["Prophet-LSTM-Hybrid", "IsolationForest", "GradientBoosting-Classifier", "Multilingual-Semantic-Parser", "PolicyScenarioPlanner"],
     }
 
 
@@ -260,8 +260,8 @@ def parse_nlp_query(req: NLPQueryRequest):
                 for kw in matched_kws
             ],
             "model_metrics": nlp_res.get("model_metrics", {
-                "engine": "IndicBERT-V2-Multilingual",
-                "accuracy": 0.968,
+                "engine": "Multilingual-Semantic-Parser (Unicode Script Detection + MoSPI Entity Mapping)",
+                "supported_languages": ["English", "Hindi", "Tamil"],
             }),
             "timestamp": datetime.utcnow().isoformat(),
         }

@@ -222,7 +222,7 @@ export const NaturalLanguageQueryBar: React.FC<NaturalLanguageQueryBarProps> = (
                 Ask StatIntel-AI &mdash; Multilingual Natural Language Analytics
               </h2>
               <span className="text-[10px] px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 rounded-full font-semibold">
-                IndicBERT-V2
+                Multilingual NL Parser (EN/HI/TA)
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
