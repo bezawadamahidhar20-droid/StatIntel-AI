@@ -2462,8 +2462,21 @@ export const getSkillRoadmap = (
 ): SkillRoadmapData => {
   const normKey = skillName.trim().toLowerCase();
 
-  if (PREBUILT_ROADMAPS[normKey]) {
-    const prebuilt = PREBUILT_ROADMAPS[normKey];
+  // Direct match or intelligent alias search
+  const foundKey = Object.keys(PREBUILT_ROADMAPS).find(k => 
+    normKey === k ||
+    normKey.includes(k) ||
+    k.includes(normKey) ||
+    (k.includes('kubernetes') && normKey.includes('kubernetes')) ||
+    (k.includes('terraform') && normKey.includes('terraform')) ||
+    (k.includes('aws') && (normKey.includes('aws') || normKey.includes('cloud'))) ||
+    (k.includes('survey') && normKey.includes('survey')) ||
+    (k.includes('national accounts') && (normKey.includes('sna') || normKey.includes('national accounts'))) ||
+    (k.includes('data extraction') && (normKey.includes('extraction') || normKey.includes('tidyverse') || normKey.includes('r &')))
+  );
+
+  if (foundKey && PREBUILT_ROADMAPS[foundKey]) {
+    const prebuilt = PREBUILT_ROADMAPS[foundKey];
     return {
       skillName: prebuilt.skillName || skillName,
       currentLevel: userCurrentLevel,
