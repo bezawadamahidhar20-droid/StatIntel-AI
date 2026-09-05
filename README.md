@@ -6,7 +6,7 @@
 [![React 19](https://img.shields.io/badge/React-19-61dafb.svg)](https://react.dev/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg)](https://fastapi.tiangolo.com/)
 
-**StatIntel-AI** is a production-grade, AI-powered statistical intelligence platform built for the **Ministry of Statistics and Programme Implementation (MoSPI)** for **Smart India Hackathon (SIH) 2024 (Problem Statement ID: SIH-2024-PS-1628)**.
+**StatIntel-AI** is a production-grade, AI-powered statistical intelligence platform built for **students and academic institutions** for **Smart India Hackathon (SIH) 2024 (Problem Statement ID: SIH-2024-PS-1628)**.
 
 ---
 
@@ -42,7 +42,7 @@ flowchart TD
         SERIES["TimeSeries Chart + 95% Confidence Bands"]
         ALERTS["Real-Time Anomaly Feed"]
         REPORTS["Bilingual Executive Report Generator (PDF)"]
-        RBAC["DigiLocker / Aadhaar SSO + Audit Trail"]
+        RBAC["Student SSO + Role-Based Access + Audit Trail"]
     end
 
     DataSources --> CONNECTORS
@@ -60,8 +60,8 @@ flowchart TD
 3. **TreeSHAP Explainable AI:** Every prediction is broken down into top 3 game-theoretic feature attribution contributions with waterfall visualization.
 4. **Interactive District Heatmap:** Visualizes demographic, literacy, and industrial output metrics across all 788 Indian districts.
 5. **Bilingual Support (i18next):** Instant toggle between English and Hindi across all views, indicators, and report summaries.
-6. **DigiLocker / Aadhaar SSO:** Visual role-based security simulation (Admin, Analyst, Viewer) with immutable audit trail logging.
-7. **Official Executive Brief Generator:** Exports ministry-branded PDF reports with official watermarks and auto-scheduled weekly cron simulation.
+6. **Student SSO & RBAC:** Visual role-based security simulation (Admin, Student, Viewer) with immutable audit trail logging.
+7. **Student Report Generator:** Exports branded PDF reports with performance summaries and auto-scheduled weekly cron simulation.
 
 ---
 
@@ -137,7 +137,7 @@ npm run build
 
 ## 🏆 Smart India Hackathon (SIH) Details
 - **Problem Statement ID:** SIH-2024-PS-1628
-- **Organization / Ministry:** Ministry of Statistics and Programme Implementation (MoSPI)
+- **Organization:** Educational Institutions & Student Analytics
 - **Category:** Software & AI/ML Statistical Intelligence
 - **Team:** Mahidhar Bezawada & Team StatIntel
 
