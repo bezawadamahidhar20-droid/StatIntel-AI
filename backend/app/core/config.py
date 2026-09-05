@@ -38,9 +38,24 @@ class Settings(BaseSettings):
     GEMINI_MODEL: str = "gemini-3.1-flash-lite"
     USE_MOCK_AI: bool = False
 
-    # External Provider Configuration
-    IGOT_API_URL: str = "https://igot-karmayogi.gov.in/api/v1"
-    IGOT_API_KEY: str = "igot_mock_api_key"
+    # ── iGOT Karmayogi (Sunbird ED / Lern based) ──────────────────
+    IGOT_MODE: str = "mock"  # mock | sandbox | live
+    IGOT_BASE_URL: str = "https://portal.igotkarmayogi.gov.in"
+    IGOT_SANDBOX_URL: str = "https://dev.karmayogibharat.net"
+    IGOT_API_KEY: str = ""  # Bearer token, issued by Karmayogi Bharat
+    IGOT_USER_TOKEN: str = ""  # x-authenticated-user-token
+    IGOT_ORG_ID: str = ""  # MoSPI root org id on iGOT
+    IGOT_CHANNEL_ID: str = ""
+    IGOT_TIMEOUT_SECONDS: int = 20
+    IGOT_CACHE_TTL_SECONDS: int = 3600
+
+    # Parichay SSO (NIC single sign-on for government users)
+    PARICHAY_CLIENT_ID: str = ""
+    PARICHAY_CLIENT_SECRET: str = ""
+    PARICHAY_AUTH_URL: str = "https://parichay.nic.in/oauth2/authorize"
+    PARICHAY_TOKEN_URL: str = "https://parichay.nic.in/oauth2/token"
+    PARICHAY_USERINFO_URL: str = "https://parichay.nic.in/oauth2/userinfo"
+    PARICHAY_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/parichay/callback"
 
     NSSTA_API_URL: str = "https://nssta.gov.in/api/v1"
     NSSTA_API_KEY: str = "nssta_mock_api_key"

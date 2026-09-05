@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { apiClient } from '../services/apiClient';
+import { igotApi } from '../services/api/igot';
 import { mockCurriculumData } from '../data/mockData';
 import { LearningModule, LearningTopic, LearningResource, StudyNotes } from '../types';
 
@@ -389,6 +390,38 @@ df['multiplier'] = df['multiplier'] / 100.0
           >
             <Play className="w-4 h-4 fill-current" />
             <span>{course.status === 'In Progress' ? 'Continue Programme' : 'Enroll Now'}</span>
+          </button>
+
+          <button
+            onClick={async () => {
+              try {
+                const res = await igotApi.enrollCourse(course.id);
+                if (addNotification) {
+                  addNotification({
+                    id: `igot-${Date.now()}`,
+                    title: 'iGOT Karmayogi Integration 🏛️',
+                    message: `Opening "${course.title}" on the official Karmayogi Bharat portal.`,
+                    type: 'success',
+                  });
+                }
+                const targetUrl =
+                  res.data?.redirectUrl ||
+                  course.externalUrl ||
+                  `https://portal.igotkarmayogi.gov.in/app/toc/${course.external_course_id || 'do_11396102948123852811'}/overview`;
+                window.open(targetUrl, '_blank', 'noopener,noreferrer');
+              } catch {
+                window.open(
+                  course.externalUrl || 'https://portal.igotkarmayogi.gov.in',
+                  '_blank',
+                  'noopener,noreferrer'
+                );
+              }
+            }}
+            className="px-4 py-2.5 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200 font-semibold text-xs flex items-center gap-1.5 hover:bg-emerald-100 transition-colors"
+          >
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <span>Enroll on iGOT Karmayogi</span>
+            <ExternalLink className="w-3.5 h-3.5 ml-0.5" />
           </button>
 
           <button

@@ -220,8 +220,44 @@ export const LoginView: React.FC = () => {
                 mode === 'admin' ? 'bg-white text-blue-700 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Shield className="w-3.5 h-3.5 text-blue-600" />
+              <Shield className="w-3.5 h-3.5" />
               <span>Faculty Admin</span>
+            </button>
+          </div>
+
+          {/* Parichay / iGOT G2G SSO Banner */}
+          <div className="mb-6 p-3.5 rounded-xl bg-linear-to-r from-emerald-50 via-teal-50 to-blue-50 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                🏛️
+              </div>
+              <div>
+                <p className="font-bold text-emerald-950 flex items-center gap-1.5">
+                  <span>Parichay National SSO &bull; iGOT Karmayogi</span>
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-200 text-emerald-800 font-bold uppercase">G2G</span>
+                </p>
+                <p className="text-[11px] text-emerald-700">
+                  Direct single sign-on for MoSPI / ISS Statistical Officers & Karmayogi Bharat Learners.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                loginAsStudent({
+                  name: 'Mahidhar Reddy (MoSPI Nodal Scholar)',
+                  college: 'Indian Statistical Institute (ISI) / MoSPI Academy',
+                  degree: 'Master of Statistics (M.Stat)',
+                  year: '4th Year (Senior Researcher)',
+                  targetRole: 'Senior Statistical Officer',
+                  email: 'mahidhar.sso@mospi.gov.in',
+                  knownSkills: ['Basic Statistics', 'Survey Methodology & Data Analysis', 'Official Statistics', 'Python for Statistical Analytics'],
+                });
+              }}
+              className="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors shrink-0 flex items-center justify-center gap-1.5"
+            >
+              <span>Login via Parichay</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 

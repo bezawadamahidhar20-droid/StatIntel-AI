@@ -70,12 +70,18 @@ export interface SkillGapItem {
 export interface Course {
   id: string;
   title: string;
-  provider: 'iGOT Karmayogi' | 'NSSTA TPAC' | 'MoSPI Training Division';
-  domain: CompetencyDomain;
+  provider: string;
+  external_provider?: string;
+  external_course_id?: string;
+  provider_type?: string;
+  externalUrl?: string;
+  source_class?: string;
+  igotProgress?: number;
+  domain: CompetencyDomain | string;
   competenciesCovered: string[];
   duration: string; // e.g. "6 hours"
   durationHours: number;
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced' | string;
   language: string;
   rating: number;
   reviewCount: number;
@@ -83,7 +89,9 @@ export interface Course {
   status: 'Recommended' | 'In Progress' | 'Completed' | 'Not Started';
   progress?: number; // 0 - 100
   description: string;
-  whyRecommended: {
+  targetCompetency?: string;
+  rationale?: string;
+  whyRecommended?: {
     summary: string;
     gapAddressed: string;
     expectedImprovement: string;
@@ -92,14 +100,14 @@ export interface Course {
       percentage: number;
     }[];
   };
-  modules: {
+  modules?: {
     id: string;
     title: string;
     duration: string;
     completed?: boolean;
   }[];
-  prerequisites: string[];
-  outcomes: string[];
+  prerequisites?: string[];
+  outcomes?: string[];
 }
 
 export interface LearningPathStep {
