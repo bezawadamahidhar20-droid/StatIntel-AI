@@ -396,9 +396,31 @@ export const QuizGeneratorView: React.FC = () => {
                   onChange={(e) => setQuestionCount(Number(e.target.value))}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 focus:bg-white text-xs"
                 >
+                  <option value={1}>1 Question</option>
+                  <option value={2}>2 Questions</option>
                   <option value={3}>3 Questions (Quick Check)</option>
+                  <option value={4}>4 Questions</option>
                   <option value={5}>5 Questions (Standard)</option>
+                  <option value={6}>6 Questions</option>
+                  <option value={7}>7 Questions</option>
                   <option value={8}>8 Questions (In-Depth)</option>
+                  <option value={9}>9 Questions</option>
+                  <option value={10}>10 Questions</option>
+                  <option value={11}>11 Questions</option>
+                  <option value={12}>12 Questions</option>
+                  <option value={13}>13 Questions</option>
+                  <option value={14}>14 Questions</option>
+                  <option value={15}>15 Questions (Extended)</option>
+                  <option value={16}>16 Questions</option>
+                  <option value={17}>17 Questions</option>
+                  <option value={18}>18 Questions</option>
+                  <option value={19}>19 Questions</option>
+                  <option value={20}>20 Questions (Full Test)</option>
+                  <option value={21}>21 Questions</option>
+                  <option value={22}>22 Questions</option>
+                  <option value={23}>23 Questions</option>
+                  <option value={24}>24 Questions</option>
+                  <option value={25}>25 Questions (Comprehensive)</option>
                 </select>
               </div>
             </div>
@@ -439,7 +461,7 @@ export const QuizGeneratorView: React.FC = () => {
                   <span>Generated Questions Preview ({generatedQuestions.length})</span>
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Review generated options, correct answers, and textbook/library citations before testing.
+                  Review generated questions before launching. Correct answers and explanations are revealed only after you complete the assessment.
                 </p>
               </div>
 
@@ -487,42 +509,26 @@ export const QuizGeneratorView: React.FC = () => {
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                    {q.options.map((opt, oIdx) => {
-                      const isCorrect = oIdx === q.correctIndex;
-                      return (
-                        <div
-                          key={oIdx}
-                          className={`p-2.5 rounded-lg border text-xs flex items-start gap-2 ${
-                            isCorrect
-                              ? 'bg-emerald-50 border-emerald-400 text-emerald-950 font-semibold'
-                              : 'bg-white border-slate-200 text-slate-700'
-                          }`}
-                        >
-                          <span
-                            className={`w-5 h-5 shrink-0 rounded flex items-center justify-center font-bold text-[10px] ${
-                              isCorrect ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'
-                            }`}
-                          >
-                            {String.fromCharCode(65 + oIdx)}
-                          </span>
-                          <span className="leading-snug pt-0.5">{opt}</span>
-                        </div>
-                      );
-                    })}
+                    {q.options.map((opt, oIdx) => (
+                      <div
+                        key={oIdx}
+                        className="p-2.5 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs flex items-start gap-2"
+                      >
+                        <span className="w-5 h-5 shrink-0 rounded flex items-center justify-center font-bold text-[10px] bg-slate-100 text-slate-600">
+                          {String.fromCharCode(65 + oIdx)}
+                        </span>
+                        <span className="leading-snug pt-0.5">{opt}</span>
+                      </div>
+                    ))}
                   </div>
 
-                  {/* Explanation & Source Reference */}
-                  <div className="p-3 bg-white rounded-lg border border-slate-200 text-xs space-y-1">
-                    <p className="text-slate-700">
-                      <strong className="text-slate-900 font-semibold">Explanation:</strong> {q.explanation}
-                    </p>
-                    {q.sourceReference && (
-                      <p className="text-slate-500 text-[11px] flex items-center gap-1.5 pt-1">
-                        <BookOpen className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                        <span>Source: <strong className="text-slate-700">{q.sourceReference}</strong></span>
-                      </p>
-                    )}
-                  </div>
+                  {/* Source hint only — no answer/explanation revealed */}
+                  {q.sourceReference && (
+                    <div className="flex items-center gap-1.5 text-[11px] text-slate-400 pt-1">
+                      <BookOpen className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                      <span>Source: <span className="text-slate-500 font-medium">{q.sourceReference}</span></span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
