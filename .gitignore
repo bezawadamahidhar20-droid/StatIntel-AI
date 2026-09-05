@@ -21,3 +21,5 @@ backend/*.db
 backend/*.sqlite
 scratch/
 
+
+.vercel
