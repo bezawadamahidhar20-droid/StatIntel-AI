@@ -456,7 +456,8 @@ Output ONLY the raw JSON array. No markdown code blocks, no backticks, no conver
   }
 
   /**
-   * Smart fallback questions covering NumPy, Matplotlib, Pandas, ML, Statistics, and MoSPI sampling
+   * Smart fallback quiz — large shuffled, difficulty-aware question bank.
+   * Supports up to 25 questions with different questions every generation.
    */
   private generateSmartFallbackQuiz(
     topic: string,
@@ -465,156 +466,512 @@ Output ONLY the raw JSON array. No markdown code blocks, no backticks, no conver
   ): GeminiQuizQuestion[] {
     const topicLower = topic.toLowerCase();
 
-    const pool: GeminiQuizQuestion[] = [];
+    /** Fisher-Yates shuffle for randomisation each call */
+    const shuffle = <T>(arr: T[]): T[] => {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    };
 
-    if (topicLower.includes('numpy') || topicLower.includes('array') || topicLower.includes('python')) {
-      pool.push(
-        {
-          id: 'q-num-1',
-          question: 'In NumPy, how do you perform element-wise multiplication between two 2D arrays A and B of identical shape?',
-          options: ['A * B', 'np.dot(A, B)', 'np.multiply_matrices(A, B)', 'A @ B'],
-          correctIndex: 0,
-          explanation: 'In NumPy, the "*" operator performs element-wise multiplication. Matrix multiplication is done using "@" or "np.matmul()".',
-          sourceReference: 'NumPy v1.26 Reference Manual • Vectorized Arithmetic',
-          difficulty,
-        },
-        {
-          id: 'q-num-2',
-          question: 'Which NumPy method creates an array of 50 evenly spaced numbers between 0 and 10, inclusive?',
-          options: ['np.arange(0, 10, 50)', 'np.linspace(0, 10, 50)', 'np.interval(0, 10, 50)', 'np.grid(0, 10, 50)'],
-          correctIndex: 1,
-          explanation: 'np.linspace(start, stop, num) specifies the exact number of evenly spaced samples including both endpoints by default.',
-          sourceReference: 'Python for Data Analysis by Wes McKinney • Ch 4',
-          difficulty,
-        },
-        {
-          id: 'q-num-3',
-          question: 'What is the shape of a NumPy array created by arr = np.zeros((3, 4, 2))?',
-          options: ['3 rows, 4 columns, 2 depth (3D tensor)', '2 rows, 4 columns, 3 depth', '12 rows, 2 columns', '24 elements in a 1D vector'],
-          correctIndex: 0,
-          explanation: 'The tuple (3, 4, 2) represents 3 matrices of size 4 rows by 2 columns, totaling 24 elements in 3 dimensions.',
-          sourceReference: 'NumPy Array Manipulation Architecture',
-          difficulty,
-        }
-      );
-    }
-
-    if (topicLower.includes('matplot') || topicLower.includes('plot') || topicLower.includes('visual')) {
-      pool.push(
-        {
-          id: 'q-plt-1',
-          question: 'In Matplotlib (pyplot), which function creates a grid of subplots returning both the Figure and Axes array?',
-          options: ['plt.figure_grid()', 'plt.subplots(nrows, ncols)', 'plt.make_axes()', 'plt.multiplot()'],
-          correctIndex: 1,
-          explanation: 'fig, axes = plt.subplots(nrows, ncols) is the standard object-oriented interface for generating multiple subplots.',
-          sourceReference: 'Storytelling with Data & Matplotlib Documentation',
-          difficulty,
-        },
-        {
-          id: 'q-plt-2',
-          question: 'When visualizing the probability distribution of a continuous statistical variable, which Matplotlib function is most appropriate?',
-          options: ['plt.bar()', 'plt.hist(data, bins=30, density=True)', 'plt.pie()', 'plt.scatter_matrix()'],
-          correctIndex: 1,
-          explanation: 'plt.hist() with density=True normalizes bin heights so the total area equals 1, representing probability density.',
-          sourceReference: 'Practical Statistics for Data Scientists Ch 1',
-          difficulty,
-        },
-        {
-          id: 'q-plt-3',
-          question: 'How do you prevent overlapping axis labels and titles across multiple subplots in Matplotlib?',
-          options: ['plt.tight_layout()', 'plt.clear_overlap()', 'plt.adjust_padding()', 'plt.autoscale(False)'],
-          correctIndex: 0,
-          explanation: 'plt.tight_layout() automatically adjusts subplot params so that subplots and labels fit cleanly within the figure area.',
-          sourceReference: 'Python Data Science Handbook • Visualization',
-          difficulty,
-        }
-      );
-    }
-
-    if (topicLower.includes('pandas') || topicLower.includes('wrangling') || topicLower.includes('data')) {
-      pool.push(
-        {
-          id: 'q-pan-1',
-          question: 'In Pandas, which method groups data by categorical columns and computes aggregate statistical measures (mean, sum)?',
-          options: ['df.aggregate_by()', 'df.groupby()', 'df.pivot_table()', 'df.cluster()'],
-          correctIndex: 1,
-          explanation: 'df.groupby(["column"]).agg({"metric": "mean"}) implements the split-apply-combine workflow for grouped summaries.',
-          sourceReference: 'Wes McKinney Python for Data Analysis • Ch 10',
-          difficulty,
-        },
-        {
-          id: 'q-pan-2',
-          question: 'How do you check for and count missing (null / NaN) values per column in a Pandas DataFrame df?',
-          options: ['df.isnull().sum()', 'df.count_missing()', 'df.dropna(axis=1)', 'df.isna().count()'],
-          correctIndex: 0,
-          explanation: 'df.isnull().sum() creates a boolean mask of missing values and sums True (1) per column.',
-          sourceReference: 'Pandas User Guide • Missing Data Handling',
-          difficulty,
-        }
-      );
-    }
-
-    if (topicLower.includes('learning') || topicLower.includes('machine') || topicLower.includes('model') || topicLower.includes('scikit')) {
-      pool.push(
-        {
-          id: 'q-ml-1',
-          question: 'In Scikit-Learn, why must the StandardScaler be fit ONLY on the training set (fit_transform) and NOT on the test set (transform only)?',
-          options: [
-            'To prevent data leakage from the test set into training',
-            'Because the test set has no mean or standard deviation',
-            'To reduce training computational time',
-            'Scikit-Learn raises a ValueError if you fit on test data',
-          ],
-          correctIndex: 0,
-          explanation: 'Fitting scalers on test data causes data leakage, as test distribution statistics would bias model training.',
-          sourceReference: 'Hands-On Machine Learning by Aurélien Géron • Ch 2',
-          difficulty,
-        },
-        {
-          id: 'q-ml-2',
-          question: 'Which metric is most informative when evaluating a classification model trained on a heavily imbalanced dataset (e.g. 99% negative, 1% positive)?',
-          options: ['Overall Accuracy', 'Precision-Recall AUC (PR-AUC) or F1-score', 'Mean Squared Error (MSE)', 'R-squared (R²)'],
-          correctIndex: 1,
-          explanation: 'A trivial model predicting always negative gets 99% accuracy. PR-AUC and F1-score specifically evaluate true positive discovery under severe imbalance.',
-          sourceReference: 'An Introduction to Statistical Learning (ISLR) • Ch 4',
-          difficulty,
-        }
-      );
-    }
-
-    // Default statistical and sampling questions if specific topic pool is short
-    pool.push(
-      {
-        id: 'q-stat-gen-1',
-        question: `Regarding ${topic}: What is the primary difference between Population Parameter and Sample Statistic?`,
+    // ── NUMPY / PYTHON ────────────────────────────────────────────────────────
+    const numpyPool: GeminiQuizQuestion[] = [
+      { id: 'np-1', difficulty: 'Beginner',
+        question: 'Which NumPy function creates a 1-D array from a Python list?',
+        options: ['np.array(list)', 'np.from_list(list)', 'np.vector(list)', 'np.create(list)'],
+        correctIndex: 0,
+        explanation: 'np.array() is the primary constructor for converting Python sequences into NumPy arrays.',
+        sourceReference: 'NumPy v1.26 Quickstart Tutorial' },
+      { id: 'np-2', difficulty: 'Beginner',
+        question: 'What does arr.shape return for a 3×4 NumPy matrix?',
+        options: ['(3, 4)', '(4, 3)', '12', '[3, 4]'],
+        correctIndex: 0,
+        explanation: 'shape returns a tuple (rows, cols). A 3-row, 4-column matrix returns (3, 4).',
+        sourceReference: 'NumPy Array Basics Documentation' },
+      { id: 'np-3', difficulty: 'Beginner',
+        question: 'Which function fills an array with zeros of a given shape?',
+        options: ['np.zeros(shape)', 'np.empty(shape)', 'np.null(shape)', 'np.blank(shape)'],
+        correctIndex: 0,
+        explanation: 'np.zeros(shape) initialises every element to 0.0. np.empty() leaves memory uninitialised.',
+        sourceReference: 'NumPy Reference Manual • Array Creation' },
+      { id: 'np-4', difficulty: 'Beginner',
+        question: 'What is the result of np.arange(0, 10, 2)?',
+        options: ['[0, 2, 4, 6, 8]', '[0, 2, 4, 6, 8, 10]', '[2, 4, 6, 8, 10]', '[0, 10, 2]'],
+        correctIndex: 0,
+        explanation: 'np.arange(start, stop, step) — stop is exclusive, so 10 is not included.',
+        sourceReference: 'NumPy v1.26 Reference Manual' },
+      { id: 'np-5', difficulty: 'Beginner',
+        question: 'How do you obtain the total number of elements in a NumPy array arr?',
+        options: ['arr.size', 'arr.count()', 'len(arr)', 'arr.total'],
+        correctIndex: 0,
+        explanation: 'arr.size returns the product of all dimension lengths — total element count.',
+        sourceReference: 'NumPy Array Attributes' },
+      { id: 'np-6', difficulty: 'Intermediate',
+        question: 'In NumPy, how do you perform element-wise multiplication between two 2D arrays A and B of identical shape?',
+        options: ['A * B', 'np.dot(A, B)', 'np.multiply_matrices(A, B)', 'A @ B'],
+        correctIndex: 0,
+        explanation: '"*" is element-wise (Hadamard product). Matrix multiplication uses "@" or np.matmul().',
+        sourceReference: 'NumPy v1.26 Reference Manual • Vectorized Arithmetic' },
+      { id: 'np-7', difficulty: 'Intermediate',
+        question: 'Which NumPy method creates 50 evenly spaced numbers between 0 and 10 inclusive?',
+        options: ['np.arange(0,10,50)', 'np.linspace(0,10,50)', 'np.interval(0,10,50)', 'np.grid(0,10,50)'],
+        correctIndex: 1,
+        explanation: 'np.linspace(start, stop, num) includes both endpoints by default.',
+        sourceReference: 'Python for Data Analysis by Wes McKinney • Ch 4' },
+      { id: 'np-8', difficulty: 'Intermediate',
+        question: 'What is the shape of np.zeros((3, 4, 2))?',
+        options: ['(3, 4, 2)', '(4, 3, 2)', '(3, 2, 4)', '24'],
+        correctIndex: 0,
+        explanation: 'The tuple directly defines the shape: 3 matrices of 4 rows × 2 columns.',
+        sourceReference: 'NumPy Array Manipulation Architecture' },
+      { id: 'np-9', difficulty: 'Intermediate',
+        question: 'Which NumPy function stacks arrays along a new axis?',
+        options: ['np.stack()', 'np.concatenate()', 'np.append()', 'np.merge()'],
+        correctIndex: 0,
+        explanation: 'np.stack() joins arrays along a NEW axis; np.concatenate() joins along an EXISTING axis.',
+        sourceReference: 'NumPy Array Manipulation Routines' },
+      { id: 'np-10', difficulty: 'Intermediate',
+        question: 'What does np.where(condition, x, y) return?',
         options: [
-          'Parameters describe the whole population (fixed, often unknown); statistics are calculated from sample data',
+          'Elements from x where condition is True, else from y',
+          'Indices where condition is True',
+          'Filtered rows of x',
+          'Boolean mask of condition',
+        ],
+        correctIndex: 0,
+        explanation: 'np.where(cond, x, y) is the vectorised ternary — returns x value when True, y when False.',
+        sourceReference: 'NumPy Logic Functions Documentation' },
+      { id: 'np-11', difficulty: 'Intermediate',
+        question: 'How do you transpose a 2D NumPy array A?',
+        options: ['A.T or np.transpose(A)', 'A.flip()', 'np.rotate(A)', 'A.reshape(-1)'],
+        correctIndex: 0,
+        explanation: 'The .T attribute and np.transpose() both swap rows and columns.',
+        sourceReference: 'NumPy Linear Algebra Guide' },
+      { id: 'np-12', difficulty: 'Advanced',
+        question: 'What is NumPy broadcasting and when does it apply?',
+        options: [
+          'Automatic shape expansion allowing arithmetic on arrays with compatible shapes',
+          'Broadcasting data over a network socket',
+          'Replicating scalar values across GPU cores',
+          'Converting float64 to float32 automatically',
+        ],
+        correctIndex: 0,
+        explanation: 'Broadcasting stretches smaller arrays along size-1 dimensions to match a larger array without copying data.',
+        sourceReference: 'NumPy Broadcasting Documentation' },
+      { id: 'np-13', difficulty: 'Advanced',
+        question: 'What does np.einsum("ij,jk->ik", A, B) compute?',
+        options: ['Matrix multiplication of A and B', 'Element-wise product', 'Outer product', 'Kronecker product'],
+        correctIndex: 0,
+        explanation: 'Einstein summation "ij,jk->ik" contracts the shared j index — equivalent to A @ B (matrix multiply).',
+        sourceReference: 'NumPy Einstein Summation Guide' },
+      { id: 'np-14', difficulty: 'Advanced',
+        question: 'Which NumPy function computes the eigenvalues and eigenvectors of a square matrix?',
+        options: ['np.linalg.eig()', 'np.linalg.det()', 'np.linalg.svd()', 'np.linalg.norm()'],
+        correctIndex: 0,
+        explanation: 'np.linalg.eig(A) returns (eigenvalues, eigenvectors). SVD factorises into U Σ Vᵀ instead.',
+        sourceReference: 'NumPy Linear Algebra Module' },
+      { id: 'np-15', difficulty: 'Advanced',
+        question: 'What is the difference between np.copy() and a view (slice) in NumPy?',
+        options: [
+          'A copy owns its data; a view shares memory with the original array',
+          'A copy is faster; a view is slower',
+          'Views own their own memory; copies share',
+          'There is no difference in NumPy 2.x',
+        ],
+        correctIndex: 0,
+        explanation: 'Modifying a view modifies the original; a copy is independent. Use arr.base is None to check ownership.',
+        sourceReference: 'NumPy Memory Layout & Views Documentation' },
+    ];
+
+    // ── MATPLOTLIB / VISUALISATION ────────────────────────────────────────────
+    const matplotPool: GeminiQuizQuestion[] = [
+      { id: 'plt-1', difficulty: 'Beginner',
+        question: 'Which function draws a basic line plot in Matplotlib?',
+        options: ['plt.plot(x, y)', 'plt.draw(x, y)', 'plt.line(x, y)', 'plt.render(x, y)'],
+        correctIndex: 0,
+        explanation: 'plt.plot() is the primary Matplotlib function for 2-D line and scatter charts.',
+        sourceReference: 'Matplotlib Pyplot Tutorial' },
+      { id: 'plt-2', difficulty: 'Beginner',
+        question: 'How do you add a title to a Matplotlib figure?',
+        options: ['plt.title("Title")', 'plt.header("Title")', 'plt.label("Title")', 'plt.caption("Title")'],
+        correctIndex: 0,
+        explanation: 'plt.title() sets the axes title; fig.suptitle() sets a figure-level super-title.',
+        sourceReference: 'Matplotlib Axes API' },
+      { id: 'plt-3', difficulty: 'Beginner',
+        question: 'Which call saves the current Matplotlib figure to a file?',
+        options: ['plt.savefig("file.png")', 'plt.export("file.png")', 'plt.write("file.png")', 'plt.render("file.png")'],
+        correctIndex: 0,
+        explanation: 'plt.savefig() supports PNG, PDF, SVG and more via the format argument.',
+        sourceReference: 'Matplotlib Figure Saving Guide' },
+      { id: 'plt-4', difficulty: 'Beginner',
+        question: 'What does plt.show() do?',
+        options: ['Renders and displays the current figure', 'Clears the figure', 'Saves the figure', 'Refreshes axis limits'],
+        correctIndex: 0,
+        explanation: 'plt.show() flushes the figure to the display backend and blocks until the window is closed.',
+        sourceReference: 'Matplotlib Interactive Mode Documentation' },
+      { id: 'plt-5', difficulty: 'Intermediate',
+        question: 'Which Matplotlib function creates a grid of subplots returning Figure and Axes objects?',
+        options: ['plt.subplots(nrows, ncols)', 'plt.figure_grid()', 'plt.make_axes()', 'plt.multiplot()'],
+        correctIndex: 0,
+        explanation: 'fig, axes = plt.subplots(r, c) is the standard OO interface for subplot grids.',
+        sourceReference: 'Storytelling with Data & Matplotlib Documentation' },
+      { id: 'plt-6', difficulty: 'Intermediate',
+        question: 'For visualising a continuous statistical variable\'s distribution, which call is most appropriate?',
+        options: ['plt.bar()', 'plt.hist(data, bins=30, density=True)', 'plt.pie()', 'plt.scatter_matrix()'],
+        correctIndex: 1,
+        explanation: 'density=True normalises so total area = 1, producing a probability density estimate.',
+        sourceReference: 'Practical Statistics for Data Scientists Ch 1' },
+      { id: 'plt-7', difficulty: 'Intermediate',
+        question: 'How do you prevent overlapping labels across multiple subplots?',
+        options: ['plt.tight_layout()', 'plt.clear_overlap()', 'plt.adjust_padding()', 'plt.autoscale(False)'],
+        correctIndex: 0,
+        explanation: 'tight_layout() auto-adjusts padding so tick labels and titles do not collide.',
+        sourceReference: 'Python Data Science Handbook • Visualization' },
+      { id: 'plt-8', difficulty: 'Intermediate',
+        question: 'Which Seaborn function produces a heatmap of a correlation matrix?',
+        options: ['sns.heatmap(df.corr())', 'sns.corrplot(df)', 'sns.matrix(df)', 'sns.pairplot(df)'],
+        correctIndex: 0,
+        explanation: 'sns.heatmap() renders a colour-encoded matrix; df.corr() computes Pearson correlations.',
+        sourceReference: 'Seaborn Statistical Data Visualization' },
+      { id: 'plt-9', difficulty: 'Intermediate',
+        question: 'What is the purpose of plt.legend() in Matplotlib?',
+        options: [
+          'Displays a key mapping line colours/styles to their labels',
+          'Adds a watermark',
+          'Hides the axis ticks',
+          'Exports chart metadata',
+        ],
+        correctIndex: 0,
+        explanation: 'plt.legend() reads the label= kwargs passed to plot calls and renders an explanatory key.',
+        sourceReference: 'Matplotlib Legend Guide' },
+      { id: 'plt-10', difficulty: 'Advanced',
+        question: 'In Matplotlib\'s object-oriented API, how do you set a log scale on the y-axis of an Axes object ax?',
+        options: ['ax.set_yscale("log")', 'ax.log_y(True)', 'ax.yaxis.log = True', 'plt.yscale("log")'],
+        correctIndex: 0,
+        explanation: 'ax.set_yscale("log") changes the y-axis to logarithmic. plt.yscale() is the pyplot equivalent.',
+        sourceReference: 'Matplotlib Axes API Reference' },
+    ];
+
+    // ── PANDAS ────────────────────────────────────────────────────────────────
+    const pandasPool: GeminiQuizQuestion[] = [
+      { id: 'pan-1', difficulty: 'Beginner',
+        question: 'How do you read a CSV file into a Pandas DataFrame?',
+        options: ['pd.read_csv("file.csv")', 'pd.load("file.csv")', 'pd.import_csv("file.csv")', 'pd.DataFrame.from_csv("file.csv")'],
+        correctIndex: 0,
+        explanation: 'pd.read_csv() is the standard Pandas function to parse CSV files into DataFrames.',
+        sourceReference: 'Pandas IO Tools Documentation' },
+      { id: 'pan-2', difficulty: 'Beginner',
+        question: 'Which method displays the first 5 rows of a DataFrame df?',
+        options: ['df.head()', 'df.top(5)', 'df.first(5)', 'df.show(5)'],
+        correctIndex: 0,
+        explanation: 'df.head(n) returns the first n rows (default 5).',
+        sourceReference: 'Pandas DataFrame API' },
+      { id: 'pan-3', difficulty: 'Beginner',
+        question: 'How do you select a single column "age" from DataFrame df?',
+        options: ['df["age"]', 'df.get("age")', 'df.col("age")', 'df.select("age")'],
+        correctIndex: 0,
+        explanation: 'df["col"] returns a Series; df[["col"]] returns a one-column DataFrame.',
+        sourceReference: 'Pandas Indexing and Selecting Data' },
+      { id: 'pan-4', difficulty: 'Beginner',
+        question: 'What does df.shape return?',
+        options: ['(rows, columns)', '(columns, rows)', 'Total element count', 'dtypes tuple'],
+        correctIndex: 0,
+        explanation: 'df.shape is a tuple (n_rows, n_cols), matching NumPy array convention.',
+        sourceReference: 'Pandas DataFrame Attributes' },
+      { id: 'pan-5', difficulty: 'Intermediate',
+        question: 'How do you count missing values per column in a Pandas DataFrame df?',
+        options: ['df.isnull().sum()', 'df.count_missing()', 'df.dropna(axis=1)', 'df.isna().count()'],
+        correctIndex: 0,
+        explanation: 'isnull() returns a boolean mask; .sum() counts True values per column.',
+        sourceReference: 'Pandas User Guide • Missing Data Handling' },
+      { id: 'pan-6', difficulty: 'Intermediate',
+        question: 'In Pandas, which method groups rows by a column and computes aggregates?',
+        options: ['df.groupby()', 'df.aggregate_by()', 'df.pivot_table()', 'df.cluster()'],
+        correctIndex: 0,
+        explanation: 'df.groupby("col").agg({"val": "mean"}) implements split-apply-combine.',
+        sourceReference: 'Wes McKinney Python for Data Analysis • Ch 10' },
+      { id: 'pan-7', difficulty: 'Intermediate',
+        question: 'What does df.merge(df2, on="id", how="left") produce?',
+        options: [
+          'All rows from df, matched rows from df2; NaN where no match',
+          'Only rows present in both DataFrames',
+          'All rows from both DataFrames including duplicates',
+          'Rows only in df2',
+        ],
+        correctIndex: 0,
+        explanation: 'A left join keeps every row in the left DataFrame and fills unmatched right-side columns with NaN.',
+        sourceReference: 'Pandas Merge, Join & Concatenate Guide' },
+      { id: 'pan-8', difficulty: 'Intermediate',
+        question: 'Which Pandas method removes duplicate rows?',
+        options: ['df.drop_duplicates()', 'df.remove_dupes()', 'df.unique()', 'df.distinct()'],
+        correctIndex: 0,
+        explanation: 'drop_duplicates() returns a DataFrame with duplicate rows removed; keep= controls which to retain.',
+        sourceReference: 'Pandas Data Cleaning Guide' },
+      { id: 'pan-9', difficulty: 'Intermediate',
+        question: 'How do you apply a custom function to every element of a DataFrame column?',
+        options: ['series.apply(func)', 'series.map_func(func)', 'series.transform(func)', 'series.eval(func)'],
+        correctIndex: 0,
+        explanation: 'Series.apply() passes each element to func; DataFrame.apply() applies along rows or columns.',
+        sourceReference: 'Pandas Apply vs Map Guide' },
+      { id: 'pan-10', difficulty: 'Advanced',
+        question: 'What is the difference between df.loc[] and df.iloc[] in Pandas?',
+        options: [
+          'loc uses label-based indexing; iloc uses integer position-based indexing',
+          'iloc is faster; loc is slower',
+          'loc uses boolean masks; iloc uses column names',
+          'They are identical in Pandas 2.x',
+        ],
+        correctIndex: 0,
+        explanation: 'df.loc[row_label, col_label] selects by name; df.iloc[row_pos, col_pos] selects by zero-based integer position.',
+        sourceReference: 'Pandas Indexing and Selecting Data' },
+      { id: 'pan-11', difficulty: 'Advanced',
+        question: 'What does df.pivot_table(values="sales", index="region", aggfunc="sum") produce?',
+        options: [
+          'A table of total sales summed by region',
+          'A sorted DataFrame by region',
+          'A crosstab of region vs sales categories',
+          'A normalised frequency table',
+        ],
+        correctIndex: 0,
+        explanation: 'pivot_table groups data and applies aggfunc — here summing sales per region.',
+        sourceReference: 'Wes McKinney Python for Data Analysis • Ch 11' },
+    ];
+
+    // ── MACHINE LEARNING ──────────────────────────────────────────────────────
+    const mlPool: GeminiQuizQuestion[] = [
+      { id: 'ml-1', difficulty: 'Beginner',
+        question: 'What is supervised learning?',
+        options: [
+          'Learning from labelled input-output pairs to predict outputs for new inputs',
+          'Learning without any labels or targets',
+          'Reinforcement-based learning through rewards',
+          'Copying patterns from a pretrained model',
+        ],
+        correctIndex: 0,
+        explanation: 'Supervised learning uses labelled examples (X, y) to train a model that can predict y for unseen X.',
+        sourceReference: 'Hands-On Machine Learning by Aurélien Géron • Ch 1' },
+      { id: 'ml-2', difficulty: 'Beginner',
+        question: 'What does train_test_split() do in Scikit-Learn?',
+        options: [
+          'Partitions arrays into random train and test subsets',
+          'Validates model performance on training data',
+          'Splits features from target labels',
+          'Balances class distributions',
+        ],
+        correctIndex: 0,
+        explanation: 'train_test_split shuffles and splits arrays/DataFrames into train/test portions for unbiased evaluation.',
+        sourceReference: 'Scikit-Learn Model Selection Documentation' },
+      { id: 'ml-3', difficulty: 'Beginner',
+        question: 'What does a confusion matrix show?',
+        options: [
+          'Counts of TP, FP, FN, TN predictions for a classifier',
+          'Feature correlations',
+          'Loss curve over epochs',
+          'Hyperparameter tuning results',
+        ],
+        correctIndex: 0,
+        explanation: 'A confusion matrix tabulates True Positives, False Positives, False Negatives, and True Negatives.',
+        sourceReference: 'An Introduction to Statistical Learning • Ch 4' },
+      { id: 'ml-4', difficulty: 'Intermediate',
+        question: 'Why must StandardScaler be fit ONLY on training data, then transform both sets?',
+        options: [
+          'To prevent data leakage from test statistics biasing model training',
+          'Because test data has no standard deviation',
+          'To reduce CPU time',
+          'Scikit-Learn raises an error otherwise',
+        ],
+        correctIndex: 0,
+        explanation: 'Fitting on test data exposes test distribution statistics during training — data leakage that inflates performance estimates.',
+        sourceReference: 'Hands-On Machine Learning by Aurélien Géron • Ch 2' },
+      { id: 'ml-5', difficulty: 'Intermediate',
+        question: 'Which metric is best for an imbalanced classification dataset (99% negative, 1% positive)?',
+        options: ['Overall Accuracy', 'Precision-Recall AUC or F1-score', 'Mean Squared Error', 'R²'],
+        correctIndex: 1,
+        explanation: 'A classifier always predicting negative gets 99% accuracy — PR-AUC/F1 properly measures positive class detection.',
+        sourceReference: 'An Introduction to Statistical Learning (ISLR) • Ch 4' },
+      { id: 'ml-6', difficulty: 'Intermediate',
+        question: 'What does cross-validation address that a single train/test split does not?',
+        options: [
+          'High variance in performance estimates due to a single random split',
+          'Overfitting to validation data automatically',
+          'Feature importance ranking',
+          'Hyperparameter optimisation',
+        ],
+        correctIndex: 0,
+        explanation: 'k-fold CV rotates the test fold across all data subsets, giving a lower-variance estimate of generalisation performance.',
+        sourceReference: 'Scikit-Learn Cross Validation Guide' },
+      { id: 'ml-7', difficulty: 'Intermediate',
+        question: 'What is regularisation in machine learning?',
+        options: [
+          'Adding a penalty term to the loss function to reduce model complexity and prevent overfitting',
+          'Normalising input features to [0, 1]',
+          'Removing duplicate training samples',
+          'Balancing class labels via resampling',
+        ],
+        correctIndex: 0,
+        explanation: 'L1 (Lasso) and L2 (Ridge) regularisation shrink coefficients, reducing overfitting by penalising large weights.',
+        sourceReference: 'Hands-On Machine Learning by Aurélien Géron • Ch 4' },
+      { id: 'ml-8', difficulty: 'Intermediate',
+        question: 'What does the Random Forest algorithm do differently from a single Decision Tree?',
+        options: [
+          'Trains many trees on bootstrap samples and random feature subsets, averaging predictions',
+          'Prunes a single deep tree to reduce variance',
+          'Uses gradient boosting to correct previous errors',
+          'Applies SVM kernel trick to decision boundaries',
+        ],
+        correctIndex: 0,
+        explanation: 'Random Forests reduce variance through bagging (bootstrap + feature randomness) and ensemble averaging.',
+        sourceReference: 'Hands-On Machine Learning by Aurélien Géron • Ch 7' },
+      { id: 'ml-9', difficulty: 'Advanced',
+        question: 'What is the bias-variance trade-off in machine learning?',
+        options: [
+          'High bias → underfitting; high variance → overfitting; optimal models balance both',
+          'High bias means large coefficients; high variance means many features',
+          'Bias measures training time; variance measures prediction speed',
+          'They are independent and can both be minimised simultaneously',
+        ],
+        correctIndex: 0,
+        explanation: 'Total error = Bias² + Variance + Irreducible Noise. Reducing one typically increases the other.',
+        sourceReference: 'An Introduction to Statistical Learning • Ch 2' },
+      { id: 'ml-10', difficulty: 'Advanced',
+        question: 'What does XGBoost\'s "gradient boosting" mean?',
+        options: [
+          'Sequentially fitting trees to the negative gradient of the loss, correcting previous errors',
+          'Averaging predictions of independently trained deep trees',
+          'Applying gradient descent inside each decision node',
+          'Boosting training speed via GPU gradients',
+        ],
+        correctIndex: 0,
+        explanation: 'XGBoost fits each tree to residuals (negative gradient), then adds it with a learning-rate shrinkage to the ensemble.',
+        sourceReference: 'XGBoost Documentation • Introduction to Boosted Trees' },
+    ];
+
+    // ── STATISTICS / SAMPLING ─────────────────────────────────────────────────
+    const statPool: GeminiQuizQuestion[] = [
+      { id: 'stat-1', difficulty: 'Beginner',
+        question: 'What is the difference between a population parameter and a sample statistic?',
+        options: [
+          'Parameters describe the whole population (fixed); statistics are computed from sample data',
           'Statistics are always larger than parameters',
-          'Parameters are estimated with Python, statistics with Excel',
+          'Parameters are estimated in Python; statistics in Excel',
           'There is no difference in modern data science',
         ],
         correctIndex: 0,
-        explanation: 'A parameter is a fixed numerical characteristic of the entire population (e.g. μ), while a statistic is an estimator computed from sample data (e.g. x̄).',
-        sourceReference: 'Sampling Techniques by William G. Cochran • Ch 2',
-        difficulty,
-      },
-      {
-        id: 'q-stat-gen-2',
-        question: `When building an analytical pipeline for ${topic}, what is the Central Limit Theorem (CLT) guarantee?`,
+        explanation: 'μ is a population parameter; x̄ is a sample statistic that estimates μ.',
+        sourceReference: 'Sampling Techniques by William G. Cochran • Ch 2' },
+      { id: 'stat-2', difficulty: 'Beginner',
+        question: 'What does the Central Limit Theorem (CLT) state?',
         options: [
-          'The sample mean distribution approaches normal as sample size increases, regardless of population distribution shape',
-          'Every population must follow a bell-shaped normal curve',
-          'Larger samples always produce a smaller mean',
-          'All variance drops to zero if n > 30',
+          'Sample means approach a normal distribution as sample size grows, regardless of population shape',
+          'All populations are normally distributed',
+          'Larger samples always have smaller means',
+          'Variance drops to zero for n > 30',
         ],
         correctIndex: 0,
-        explanation: 'The Central Limit Theorem guarantees that the distribution of sample means approaches normality as n increases, provided variance is finite.',
-        sourceReference: 'Practical Statistics for Data Scientists • Ch 2',
-        difficulty,
-      }
-    );
+        explanation: 'CLT guarantees approximate normality of x̄ when n is large and population variance is finite.',
+        sourceReference: 'Practical Statistics for Data Scientists • Ch 2' },
+      { id: 'stat-3', difficulty: 'Beginner',
+        question: 'What is the p-value in hypothesis testing?',
+        options: [
+          'Probability of obtaining results at least as extreme as observed, assuming H₀ is true',
+          'Probability that the null hypothesis is true',
+          'Probability of Type II error',
+          'Significance level α',
+        ],
+        correctIndex: 0,
+        explanation: 'p-value < α (e.g. 0.05) leads to rejecting H₀; it does NOT measure H₀ truth probability.',
+        sourceReference: 'Statistical Inference by Casella & Berger • Ch 8' },
+      { id: 'stat-4', difficulty: 'Intermediate',
+        question: 'Why is Neyman optimum allocation preferred over proportional allocation in stratified sampling?',
+        options: [
+          'It minimises variance for a fixed n by allocating more units to larger and more variable strata',
+          'It gives equal sample sizes to all strata',
+          'It eliminates the need for sampling weights',
+          'It requires no prior stratum standard deviations',
+        ],
+        correctIndex: 0,
+        explanation: 'Neyman allocation: nₕ ∝ Nₕσₕ. Larger, more variable strata get more samples.',
+        sourceReference: 'Sampling Techniques by William G. Cochran • Ch 5' },
+      { id: 'stat-5', difficulty: 'Intermediate',
+        question: 'What does a 95% confidence interval (CI) mean?',
+        options: [
+          'If repeated many times, 95% of such CIs would contain the true parameter',
+          'There is a 95% chance the parameter lies in this specific interval',
+          'The sample mean is within 95% of the population mean',
+          'The margin of error is 5%',
+        ],
+        correctIndex: 0,
+        explanation: 'CI is a frequentist concept about the procedure, not the probability for a specific interval.',
+        sourceReference: 'Practical Statistics for Data Scientists • Ch 3' },
+      { id: 'stat-6', difficulty: 'Intermediate',
+        question: 'What is the difference between Type I and Type II errors?',
+        options: [
+          'Type I: rejecting a true H₀ (false positive); Type II: failing to reject a false H₀ (false negative)',
+          'Type I: accepting a false H₀; Type II: rejecting a true H₁',
+          'Type I relates to sample size; Type II to significance level',
+          'They are inverses of each other with no trade-off',
+        ],
+        correctIndex: 0,
+        explanation: 'α = P(Type I error); β = P(Type II error); Power = 1 − β.',
+        sourceReference: 'Statistical Inference by Casella & Berger • Ch 8' },
+      { id: 'stat-7', difficulty: 'Advanced',
+        question: 'What does the coefficient of variation (CV) measure and why is it useful?',
+        options: [
+          'Relative variability (SD / Mean × 100%) — useful for comparing dispersion across different scales',
+          'Absolute spread around the median',
+          'Correlation between two random variables',
+          'Variance explained by the regression model',
+        ],
+        correctIndex: 0,
+        explanation: 'CV = (σ/μ)×100 allows comparing variability of datasets with different units or magnitudes.',
+        sourceReference: 'Statistics: Principles and Methods by Johnson & Bhattacharyya' },
+      { id: 'stat-8', difficulty: 'Advanced',
+        question: 'In multiple linear regression, what does multicollinearity cause?',
+        options: [
+          'Unstable, high-variance coefficient estimates that are hard to interpret individually',
+          'Biased predictions on new data',
+          'Lower R² on the training set',
+          'Heteroscedasticity in residuals',
+        ],
+        correctIndex: 0,
+        explanation: 'Multicollinearity inflates standard errors of correlated predictors, making individual coefficients unreliable.',
+        sourceReference: 'Applied Regression Analysis by Draper & Smith • Ch 8' },
+    ];
 
-    return pool.slice(0, numQuestions);
+    // ── Assemble pool based on topic ──────────────────────────────────────────
+    let combined: GeminiQuizQuestion[] = [];
+    const inTopic = (...words: string[]) => words.some(w => topicLower.includes(w));
+
+    if (inTopic('numpy', 'array', 'python', 'scipy')) combined.push(...numpyPool);
+    if (inTopic('matplot', 'plot', 'visual', 'seaborn', 'chart')) combined.push(...matplotPool);
+    if (inTopic('pandas', 'wrangling', 'dataframe')) combined.push(...pandasPool);
+    if (inTopic('machine', 'learning', 'scikit', 'sklearn', 'model', 'classification', 'regression', 'xgboost', 'forest')) combined.push(...mlPool);
+    if (inTopic('statistic', 'sampling', 'hypothesis', 'survey', 'mospi', 'inference', 'nsso', 'plfs')) combined.push(...statPool);
+
+    // If no specific category matched, use all pools
+    if (combined.length === 0) {
+      combined = [...numpyPool, ...matplotPool, ...pandasPool, ...mlPool, ...statPool];
+    }
+
+    // ── Filter by difficulty first, fall back to full pool if not enough ─────
+    const difficultyFiltered = combined.filter(q => q.difficulty === difficulty);
+    const pool = difficultyFiltered.length >= numQuestions ? difficultyFiltered : combined;
+
+    // ── Shuffle so questions differ every generation ──────────────────────────
+    const shuffled = shuffle(pool);
+
+    // ── If we still don't have enough, cycle through shuffled pool ───────────
+    const result: GeminiQuizQuestion[] = [];
+    let i = 0;
+    while (result.length < numQuestions) {
+      const q = shuffled[i % shuffled.length];
+      result.push({ ...q, id: `${q.id}-${result.length}`, difficulty });
+      i++;
+    }
+
+    return result;
   }
 
   /**
