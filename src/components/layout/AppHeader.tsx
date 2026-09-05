@@ -17,6 +17,7 @@ import {
   LogOut,
   KeyRound,
   UserPlus,
+  Briefcase,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
@@ -151,10 +152,18 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onMobileMenuToggle }) => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs flex items-center gap-1.5 transition-colors"
+                className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition-colors"
               >
-                <GraduationCap className="w-3.5 h-3.5" />
-                <span>Student Login / Demo</span>
+                <Briefcase className="w-3.5 h-3.5" />
+                <span>Statistical Officer Sign In</span>
+              </button>
+
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors flex items-center gap-1.5"
+              >
+                <GraduationCap className="w-3.5 h-3.5 text-blue-600" />
+                <span>Scholar Access</span>
               </button>
 
               <button

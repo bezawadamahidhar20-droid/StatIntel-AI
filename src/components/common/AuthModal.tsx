@@ -15,6 +15,9 @@ import {
   Plus,
   Check,
   CheckCircle2,
+  Briefcase,
+  Building2,
+  UserCheck,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { groqService, isTechnicalSoftwareSkill, normalizeSkillName } from '../../services/groqService';
@@ -38,6 +41,49 @@ const POPULAR_SKILL_SUGGESTIONS = [
   'AWS',
 ];
 
+const OFFICER_PRESETS = [
+  {
+    name: 'Dr. Rajesh Kumar Sharma',
+    designation: 'Senior Statistical Officer (SSO)',
+    department: 'NSSO Field Operations Division (FOD)',
+    email: 'rajesh.sso@mospi.gov.in',
+    cadreId: 'SSS-2019-8842',
+    assignment: 'Supervision of PLFS Round 80 and ASUSE Field Audits',
+    targetRole: 'Senior Statistical Officer',
+    skills: ['Survey Design & Sampling Methodology', 'Labour & Employment Statistics (PLFS)', 'CAPI Tablet Field Data Collection', 'Data Quality Frameworks (DQAF)'],
+  },
+  {
+    name: 'Pooja Verma, ISS',
+    designation: 'Assistant Director (Economic Statistics)',
+    department: 'CSO Economic Statistics Division (ESD)',
+    email: 'pooja.verma@nic.in',
+    cadreId: 'ISS-2021-3041',
+    assignment: 'Revision of CPI Base Year and Index of Industrial Production (IIP)',
+    targetRole: 'Economic Statistics Specialist',
+    skills: ['Price Statistics (CPI & WPI)', 'Index Numbers & IIP', 'National Accounts (GDP/GVA)', 'SAS & R Programming'],
+  },
+  {
+    name: 'Anand Sundaram',
+    designation: 'Junior Statistical Officer (Data Lead)',
+    department: 'Data Informatics & Innovation Division (DIID)',
+    email: 'anand.diid@mospi.gov.in',
+    cadreId: 'SSS-2022-1092',
+    assignment: 'National Data Warehouse ETL pipelines and MeghRaj cloud migration',
+    targetRole: 'Data Engineering Specialist',
+    skills: ['Python for Microdata Analytics', 'SQL Database Systems', 'Government Cloud (MeghRaj)', 'DPDP Act 2023'],
+  },
+  {
+    name: 'Dr. Neha Sen, ISS',
+    designation: 'Director (National Accounts Division)',
+    department: 'Central Statistics Office — NAD',
+    email: 'neha.sen@mospi.gov.in',
+    cadreId: 'ISS-2014-1105',
+    assignment: 'SNA 2008 Supply-Use Tables (SUT) and Quarterly GDP Estimation',
+    targetRole: 'National Accounts Expert',
+    skills: ['National Accounts (GDP/GVA)', 'Macroeconomic Accounting', 'Econometrics & Forecasting', 'Evidence-Based Decision Making'],
+  },
+];
+
 import { DISCORD_AVATAR_PRESETS, DEFAULT_AVATAR } from '../../constants/avatars';
 
 export const AuthModal: React.FC = () => {
@@ -49,7 +95,17 @@ export const AuthModal: React.FC = () => {
     isAuthenticated,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'register' | 'login' | 'admin'>('register');
+  const [activeTab, setActiveTab] = useState<'officer' | 'register' | 'login' | 'admin'>('officer');
+
+  // Statistical Officer Form State
+  const [officerName, setOfficerName] = useState(OFFICER_PRESETS[0].name);
+  const [officerDesignation, setOfficerDesignation] = useState(OFFICER_PRESETS[0].designation);
+  const [officerDepartment, setOfficerDepartment] = useState(OFFICER_PRESETS[0].department);
+  const [officerEmail, setOfficerEmail] = useState(OFFICER_PRESETS[0].email);
+  const [officerCadreId, setOfficerCadreId] = useState(OFFICER_PRESETS[0].cadreId);
+  const [officerAssignment, setOfficerAssignment] = useState(OFFICER_PRESETS[0].assignment);
+  const [officerTargetRole, setOfficerTargetRole] = useState(OFFICER_PRESETS[0].targetRole);
+  const [officerSkills, setOfficerSkills] = useState<string[]>(OFFICER_PRESETS[0].skills);
 
   // Student Registration Form State
   const [name, setName] = useState('');
@@ -139,6 +195,31 @@ export const AuthModal: React.FC = () => {
       setIsDetectingSkills(false);
       setTimeout(() => setGroqDetectionMessage(''), 4500);
     }
+  };
+
+  const handleSelectPresetOfficer = (preset: typeof OFFICER_PRESETS[0]) => {
+    setOfficerName(preset.name);
+    setOfficerDesignation(preset.designation);
+    setOfficerDepartment(preset.department);
+    setOfficerEmail(preset.email);
+    setOfficerCadreId(preset.cadreId);
+    setOfficerAssignment(preset.assignment);
+    setOfficerTargetRole(preset.targetRole);
+    setOfficerSkills(preset.skills);
+  };
+
+  const handleOfficerSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    loginAsStudent({
+      name: officerName.trim() || 'Statistical Officer',
+      college: 'National Statistical Systems Training Academy (NSSTA)',
+      degree: 'Indian Statistical Service / SSS Cadre',
+      year: 'Gazetted Officer Cadre',
+      targetRole: officerTargetRole || officerDesignation,
+      email: officerEmail.trim() || 'officer.stat@mospi.gov.in',
+      knownSkills: officerSkills.length > 0 ? officerSkills : ['Survey Design & Sampling Methodology', 'Official Statistics'],
+    });
+    setIsAuthModalOpen(false);
   };
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
@@ -238,8 +319,25 @@ export const AuthModal: React.FC = () => {
             Choose from 20 industry roles, identify your skills with Groq AI, and get a tailored career roadmap with recommended master books.
           </p>
 
-          {/* Navigation Tabs */}
-          <div className="flex gap-2 mt-5 border-b border-white/15 pb-0 text-xs">
+          {/* Navigation Tabs (4 Options) */}
+          <div className="flex gap-2 mt-5 border-b border-white/15 pb-0 text-xs overflow-x-auto">
+            <button
+              onClick={() => {
+                setActiveTab('officer');
+                setRegisterError('');
+                setLoginError('');
+                setAdminError('');
+              }}
+              className={`pb-2.5 px-3 font-semibold transition-all border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
+                activeTab === 'officer'
+                  ? 'border-amber-400 text-white font-bold'
+                  : 'border-transparent text-blue-200 hover:text-white'
+              }`}
+            >
+              <Briefcase className="w-3.5 h-3.5 text-amber-300" />
+              <span>Statistical Officer</span>
+            </button>
+
             <button
               onClick={() => {
                 setActiveTab('register');
@@ -247,14 +345,14 @@ export const AuthModal: React.FC = () => {
                 setLoginError('');
                 setAdminError('');
               }}
-              className={`pb-2.5 px-3 font-semibold transition-all border-b-2 flex items-center gap-1.5 ${
+              className={`pb-2.5 px-3 font-semibold transition-all border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
                 activeTab === 'register'
                   ? 'border-amber-400 text-white font-bold'
                   : 'border-transparent text-blue-200 hover:text-white'
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>Student Registration</span>
+              <span>Scholar Registration</span>
             </button>
 
             <button
@@ -264,7 +362,7 @@ export const AuthModal: React.FC = () => {
                 setLoginError('');
                 setAdminError('');
               }}
-              className={`pb-2.5 px-3 font-semibold transition-all border-b-2 flex items-center gap-1.5 ${
+              className={`pb-2.5 px-3 font-semibold transition-all border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
                 activeTab === 'login'
                   ? 'border-amber-400 text-white font-bold'
                   : 'border-transparent text-blue-200 hover:text-white'
@@ -281,20 +379,160 @@ export const AuthModal: React.FC = () => {
                 setLoginError('');
                 setAdminError('');
               }}
-              className={`pb-2.5 px-3 font-semibold transition-all border-b-2 flex items-center gap-1.5 ${
+              className={`pb-2.5 px-3 font-semibold transition-all border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
                 activeTab === 'admin'
                   ? 'border-amber-400 text-white font-bold'
                   : 'border-transparent text-blue-200 hover:text-white'
               }`}
             >
               <Shield className="w-3.5 h-3.5 text-blue-300" />
-              <span>Faculty / Admin Access</span>
+              <span>Faculty Admin</span>
             </button>
           </div>
         </div>
 
         {/* Modal Body */}
         <div className="p-6 max-h-[76vh] overflow-y-auto space-y-4">
+          {/* TAB 0: Statistical Officer Sign In */}
+          {activeTab === 'officer' && (
+            <form onSubmit={handleOfficerSubmit} className="space-y-4 text-xs">
+              <div className="pb-1">
+                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  <Briefcase className="w-4 h-4 text-indigo-600" />
+                  <span>MoSPI & Cadre Statistical Officer Portal</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Sign in with your official designation to automatically load your Competency Digital Twin and generate an adaptive learning roadmap.
+                </p>
+              </div>
+
+              {/* Quick Presets */}
+              <div>
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">
+                  ⚡ Quick Select Official Cadre Preset:
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {OFFICER_PRESETS.map((p, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleSelectPresetOfficer(p)}
+                      className={`text-left p-3 rounded-xl border transition-all ${
+                        officerName === p.name
+                          ? 'border-indigo-600 bg-indigo-50 text-indigo-950 font-bold shadow-xs ring-1 ring-indigo-500/20'
+                          : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-900">{p.name}</span>
+                        <span className="text-[9px] bg-slate-100 px-1.5 py-0.5 rounded font-mono text-slate-600">
+                          {p.cadreId}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-indigo-700 font-medium mt-0.5">{p.designation}</div>
+                      <div className="text-[10px] text-slate-500 truncate">{p.department}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Officer Form Fields */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-slate-700 font-semibold block mb-1">
+                      Official Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={officerName}
+                      onChange={(e) => setOfficerName(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-slate-700 font-semibold block mb-1">
+                      Designation & Cadre *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={officerDesignation}
+                      onChange={(e) => setOfficerDesignation(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-slate-700 font-semibold block mb-1">
+                      Department / Directorate *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={officerDepartment}
+                      onChange={(e) => setOfficerDepartment(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-slate-700 font-semibold block mb-1">
+                      Parichay / NIC Email *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={officerEmail}
+                      onChange={(e) => setOfficerEmail(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="text-slate-700 font-semibold block mb-1">
+                      Current Assignment & Responsibilities
+                    </label>
+                    <input
+                      type="text"
+                      value={officerAssignment}
+                      onChange={(e) => setOfficerAssignment(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-200">
+                  <label className="text-[11px] font-semibold text-slate-600 block mb-1.5">
+                    Recognized Competencies for this Officer Profile:
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {officerSkills.map((sk, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-800 border border-indigo-200 rounded-lg font-medium text-[11px]"
+                      >
+                        <CheckCircle2 className="w-3 h-3 text-indigo-600" />
+                        <span>{sk}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all"
+              >
+                <UserCheck className="w-4 h-4" />
+                <span>Sign In as Statistical Officer & Open Adaptive Roadmap</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+          )}
+
           {/* TAB 1: Student Registration */}
           {activeTab === 'register' && (
             <form onSubmit={handleRegisterSubmit} className="space-y-4">
